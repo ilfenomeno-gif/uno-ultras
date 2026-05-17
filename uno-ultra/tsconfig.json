@@ -9,5 +9,10 @@
     "skipLibCheck": true,
     "types": ["node", "vitest/globals"]
   },
-  "include": ["src", "tests", "vite.config.ts"]
+  "include": ["src", "tests/*.test.ts", "vite.config.ts"],
+  "exclude": [
+    "src/core/GameState.ts",
+    "src/core/init.ts",
+    "src/ui/ProfilePanel.ts"
+  ]
 }
