@@ -3,6 +3,10 @@ import type { DomainEvents } from './types/events';
 import { Emitter } from './utils/emitter';
 import { ScreenRouter } from './ui/ScreenRouter';
 import { Site } from './ui/Site';
+import { ConnectionManager } from './multiplayer/ConnectionManager';
+import { installLegacyMpBridge } from './multiplayer/legacyBridge';
+import { FriendService } from './multiplayer/FriendService';
+import { Mp3pLobbyController } from './multiplayer/Mp3pLobbyController';
 
 const root = document.getElementById('app');
 if (!root) {
@@ -12,6 +16,10 @@ if (!root) {
 const events = new Emitter<DomainEvents>();
 const router = new ScreenRouter(events);
 Site.getInstance();
+const mpManager = new ConnectionManager();
+const friendService = new FriendService(events);
+const mp3pLobby = new Mp3pLobbyController(events);
+installLegacyMpBridge(mpManager, friendService, mp3pLobby);
 
 events.on('ui:screen', ({ screen }) => {
   root.innerHTML = `
