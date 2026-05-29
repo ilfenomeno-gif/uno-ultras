@@ -1,5 +1,14 @@
 # Migration Plan (6 fasi)
 
+## Fase 0 (completata)
+- Riversamento integrale del monolite in [public/legacy/uno_ultra_v52.html](../public/legacy/uno_ultra_v52.html).
+- Verifica integrita con controllo dimensione e hash SHA256.
+- Esposizione rapida da runtime tramite link in [index.html](../index.html).
+
+Exit criteria:
+- Sorgente legacy disponibile dentro la codebase uno-ultra.
+- Tracciabilita della copia documentata nei docs.
+
 ## Fase 1 (1-2 giorni)
 - Estrazione costanti e helper puri.
 - Introduzione modulo storage separato.

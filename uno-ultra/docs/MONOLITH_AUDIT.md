@@ -3,6 +3,11 @@
 ## Scope
 Source analizzato: file HTML monolitico con CSS, markup e logica JS nello stesso artefatto.
 
+## Stato Riversamento
+- Riversamento completo effettuato in [public/legacy/uno_ultra_v52.html](../public/legacy/uno_ultra_v52.html).
+- Il file e stato verificato byte a byte rispetto all'originale esterno.
+- Sorgente canonica per la migrazione: [public/legacy/uno_ultra_v52.html](../public/legacy/uno_ultra_v52.html).
+
 ## Evidenze principali
 - Dominio molto ampio: UNO + mini-giochi multipli (Scopa, Poker, Burraco, Millemiglia, Ruba, Scala, Blackjack).
 - Multiplayer esteso: lobby 1v1, 3P, 4P, 2v2, 3v3 con friend/invite flow.

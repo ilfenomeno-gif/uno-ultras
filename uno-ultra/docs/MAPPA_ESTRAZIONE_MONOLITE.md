@@ -5,6 +5,7 @@
 - Nessuna eliminazione distruttiva durante la migrazione.
 - Ogni estrazione produce prima servizio puro, poi controller UI, poi bridge legacy.
 - Core, AI, multiplayer e progression non devono dipendere da DOM.
+- Sorgente legacy canonica: [public/legacy/uno_ultra_v52.html](../public/legacy/uno_ultra_v52.html).
 
 ## Evidenze principali nel monolite
 - Funzioni multiplayer/friends critiche presenti in [uno_ultra_v52 (1) (2).html](../uno_ultra_v52%20(1)%20(2).html#L14475), [uno_ultra_v52 (1) (2).html](../uno_ultra_v52%20(1)%20(2).html#L14539), [uno_ultra_v52 (1) (2).html](../uno_ultra_v52%20(1)%20(2).html#L15074), [uno_ultra_v52 (1) (2).html](../uno_ultra_v52%20(1)%20(2).html#L15181), [uno_ultra_v52 (1) (2).html](../uno_ultra_v52%20(1)%20(2).html#L15219), [uno_ultra_v52 (1) (2).html](../uno_ultra_v52%20(1)%20(2).html#L15318), [uno_ultra_v52 (1) (2).html](../uno_ultra_v52%20(1)%20(2).html#L15345).

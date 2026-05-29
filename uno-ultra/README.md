@@ -11,6 +11,10 @@
 ## Struttura
 Vedi [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
+## Monolite riversato
+- Copia integrale del file legacy disponibile in `public/legacy/uno_ultra_v52.html`.
+- Accesso rapido anche da `index.html` tramite il link `Apri Monolite v52`.
+
 ## Avvio
 ```bash
 npm install

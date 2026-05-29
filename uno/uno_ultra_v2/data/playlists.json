@@ -1,0 +1,283 @@
+{
+  "playlists": [
+    {
+      "key": "p1",
+      "category": "uno",
+      "mode": "ranked",
+      "players": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p3",
+      "category": "uno",
+      "mode": "ranked",
+      "players": 3,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p4",
+      "category": "uno",
+      "mode": "ranked",
+      "players": 4,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p1_casual",
+      "category": "uno",
+      "mode": "casual",
+      "players": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p3_casual",
+      "category": "uno",
+      "mode": "casual",
+      "players": 3,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p4_casual",
+      "category": "uno",
+      "mode": "casual",
+      "players": 4,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p1_blitz",
+      "category": "uno",
+      "mode": "blitz",
+      "players": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p3_blitz",
+      "category": "uno",
+      "mode": "blitz",
+      "players": 3,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p4_blitz",
+      "category": "uno",
+      "mode": "blitz",
+      "players": 4,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p1_chaos",
+      "category": "uno",
+      "mode": "chaos",
+      "players": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p3_chaos",
+      "category": "uno",
+      "mode": "chaos",
+      "players": 3,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p4_chaos",
+      "category": "uno",
+      "mode": "chaos",
+      "players": 4,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_2v2",
+      "category": "uno",
+      "mode": "ranked",
+      "players": 4,
+      "teams": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_3v3",
+      "category": "uno",
+      "mode": "ranked",
+      "players": 6,
+      "teams": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_2v2_casual",
+      "category": "uno",
+      "mode": "casual",
+      "players": 4,
+      "teams": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_3v3_casual",
+      "category": "uno",
+      "mode": "casual",
+      "players": 6,
+      "teams": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_ruba",
+      "category": "minigame",
+      "game": "ruba",
+      "players": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_ruba_1",
+      "category": "minigame",
+      "game": "ruba",
+      "players": 2,
+      "variant": "solo",
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_ruba_3",
+      "category": "minigame",
+      "game": "ruba",
+      "players": 3,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_ruba_4",
+      "category": "minigame",
+      "game": "ruba",
+      "players": 4,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_scala",
+      "category": "minigame",
+      "game": "scala40",
+      "players": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_scala_1",
+      "category": "minigame",
+      "game": "scala40",
+      "players": 2,
+      "variant": "solo",
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_scala_3",
+      "category": "minigame",
+      "game": "scala40",
+      "players": 3,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_scala_4",
+      "category": "minigame",
+      "game": "scala40",
+      "players": 4,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_bj1",
+      "category": "minigame",
+      "game": "blackjack",
+      "players": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_bj2",
+      "category": "minigame",
+      "game": "blackjack",
+      "players": 3,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_bj3",
+      "category": "minigame",
+      "game": "blackjack",
+      "players": 4,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_poker",
+      "category": "minigame",
+      "game": "poker",
+      "players": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_poker_3",
+      "category": "minigame",
+      "game": "poker",
+      "players": 3,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_poker_4",
+      "category": "minigame",
+      "game": "poker",
+      "players": 4,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_scopa",
+      "category": "minigame",
+      "game": "scopa",
+      "players": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_scopa_3",
+      "category": "minigame",
+      "game": "scopa",
+      "players": 3,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_scopa_4",
+      "category": "minigame",
+      "game": "scopa",
+      "players": 4,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_burraco",
+      "category": "minigame",
+      "game": "burraco",
+      "players": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_burraco_3",
+      "category": "minigame",
+      "game": "burraco",
+      "players": 3,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_burraco_4",
+      "category": "minigame",
+      "game": "burraco",
+      "players": 4,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_mille",
+      "category": "minigame",
+      "game": "millemiglia",
+      "players": 2,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_mille_3",
+      "category": "minigame",
+      "game": "millemiglia",
+      "players": 3,
+      "defaultMmr": 200
+    },
+    {
+      "key": "p_mille_4",
+      "category": "minigame",
+      "game": "millemiglia",
+      "players": 4,
+      "defaultMmr": 200
+    }
+  ]
+}

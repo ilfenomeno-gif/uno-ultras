@@ -1,0 +1,17 @@
+{
+  "name": "uno-ultra-v2",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Modular reconstruction of UNO Ultra from the original monolith.",
+  "scripts": {
+    "port:original": "node scripts/port-original.js",
+    "audit:original": "node scripts/audit-original.js",
+    "dev": "node scripts/dev.js",
+    "build": "node scripts/build.js",
+    "check": "node scripts/build.js --check"
+  },
+  "dependencies": {
+    "peerjs": "^1.5.5"
+  }
+}

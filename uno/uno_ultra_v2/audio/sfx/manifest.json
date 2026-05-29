@@ -1,0 +1,5 @@
+{
+  "enabled": true,
+  "files": [],
+  "notes": "WebAudio runtime cues are generated procedurally. This manifest reserves the SFX asset namespace."
+}

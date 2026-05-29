@@ -1,0 +1,5 @@
+{
+  "enabled": true,
+  "files": [],
+  "notes": "Background music is currently synthesized in runtime. This manifest reserves the music asset namespace."
+}

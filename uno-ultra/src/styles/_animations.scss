@@ -1,3 +1,5 @@
+/* pronto per nuova grafica */
+
 @keyframes deal   { from { transform: translateY(-80px) rotate(-10deg); opacity:0; } to { transform:none; opacity:1; } }
 @keyframes shake  { 0%,100%{transform:none} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }

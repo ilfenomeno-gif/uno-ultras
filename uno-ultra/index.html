@@ -3,11 +3,47 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UNO Ultra Modular</title>
+    <meta name="theme-color" content="#07111e" />
+    <title>UNO ULTRA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Manrope:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/css/base.css" />
+    <style>
+      /* pronto per nuova grafica */
+    </style>
   </head>
   <body>
-    <div id="app"></div>
+    <div class="uno-card-bg" aria-hidden="true"></div>
+    <div class="rl-shell-adapter">
+      <aside class="rl-sidebar-adapter" id="rl-sidebar-adapter" aria-label="Menu principale laterale">
+        <div class="adapter-logo">UNO ULTRA</div>
+        <nav class="adapter-nav" aria-label="Navigazione Rocket League style">
+          <button class="menu-btn" data-screen="play">🎮 GIOCA</button>
+          <button class="menu-btn" data-screen="store">🛒 NEGOZIO DI OGGETTI</button>
+          <button class="menu-btn" data-screen="garage">🚗 GARAGE</button>
+          <button class="menu-btn" data-screen="club">🏆 CLUB</button>
+          <button class="menu-btn" data-screen="profile">👤 PROFILO</button>
+          <button class="menu-btn" data-screen="settings">⚙ IMPOSTAZIONI</button>
+          <button class="menu-btn" data-action="exit">❌ ABBANDONA</button>
+        </nav>
+        <div class="user-profile">
+          <span class="club-tag">[JUV]</span>
+          <span class="username">sebastianbarillas</span>
+          <span class="status">GOT IT, HABIB!</span>
+          <button class="create-group-btn">CREA UN GRUPPO</button>
+        </div>
+      </aside>
+      <main class="adapter-main">
+        <div id="app"></div>
+      </main>
+    </div>
+    <a href="/legacy/uno_ultra_v52.html" class="legacy-link" aria-label="Apri versione monolite trasferita">
+      Apri Monolite v52
+    </a>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -1,0 +1,248 @@
+{
+  "generatedAt": "2026-05-25T21:29:09.341Z",
+  "missing": [],
+  "counts": {
+    "total": 34,
+    "matched": 34
+  },
+  "checked": [
+    {
+      "id": "loading",
+      "token": "id=\"loading\"",
+      "scope": "screen",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "login",
+      "token": "id=\"login\"",
+      "scope": "screen",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "splash",
+      "token": "id=\"splash\"",
+      "scope": "screen",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "home",
+      "token": "id=\"nav-play\"",
+      "scope": "screen",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "game",
+      "token": "id=\"game\"",
+      "scope": "screen",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "tournament",
+      "token": "id=\"tournament\"",
+      "scope": "screen",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "online",
+      "token": "onclick=\"openMultiplayer()\"",
+      "scope": "screen",
+      "inOriginal": false,
+      "inPort": false
+    },
+    {
+      "id": "showScr",
+      "token": "function showscr",
+      "scope": "function",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "setText",
+      "token": "function settext",
+      "scope": "function",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "startGame",
+      "token": "function startgame",
+      "scope": "function",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "openTournament",
+      "token": "function opentournament",
+      "scope": "function",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "cloudLogin",
+      "token": "async function cloudlogin",
+      "scope": "function",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "toggleMusic",
+      "token": "function togglemusic",
+      "scope": "function",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "burst",
+      "token": "function burst(",
+      "scope": "function",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "renderAIs",
+      "token": "renderais",
+      "scope": "function",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "aiTurn",
+      "token": "function aiturn",
+      "scope": "function",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "openMultiplayer",
+      "token": "function openmultiplayer",
+      "scope": "function",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "pentathlon",
+      "token": "pentathlon",
+      "scope": "system",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "spectator",
+      "token": "spectator",
+      "scope": "system",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "replay",
+      "token": "replay",
+      "scope": "system",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "quick-chat",
+      "token": "quick-chat",
+      "scope": "system",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "friend",
+      "token": "friend",
+      "scope": "system",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "nvda",
+      "token": "nvda",
+      "scope": "system",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "ucs",
+      "token": "ucs",
+      "scope": "system",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "grand-prix",
+      "token": "grand prix",
+      "scope": "system",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "custom-game",
+      "token": "custom game",
+      "scope": "system",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "double-elimination",
+      "token": "double elimination",
+      "scope": "system",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "scopa",
+      "token": "scopa",
+      "scope": "minigame",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "ruba",
+      "token": "ruba",
+      "scope": "minigame",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "scala40",
+      "token": "scala",
+      "scope": "minigame",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "blackjack",
+      "token": "blackjack",
+      "scope": "minigame",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "poker",
+      "token": "poker",
+      "scope": "minigame",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "burraco",
+      "token": "burraco",
+      "scope": "minigame",
+      "inOriginal": true,
+      "inPort": true
+    },
+    {
+      "id": "millemiglia",
+      "token": "millemiglia",
+      "scope": "minigame",
+      "inOriginal": true,
+      "inPort": true
+    }
+  ]
+}

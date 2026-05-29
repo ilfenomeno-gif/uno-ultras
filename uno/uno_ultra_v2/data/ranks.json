@@ -1,0 +1,162 @@
+{
+  "xpFormula": {
+    "base": 100,
+    "exponent": 1.35
+  },
+  "ranks": [
+    {
+      "name": "Bronze I",
+      "icon": "🥉",
+      "min": 0,
+      "color": "#CD7F32",
+      "next": 133
+    },
+    {
+      "name": "Bronze II",
+      "icon": "🥉",
+      "min": 133,
+      "color": "#CD7F32",
+      "next": 266
+    },
+    {
+      "name": "Bronze III",
+      "icon": "🥉",
+      "min": 266,
+      "color": "#CD7F32",
+      "next": 400
+    },
+    {
+      "name": "Silver I",
+      "icon": "🥈",
+      "min": 400,
+      "color": "#C0C0C0",
+      "next": 466
+    },
+    {
+      "name": "Silver II",
+      "icon": "🥈",
+      "min": 466,
+      "color": "#C0C0C0",
+      "next": 533
+    },
+    {
+      "name": "Silver III",
+      "icon": "🥈",
+      "min": 533,
+      "color": "#C0C0C0",
+      "next": 600
+    },
+    {
+      "name": "Gold I",
+      "icon": "🥇",
+      "min": 600,
+      "color": "#D39940",
+      "next": 666
+    },
+    {
+      "name": "Gold II",
+      "icon": "🥇",
+      "min": 666,
+      "color": "#D39940",
+      "next": 733
+    },
+    {
+      "name": "Gold III",
+      "icon": "🥇",
+      "min": 733,
+      "color": "#D39940",
+      "next": 800
+    },
+    {
+      "name": "Platinum I",
+      "icon": "💠",
+      "min": 800,
+      "color": "#D2E4E3",
+      "next": 866
+    },
+    {
+      "name": "Platinum II",
+      "icon": "💠",
+      "min": 866,
+      "color": "#D2E4E3",
+      "next": 933
+    },
+    {
+      "name": "Platinum III",
+      "icon": "💠",
+      "min": 933,
+      "color": "#D2E4E3",
+      "next": 1000
+    },
+    {
+      "name": "Diamond I",
+      "icon": "💎",
+      "min": 1000,
+      "color": "#7EE4F8",
+      "next": 1066
+    },
+    {
+      "name": "Diamond II",
+      "icon": "💎",
+      "min": 1066,
+      "color": "#7EE4F8",
+      "next": 1133
+    },
+    {
+      "name": "Diamond III",
+      "icon": "💎",
+      "min": 1133,
+      "color": "#7EE4F8",
+      "next": 1200
+    },
+    {
+      "name": "Champion I",
+      "icon": "🏅",
+      "min": 1200,
+      "color": "#4A9CE1",
+      "next": 1266
+    },
+    {
+      "name": "Champion II",
+      "icon": "🏅",
+      "min": 1266,
+      "color": "#4A9CE1",
+      "next": 1333
+    },
+    {
+      "name": "Champion III",
+      "icon": "🏅",
+      "min": 1333,
+      "color": "#4A9CE1",
+      "next": 1400
+    },
+    {
+      "name": "Grand Champion I",
+      "icon": "🔥",
+      "min": 1400,
+      "color": "#FF4081",
+      "next": 1466
+    },
+    {
+      "name": "Grand Champion II",
+      "icon": "🔥",
+      "min": 1466,
+      "color": "#FF4081",
+      "next": 1533
+    },
+    {
+      "name": "Grand Champion III",
+      "icon": "🔥",
+      "min": 1533,
+      "color": "#FF4081",
+      "next": 1600
+    },
+    {
+      "name": "Supersonic Legend",
+      "icon": "⚡",
+      "min": 1600,
+      "color": "#FFFFFF",
+      "next": 99999
+    }
+  ]
+}
