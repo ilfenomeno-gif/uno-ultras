@@ -9,6 +9,7 @@ let selectedPlayers: PlayersMode = 2;
 let engine: UnoEngine | null = null;
 let gameLog: string[] = [];
 let renderCallback: (() => void) | null = null;
+let pendingWildIndex: number | null = null;
 
 export function setPlayRenderCallback(callback: () => void): void {
   renderCallback = callback;
@@ -46,6 +47,18 @@ function focusAfterAction(): void {
     const playableCard = document.querySelector('.hand .card.playable:not([disabled])') as HTMLElement | null;
     (logEntry ?? playableCard)?.focus();
   });
+}
+
+export function getPendingWildIndex(): number | null {
+  return pendingWildIndex;
+}
+
+export function clearPendingWild(): void {
+  pendingWildIndex = null;
+}
+
+export function setPendingWild(index: number): void {
+  pendingWildIndex = index;
 }
 
 export function setSelectedGame(game: GameId): void {
@@ -96,6 +109,21 @@ export function renderUnoBoard(): string {
     })
     .join('');
 
+  const colorPicker =
+    pendingWildIndex !== null
+      ? `
+      <div class="color-picker" role="dialog" aria-modal="true" aria-label="Scegli il colore per il Jolly">
+        <p>Scegli il colore:</p>
+        <div class="color-picker-buttons">
+          <button class="card red" data-action="choose-color" data-color="red" aria-label="Rosso" type="button">Rosso</button>
+          <button class="card blue" data-action="choose-color" data-color="blue" aria-label="Blu" type="button">Blu</button>
+          <button class="card green" data-action="choose-color" data-color="green" aria-label="Verde" type="button">Verde</button>
+          <button class="card yellow" data-action="choose-color" data-color="yellow" aria-label="Giallo" type="button">Giallo</button>
+        </div>
+      </div>
+    `
+      : '';
+
   return `
     <section class="panel game">
       <div class="game-top">
@@ -110,6 +138,7 @@ export function renderUnoBoard(): string {
         <div class="deck" data-action="draw" aria-label="Pesca carta dal mazzo">PESCA</div>
         <div class="discard ${colorClass(topCard.color)}" aria-label="Carta scartata: ${cardLabel(topCard)} ${colorLabel(topCard.color)}">${cardLabel(topCard)}</div>
       </div>
+      ${colorPicker}
       <div class="hand">${hand}</div>
       <div class="game-actions">
         <button class="btn-ghost" data-action="say-uno">Dichiara UNO</button>
@@ -131,6 +160,7 @@ export function renderPlay(): string {
 export function stopGame(): void {
   engine = null;
   gameLog = [];
+  clearPendingWild();
   clearAiTimer();
   renderCallback?.();
 }
@@ -200,7 +230,41 @@ export function handlePlayAction(action: string, actor: HTMLElement): boolean {
 
   if (action === 'play-card' && engine && engine.state.currentPlayerIndex === 0) {
     const index = Number(actor.dataset.index ?? '-1');
+    const card = engine.state.players[0]?.hand[index];
+    if (card && (card.value === 'wild' || card.value === 'wild4')) {
+      setPendingWild(index);
+      renderCallback?.();
+      window.requestAnimationFrame(() => {
+        const picker = document.querySelector('.color-picker button') as HTMLElement | null;
+        picker?.focus();
+      });
+      return true;
+    }
+
     const message = engine.playFromCurrent(index);
+    gameLog.unshift(message);
+
+    if (engine.state.winner) {
+      const won = engine.state.winner === 'Tu';
+      registerWin(won);
+      notify(won ? 'Hai vinto!' : `${engine.state.winner} vince!`);
+      stopGame();
+      return true;
+    }
+
+    renderCallback?.();
+    focusAfterAction();
+    triggerAi();
+    return true;
+  }
+
+  if (action === 'choose-color' && engine && pendingWildIndex !== null) {
+    const color = actor.dataset.color as Exclude<CardColor, 'wild'> | undefined;
+    if (!color) return true;
+
+    const index = pendingWildIndex;
+    clearPendingWild();
+    const message = engine.playFromCurrent(index, color);
     gameLog.unshift(message);
 
     if (engine.state.winner) {

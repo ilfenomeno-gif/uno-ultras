@@ -225,3 +225,24 @@
   padding: 8px 6px;
   font-size: 12px;
 }
+
+.color-picker {
+  background: var(--glass-strong, #1e1e2e);
+  border: 2px solid var(--violet, #7c3aed);
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.color-picker p {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+}
+
+.color-picker .color-picker-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
