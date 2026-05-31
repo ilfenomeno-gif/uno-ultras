@@ -14,6 +14,14 @@ let pendingWildIndex: number | null = null;
 let showHandoffScreen = false;
 let handoffPlayerName = '';
 
+function scheduleFrame(callback: () => void): void {
+  if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+    window.requestAnimationFrame(() => callback());
+    return;
+  }
+  callback();
+}
+
 export function setPlayRenderCallback(callback: () => void): void {
   renderCallback = callback;
 }
@@ -55,7 +63,8 @@ function pushGameplayMessage(message: string): void {
 }
 
 function focusAfterAction(): void {
-  window.requestAnimationFrame(() => {
+  if (typeof document === 'undefined') return;
+  scheduleFrame(() => {
     const logEntry = document.querySelector('.log .log-entry') as HTMLElement | null;
     const playableCard = document.querySelector('.hand .card.playable:not([disabled])') as HTMLElement | null;
     (logEntry ?? playableCard)?.focus();
@@ -87,6 +96,14 @@ export function setSelectedMode(mode: GameMode): void {
   if (selectedMode === 'single') {
     selectedPlayers = 2;
   }
+}
+
+export function getEngineStateForTest(): UnoEngine['state'] | null {
+  return engine?.state ?? null;
+}
+
+export function isHandoffVisibleForTest(): boolean {
+  return showHandoffScreen;
 }
 
 function isHumanTurn(state: UnoEngine['state']): boolean {
@@ -355,7 +372,7 @@ export function handlePlayAction(action: string, actor: HTMLElement): boolean {
     if (card && (card.value === 'wild' || card.value === 'wild4')) {
       setPendingWild(index);
       renderCallback?.();
-      window.requestAnimationFrame(() => {
+      scheduleFrame(() => {
         const picker = document.querySelector('.color-picker button') as HTMLElement | null;
         picker?.focus();
       });
