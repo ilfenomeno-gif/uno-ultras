@@ -39,6 +39,12 @@ function saveSettings(): void {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 }
 
+function applySettingsToBody(): void {
+  if (typeof document === 'undefined') return;
+  document.body.classList.toggle('reduce-motion', settings.reduceMotion);
+  document.body.classList.toggle('colorblind', settings.colorblind);
+}
+
 export function handleSettingsInput(target: HTMLElement): boolean {
   const key = target.getAttribute('data-setting');
   if (!key) return false;
@@ -51,10 +57,14 @@ export function handleSettingsInput(target: HTMLElement): boolean {
   if (key === 'nvdaAssist') settings.nvdaAssist = input.checked;
 
   saveSettings();
+  applySettingsToBody();
   return true;
 }
 
 export function renderSettings(): string {
+  settings = loadSettings();
+  applySettingsToBody();
+
   return `
     <section class="panel">
       <h2>Impostazioni</h2>

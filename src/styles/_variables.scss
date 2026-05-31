@@ -31,6 +31,19 @@ body {
   overflow-x: hidden;
 }
 
+body.reduce-motion * {
+  transition: none !important;
+  animation: none !important;
+}
+
+body.colorblind .card.red {
+  background: #0077bb;
+}
+
+body.colorblind .card.green {
+  background: #ee7733;
+}
+
 .bg-animated {
   position: fixed;
   inset: 0;
