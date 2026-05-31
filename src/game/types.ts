@@ -16,4 +16,6 @@ export type DemoProfile = {
   mmr: number;
   credits: number;
   titles: string[];
+  activeTitle: string;
+  activeTitleIndex: number;
 };

@@ -34,6 +34,12 @@ document.addEventListener('click', (event) => {
     notify(`Crediti insufficienti! Ti mancano ${Math.max(0, cost - profile.credits)} crediti.`);
     return;
   }
+  if (action === 'select-title' && actor.dataset.title) {
+    profile.activeTitle = actor.dataset.title;
+    profile.activeTitleIndex = Math.max(0, profile.titles.indexOf(profile.activeTitle));
+    saveProfile();
+    return render();
+  }
   if (action === 'pick-mode' && actor.dataset.mode) return setSelectedMode(actor.dataset.mode as GameMode), render();
   if (action === 'pick-game' && actor.dataset.game) return setSelectedGame(actor.dataset.game as GameId), render();
   if (action === 'pick-players' && actor.dataset.players) return setSelectedPlayers(Number(actor.dataset.players) as PlayersMode), render();
@@ -42,6 +48,12 @@ document.addEventListener('click', (event) => {
 
 document.addEventListener('input', (event) => {
   const target = event.target as HTMLElement;
+  const profileField = (target as HTMLInputElement).dataset.profileField;
+  if (profileField === 'name') {
+    profile.name = ((target as HTMLInputElement).value || '').trim() || 'Giocatore';
+    saveProfile();
+    return;
+  }
   if (handleSettingsInput(target)) render();
 });
 

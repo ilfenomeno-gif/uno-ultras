@@ -56,7 +56,9 @@ const defaultProfile: DemoProfile = {
   games: 0,
   mmr: 200,
   credits: 1000,
-  titles: ['Architetto del Caos']
+  titles: ['Architetto del Caos'],
+  activeTitle: 'Architetto del Caos',
+  activeTitleIndex: 0
 };
 
 const RANK_THRESHOLDS = [
@@ -89,6 +91,11 @@ export function loadProfile(): DemoProfile {
     if (!raw) throw new Error('empty');
     const parsed = JSON.parse(raw) as Partial<DemoProfile>;
     if (parsed.version !== 1) return { ...defaultProfile };
+
+    const titles = Array.isArray(parsed.titles) && parsed.titles.length > 0 ? parsed.titles : [...defaultProfile.titles];
+    const activeTitle = parsed.activeTitle && titles.includes(parsed.activeTitle) ? parsed.activeTitle : titles[0];
+    const activeTitleIndex = Math.max(0, titles.indexOf(activeTitle));
+
     return {
       version: 1,
       name: parsed.name || defaultProfile.name,
@@ -97,7 +104,9 @@ export function loadProfile(): DemoProfile {
       games: parsed.games || defaultProfile.games,
       mmr: parsed.mmr || defaultProfile.mmr,
       credits: parsed.credits || defaultProfile.credits,
-      titles: Array.isArray(parsed.titles) ? parsed.titles : []
+      titles,
+      activeTitle,
+      activeTitleIndex
     };
   } catch {
     return { ...defaultProfile };
@@ -122,6 +131,10 @@ export function registerWin(isWin: boolean): void {
     profile.credits += 25;
     if (!profile.titles.includes('Leggenda di UNO') && profile.wins >= 5) {
       profile.titles.push('Leggenda di UNO');
+      if (!profile.activeTitle) {
+        profile.activeTitle = 'Leggenda di UNO';
+        profile.activeTitleIndex = profile.titles.indexOf(profile.activeTitle);
+      }
     }
   } else {
     profile.losses += 1;
