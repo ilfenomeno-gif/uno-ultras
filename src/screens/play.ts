@@ -41,6 +41,16 @@ function cardAriaLabel(card: Card, playable: boolean): string {
   return `Carta ${cardLabel(card)} ${colorLabel(card.color)}, ${playable ? 'giocabile' : 'non giocabile'}`;
 }
 
+function pushGameplayMessage(message: string): void {
+  const penaltyToken = '(penalita UNO +2)';
+  if (message.includes(penaltyToken)) {
+    gameLog.unshift(message.replace(` ${penaltyToken}`, '').replace(penaltyToken, '').trim());
+    gameLog.unshift('Penalita: non hai dichiarato UNO! +2 carte.');
+    return;
+  }
+  gameLog.unshift(message);
+}
+
 function focusAfterAction(): void {
   window.requestAnimationFrame(() => {
     const logEntry = document.querySelector('.log .log-entry') as HTMLElement | null;
@@ -214,7 +224,7 @@ export function handlePlayAction(action: string, actor: HTMLElement): boolean {
 
   if (action === 'draw' && engine && engine.state.currentPlayerIndex === 0) {
     const message = engine.drawForCurrent();
-    gameLog.unshift(message);
+    pushGameplayMessage(message);
     renderCallback?.();
     focusAfterAction();
     triggerAi();
@@ -223,7 +233,11 @@ export function handlePlayAction(action: string, actor: HTMLElement): boolean {
 
   if (action === 'say-uno' && engine && engine.state.currentPlayerIndex === 0) {
     engine.sayUno();
-    gameLog.unshift('UNO dichiarato.');
+    if (engine.getCurrentPlayer().hand.length === 1) {
+      gameLog.unshift('UNO dichiarato! Ora gioca la tua ultima carta.');
+    } else {
+      gameLog.unshift('UNO dichiarato.');
+    }
     renderCallback?.();
     focusAfterAction();
     return true;
@@ -243,7 +257,7 @@ export function handlePlayAction(action: string, actor: HTMLElement): boolean {
     }
 
     const message = engine.playFromCurrent(index);
-    gameLog.unshift(message);
+    pushGameplayMessage(message);
 
     if (engine.state.winner) {
       const won = engine.state.winner === 'Tu';
@@ -266,7 +280,7 @@ export function handlePlayAction(action: string, actor: HTMLElement): boolean {
     const index = pendingWildIndex;
     clearPendingWild();
     const message = engine.playFromCurrent(index, color);
-    gameLog.unshift(message);
+    pushGameplayMessage(message);
 
     if (engine.state.winner) {
       const won = engine.state.winner === 'Tu';
