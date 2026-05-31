@@ -93,6 +93,10 @@ function drawFromDeck(state: UnoState, count = 1): Card[] {
 
   for (let i = 0; i < count; i += 1) {
     if (state.deck.length === 0) {
+      if (state.discard.length <= 1) {
+        break;
+      }
+
       const topDiscard = state.discard.pop();
       state.deck = shuffle(state.discard);
       state.discard = topDiscard ? [topDiscard] : [];
