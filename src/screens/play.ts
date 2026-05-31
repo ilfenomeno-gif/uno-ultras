@@ -203,6 +203,9 @@ export function renderUnoBoard(): string {
         </div>
         <div class="pill">Draw Stack: ${state.drawStack}</div>
       </div>
+      <div class="sr-only" aria-live="assertive" aria-atomic="true">
+        ${selectedMode === 'single' && state.currentPlayerIndex === 0 ? 'E il tuo turno.' : `Turno di ${state.players[state.currentPlayerIndex]?.name ?? '?'}.`}
+      </div>
       <div class="opponents">${opponents}</div>
       <div class="table-area">
         <button class="deck" data-action="draw" aria-label="Pesca carta dal mazzo" type="button" ${myTurn ? '' : 'disabled'}>PESCA</button>

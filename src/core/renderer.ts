@@ -28,6 +28,7 @@ export function render(): void {
   if (!app) return;
 
   app.innerHTML = `
+    <a href="#main-content" class="skip-link">Salta al contenuto principale</a>
     <div class="layout">
       <aside class="sidebar">
         <h2>UNO ULTRAS</h2>
@@ -41,8 +42,8 @@ export function render(): void {
           <button class="menu ${currentScreen === 'leaderboard' ? 'active' : ''}" data-action="goto" data-screen="leaderboard">Classifica</button>
         </nav>
       </aside>
-      <main class="content">${renderScreen()}</main>
+      <main class="content" id="main-content">${renderScreen()}</main>
     </div>
-    <div id="notify" class="notify"></div>
+    <div id="notify" class="notify" role="status" aria-live="polite"></div>
   `;
 }

@@ -1,4 +1,5 @@
 import type { ScreenId } from '../game/types';
+import { stopGame } from '../screens/play';
 
 export let currentScreen: ScreenId = resolveScreenFromPath(location.pathname);
 
@@ -24,12 +25,25 @@ export function pathForScreen(screen: ScreenId): string {
 }
 
 export function navigateTo(screen: ScreenId, push = true): void {
+  const leavingPlay = currentScreen === 'play' && screen !== 'play';
   currentScreen = screen;
   if (push) history.pushState({ screen }, '', pathForScreen(screen));
+  if (leavingPlay) {
+    stopGame();
+    return;
+  }
   renderCallback?.();
 }
 
 window.addEventListener('popstate', () => {
-  currentScreen = resolveScreenFromPath(location.pathname);
+  const nextScreen = resolveScreenFromPath(location.pathname);
+  const leavingPlay = currentScreen === 'play' && nextScreen !== 'play';
+  currentScreen = nextScreen;
+
+  if (leavingPlay) {
+    stopGame();
+    return;
+  }
+
   renderCallback?.();
 });
