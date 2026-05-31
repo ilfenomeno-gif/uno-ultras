@@ -1,0 +1,227 @@
+.hero {
+  border: 2px solid var(--violet);
+  border-radius: 22px;
+  padding: 32px 24px 24px 24px;
+  background: linear-gradient(145deg, rgba(69, 232, 207, 0.22), rgba(124, 95, 255, 0.13), rgba(255, 124, 165, 0.1));
+  box-shadow: 0 0 32px 0 var(--violet);
+  animation: heroIn 1.2s cubic-bezier(0.7, 0, 0.2, 1) 0.2s both;
+}
+
+@keyframes heroIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero h1 {
+  margin: 0;
+  font-family: 'Sora', sans-serif;
+  font-size: clamp(32px, 5vw, 54px);
+  line-height: 1;
+  color: var(--teal);
+  text-shadow: 0 0 18px var(--teal), 0 2px 8px #000;
+  letter-spacing: 0.09em;
+}
+
+.hero p {
+  margin: 14px 0 0;
+  max-width: 70ch;
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.hero-actions {
+  margin-top: 22px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.launch-row {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.inline-link {
+  display: inline-block;
+  margin-top: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.game .game-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.pill {
+  border: 1px solid rgba(255, 186, 82, 0.5);
+  border-radius: 999px;
+  padding: 5px 10px;
+  color: var(--amber);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.opponents {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.opponent {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  padding: 8px;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.opponent.active {
+  border-color: rgba(255, 124, 165, 0.6);
+  background: rgba(255, 124, 165, 0.14);
+}
+
+.table-area {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.deck,
+.discard {
+  width: 110px;
+  height: 150px;
+  border-radius: 16px;
+  border: 2.5px solid var(--violet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 28px;
+  background: linear-gradient(135deg, #1a1a35 60%, #0a0e1a 100%);
+  box-shadow: 0 0 24px 0 var(--violet);
+  position: relative;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.deck {
+  cursor: pointer;
+  animation: deckPulse 2.2s infinite alternate;
+}
+
+@keyframes deckPulse {
+  from {
+    box-shadow: 0 0 24px 0 var(--violet);
+  }
+
+  to {
+    box-shadow: 0 0 48px 0 var(--teal);
+  }
+}
+
+.discard.red,
+.card.red {
+  background: linear-gradient(120deg, #b53b49 60%, #7c5fff 100%);
+}
+
+.discard.blue,
+.card.blue {
+  background: linear-gradient(120deg, #3270ba 60%, #45e8cf 100%);
+}
+
+.discard.green,
+.card.green {
+  background: linear-gradient(120deg, #2f9f67 60%, #ffba52 100%);
+}
+
+.discard.yellow,
+.card.yellow {
+  background: linear-gradient(120deg, #c9a12f 60%, #ff7ca5 100%);
+}
+
+.discard.wild,
+.card.wild {
+  background: linear-gradient(45deg, #b53b49, #3270ba, #2f9f67, #c9a12f);
+}
+
+.hand {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.game-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.log {
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.22);
+  padding: 9px;
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.log-entry {
+  text-align: left;
+  border: 0;
+  padding: 4px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  cursor: default;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 14px;
+}
+
+.board {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.board th,
+.board td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  text-align: left;
+  padding: 8px 6px;
+  font-size: 12px;
+}
