@@ -1,4 +1,5 @@
 import type { DemoProfile, GameId } from '../game/types';
+import { notify } from './notify';
 
 export const PROFILE_KEY = 'uno-ultras-definitivo-profile';
 
@@ -48,6 +49,7 @@ export const TITLES = [
 ];
 
 const defaultProfile: DemoProfile = {
+  version: 1,
   name: 'Giocatore',
   wins: 0,
   losses: 0,
@@ -57,18 +59,42 @@ const defaultProfile: DemoProfile = {
   titles: ['Architetto del Caos']
 };
 
+const RANK_THRESHOLDS = [
+  270,
+  340,
+  410,
+  480,
+  550,
+  620,
+  690,
+  760,
+  830,
+  900,
+  970,
+  1040,
+  1110,
+  1180,
+  1250,
+  1320,
+  1390,
+  1460,
+  1530
+];
+
 export let profile = loadProfile();
 
 export function loadProfile(): DemoProfile {
   try {
     const raw = localStorage.getItem(PROFILE_KEY);
     if (!raw) throw new Error('empty');
-    const parsed = JSON.parse(raw) as DemoProfile;
+    const parsed = JSON.parse(raw) as Partial<DemoProfile>;
+    if (parsed.version !== 1) return { ...defaultProfile };
     return {
+      version: 1,
       name: parsed.name || defaultProfile.name,
-      wins: parsed.wins || 0,
-      losses: parsed.losses || 0,
-      games: parsed.games || 0,
+      wins: parsed.wins || defaultProfile.wins,
+      losses: parsed.losses || defaultProfile.losses,
+      games: parsed.games || defaultProfile.games,
       mmr: parsed.mmr || defaultProfile.mmr,
       credits: parsed.credits || defaultProfile.credits,
       titles: Array.isArray(parsed.titles) ? parsed.titles : []
@@ -83,11 +109,12 @@ export function saveProfile(): void {
 }
 
 export function getRankLabel(mmr: number): string {
-  const index = Math.min(RANKS.length - 1, Math.floor(Math.max(0, mmr - 200) / 70));
+  const index = RANK_THRESHOLDS.filter((threshold) => mmr >= threshold).length;
   return RANKS[index] ?? 'Bronzo I';
 }
 
 export function registerWin(isWin: boolean): void {
+  const previousRank = getRankLabel(profile.mmr);
   profile.games += 1;
   if (isWin) {
     profile.wins += 1;
@@ -101,4 +128,11 @@ export function registerWin(isWin: boolean): void {
     profile.mmr = Math.max(200, profile.mmr - 8);
   }
   saveProfile();
+
+  if (isWin) {
+    const newRank = getRankLabel(profile.mmr);
+    if (newRank !== previousRank) {
+      notify(`Rank Up! Ora sei ${newRank}`);
+    }
+  }
 }

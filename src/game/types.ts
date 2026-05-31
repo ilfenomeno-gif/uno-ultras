@@ -7,6 +7,7 @@ export type PlayersMode = 2 | 3 | 4;
 export type GameId = 'uno' | 'ruba' | 'scopa' | 'poker' | 'burraco' | 'blackjack' | 'millemiglia' | 'scala40';
 
 export type DemoProfile = {
+  version: 1;
   name: string;
   wins: number;
   losses: number;
