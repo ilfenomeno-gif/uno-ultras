@@ -5,6 +5,9 @@ export default defineConfig({
     port: 5174,
     open: true
   },
+  optimizeDeps: {
+    entries: ['index.html']
+  },
   test: {
     include: ['tests/*.test.ts'],
     environment: 'node'
