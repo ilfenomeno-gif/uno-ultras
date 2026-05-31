@@ -1,30 +1,34 @@
-# UNO Ultras Definitivo
+# UNO ULTRAS
 
-Beta demo ricostruita da zero prendendo come base tecnica `uno-ultra` e come riferimento funzionale il monolite `uno_ultra_v52 (1) (2).html` (non modificato).
+UNO ULTRAS is a modular web game frontend focused on a playable UNO core loop,
+local progression, and an architecture ready for incremental feature expansion.
 
-## Cosa include
-- App multipagina interna: Home, Gioca, Shop, Impostazioni, Profilo, Classifica.
-- Matrice modalita completa per:
-  - UNO
-  - Ruba Mazzetto
-  - Scopa
-  - Poker
-  - Burraco
-  - Blackjack
-  - Millemiglia
-  - Scala 40
-- Formati disponibili: 1v1, 3 giocatori, 4 giocatori.
-- Gameplay UNO completo in demo (AI bot, turni, penalita UNO, vittoria, progressione locale).
-- Profilo persistente in localStorage (MMR, crediti, statistiche, titoli).
-- Copia reference del monolite in `public/legacy/uno_ultra_v52_reference.html` (originale non toccato).
+## Tech Stack
 
-## Avvio
+- TypeScript
+- Vite
+- SCSS
+
+## Install and Run
+
 ```bash
 npm install
 npm run dev
 ```
 
-URL di default: `http://localhost:5174`
+## Build
 
-## Nota beta
-Le altre modalita oltre UNO sono gia presenti con interfaccia e wiring di lancio, pronte per il porting logico completo per fase successiva.
+```bash
+npm run build
+```
+
+## Test
+
+```bash
+npm test
+```
+
+## Documentation
+
+- Architecture: docs/architecture.md
+- Changelog: docs/changelog.md
