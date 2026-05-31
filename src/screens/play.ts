@@ -57,25 +57,15 @@ export function setSelectedPlayers(players: PlayersMode): void {
 }
 
 export function renderGameMatrix(): string {
-  const games = Object.entries(GAME_LABELS).map(([id, name]) => {
-    const active = selectedGame === id;
-    return `<button class="chip ${active ? 'active' : ''}" data-action="pick-game" data-game="${id}" aria-pressed="${active ? 'true' : 'false'}">${name}</button>`;
-  });
-
-  const modes = [2, 3, 4].map((value) => {
-    const active = selectedPlayers === value;
-    const label = value === 2 ? '1v1' : `${value} giocatori`;
-    return `<button class="chip ${active ? 'active' : ''}" data-action="pick-players" data-players="${value}" aria-pressed="${active ? 'true' : 'false'}">${label}</button>`;
-  });
+  const games = [`<button class="chip active" data-action="pick-game" data-game="uno" aria-pressed="true">${GAME_LABELS.uno}</button>`];
 
   return `
     <section class="panel">
-      <h2>Modalita complete</h2>
-      <p>Scegli gioco e numero giocatori. UNO e gia giocabile in demo beta.</p>
+      <h2>Modalita disponibile</h2>
+      <p>In questa build e disponibile solo UNO in formato 1v1.</p>
       <div class="chip-wrap">${games.join('')}</div>
-      <div class="chip-wrap">${modes.join('')}</div>
       <div class="launch-row">
-        <span>${GAME_LABELS[selectedGame]} - ${selectedPlayers === 2 ? '1v1' : `${selectedPlayers} giocatori`}</span>
+        <span>${GAME_LABELS.uno} - 1v1</span>
         <button class="btn-primary" data-action="start-mode">Avvia Modalita</button>
       </div>
     </section>
@@ -135,11 +125,6 @@ export function renderPlay(): string {
   return `
     ${renderGameMatrix()}
     ${engine ? renderUnoBoard() : ''}
-    <section class="panel">
-      <h3>Meccaniche reference dal monolite</h3>
-      <p>Il file padre rimane intatto. Questa beta e una ricostruzione da zero pronta a integrare progressivamente tutte le meccaniche.</p>
-      <a class="inline-link" href="/legacy/uno_ultra_v52_reference.html" target="_blank" rel="noopener noreferrer">Apri riferimento monolite</a>
-    </section>
   `;
 }
 
@@ -151,10 +136,8 @@ export function stopGame(): void {
 }
 
 export function startMode(): void {
-  if (selectedGame !== 'uno') {
-    notify(`${GAME_LABELS[selectedGame]} pronta come modulo beta UI. Gameplay completo in prossima fase.`);
-    return;
-  }
+  selectedGame = 'uno';
+  selectedPlayers = 2;
 
   engine = new UnoEngine(selectedPlayers);
   gameLog = [`Partita UNO avviata (${selectedPlayers === 2 ? '1v1' : `${selectedPlayers} giocatori`}).`];
@@ -182,6 +165,12 @@ function triggerAi(): void {
 }
 
 export function handlePlayAction(action: string, actor: HTMLElement): boolean {
+  if (action === 'pick-game' && actor.dataset.game === 'uno') {
+    selectedGame = 'uno';
+    renderCallback?.();
+    return true;
+  }
+
   if (action === 'start-mode') {
     startMode();
     return true;
