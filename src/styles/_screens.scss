@@ -43,6 +43,15 @@
   flex-wrap: wrap;
 }
 
+.mode-selector {
+  margin-top: 12px;
+}
+
+.mode-selector h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
 .launch-row {
   margin-top: 12px;
   display: flex;
@@ -72,6 +81,10 @@
   justify-content: space-between;
   gap: 8px;
   align-items: center;
+}
+
+.current-player-banner {
+  margin-bottom: 6px;
 }
 
 .pill {
@@ -192,6 +205,10 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.handoff {
+  text-align: center;
 }
 
 .log {
