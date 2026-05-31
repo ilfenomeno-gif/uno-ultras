@@ -129,8 +129,20 @@
 }
 
 .deck {
+  padding: 0;
+  font-family: inherit;
+  color: var(--text);
+}
+
+.deck {
   cursor: pointer;
   animation: deckPulse 2.2s infinite alternate;
+}
+
+.deck:disabled {
+  cursor: default;
+  opacity: 0.5;
+  animation: none;
 }
 
 @keyframes deckPulse {

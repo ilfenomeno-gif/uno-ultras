@@ -98,9 +98,10 @@ export function renderUnoBoard(): string {
     .join('');
 
   const playableIndices = engine.getPlayableIndicesForCurrent();
+  const myTurn = state.currentPlayerIndex === 0;
   const hand = me.hand
     .map((card, idx) => {
-      const playable = state.currentPlayerIndex === 0 && playableIndices.includes(idx);
+      const playable = myTurn && playableIndices.includes(idx);
       return `
         <button class="card ${colorClass(card.color)} ${playable ? 'playable' : ''}" data-action="play-card" data-index="${idx}" aria-label="${cardAriaLabel(card, playable)}" ${playable ? '' : 'disabled'}>
           <span>${cardLabel(card)}</span>
@@ -135,14 +136,14 @@ export function renderUnoBoard(): string {
       </div>
       <div class="opponents">${opponents}</div>
       <div class="table-area">
-        <div class="deck" data-action="draw" aria-label="Pesca carta dal mazzo">PESCA</div>
+        <button class="deck" data-action="draw" aria-label="Pesca carta dal mazzo" type="button" ${myTurn ? '' : 'disabled'}>PESCA</button>
         <div class="discard ${colorClass(topCard.color)}" aria-label="Carta scartata: ${cardLabel(topCard)} ${colorLabel(topCard.color)}">${cardLabel(topCard)}</div>
       </div>
       ${colorPicker}
       <div class="hand">${hand}</div>
       <div class="game-actions">
-        <button class="btn-ghost" data-action="say-uno">Dichiara UNO</button>
-        <button class="btn-ghost" data-action="draw">Pesca Carta</button>
+        <button class="btn-ghost" data-action="say-uno" ${myTurn ? '' : 'disabled'}>Dichiara UNO</button>
+        <button class="btn-ghost" data-action="draw" ${myTurn ? '' : 'disabled'}>Pesca Carta</button>
         <button class="btn-ghost" data-action="stop-game">Abbandona Match</button>
       </div>
       <div class="log" aria-live="polite" aria-atomic="false">${gameLog.slice(0, 6).map((x) => `<button type="button" class="log-entry">${x}</button>`).join('')}</div>
