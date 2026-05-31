@@ -1,1 +1,1 @@
-export { createPeerId, createRoomCode, createTransport } from "./multiplayer/session.js";
+export { createPeerId, createRoomCode, createTransport, createPresenceChannel } from "./multiplayer/session.js";

@@ -2,6 +2,15 @@
 
 Refactoring modulare del progetto monolitico `uno_ultra_v52 (1) (2).html`.
 
+## Runtime Reale
+
+- La shell caricata da `index.html` monta il runtime effettivo tramite iframe.
+- Il gameplay effettivamente eseguito dal launcher in locale e in produzione risiede in `legacy/index-runtime.html` (compatibilita interna).
+- `legacy/original-runtime.html` resta una sorgente legacy di audit/porting, non usata nel routing di avvio partita.
+- `data/original-reference.html` resta la sorgente di riferimento usata dagli script di porting e audit.
+- Le patch funzionali che devono cambiare il comportamento live del gioco vanno applicate al runtime `legacy/` e poi mantenute allineate con le sorgenti di porting quando necessario.
+- La navigazione utente (profilo, targhette, shop, battle pass, sfide, stagione, lobby) e unificata in `index.html`: la UI legacy non e un entrypoint operativo.
+
 ## Struttura
 
 - `index.html`: shell applicativa e schermate.
@@ -20,6 +29,8 @@ Refactoring modulare del progetto monolitico `uno_ultra_v52 (1) (2).html`.
 - `scripts/dev.js`: server statico locale.
 - `scripts/build.js`: controllo struttura + build in `dist/`.
 - `scripts/audit-original.js`: audit diff-driven dei marker funzionali principali tra `original.html` e il porting corrente.
+- `legacy/index-runtime.html`: runtime usato dal bridge del launcher per avvio partita, minigiochi e meccaniche.
+- `legacy/original-runtime.html`: sorgente legacy mantenuta per confronto/audit, non per il bootstrap live.
 
 ## Obiettivo fase attuale
 
@@ -50,3 +61,12 @@ Refactoring modulare del progetto monolitico `uno_ultra_v52 (1) (2).html`.
 - `npm run port:original`: rigenera `index.html`, `css/styles.css`, `data/cards.json`, `data/ranks.json`, `data/playlists.json` e il bridge `js/main.js` dal monolite.
 - `npm run audit:original`: rigenera `data/port-audit.json` con i marker funzionali rilevati dal monolite.
 - `js/main.js` resta un ponte metadata valido per l'albero modulare richiesto, senza interferire con il runtime estratto.
+
+## Note Operative
+
+- `node_modules/` e `dist/` sono gia esclusi dal versionamento tramite `.gitignore`.
+- La leaderboard locale puo aggregare profili salvati nel DB locale (`uno-ultra-profiles-v8`) senza backend.
+- Il controllo piu economico dopo patch al runtime e `npm run check`.
+- Mapping UI aggiornato:
+- `docs/reports/UI-LEGACY-MAP.md`
+- `docs/reports/UI-NUOVA-MAP.md`

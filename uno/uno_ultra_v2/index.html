@@ -3,11 +3,4028 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>UNO ULTRA v49 — Online</title>
+<title>UNO ULTRA — Launcher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./css/shell.css">
 </head>
 <body>
+
+<!-- Screen-reader live region -->
+<div id="a11y-live" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ═══ RUNTIME iframe (z-index 0) ════════════════════════ -->
 <div id="app"></div>
+
+<!-- ═══ IN-GAME FLOATING BAR (z-index 200) ═══════════════ -->
+<div id="ingame-bar" role="toolbar" aria-label="Controlli in gioco">
+  <button id="ingame-back" aria-label="Torna al menu principale">← Menu</button>
+  <span id="ingame-label">Partita in corso</span>
+</div>
+
+<!-- ═══ LAUNCHER OVERLAY (z-index 10) ════════════════════ -->
+<div id="launcher" role="application" aria-label="UNO ULTRA">
+
+  <!-- ════════════════════════════════════════════════
+       SCREEN 1 — MAIN MENU
+  ════════════════════════════════════════════════════ -->
+  <div id="screen-mainmenu" class="launcher-screen active">
+
+    <!-- Decorative floating cards (background) -->
+    <div class="mm-cards-bg" aria-hidden="true">
+      <div class="mm-card-dec c1">7</div>
+      <div class="mm-card-dec c2">+2</div>
+      <div class="mm-card-dec c3">↺</div>
+      <div class="mm-card-dec wild">W</div>
+    </div>
+
+    <!-- Logo + tagline -->
+    <div class="mm-logo">UNO ULTRA</div>
+    <div class="mm-tagline">La versione definitiva</div>
+
+    <!-- Vertical main menu -->
+    <nav class="mm-nav" role="navigation" aria-label="Menu principale">
+      <button class="mm-btn" id="btn-singleplayer"
+              aria-label="Entra in Singleplayer">
+        🎮 Singleplayer
+      </button>
+      <button class="mm-btn" id="btn-multiplayer"
+              aria-label="Entra in Multiplayer online">
+        🌐 Multiplayer
+      </button>
+      <button class="mm-btn" id="btn-impostazioni"
+              aria-label="Apri Impostazioni">
+        ⚙️ Impostazioni
+      </button>
+      <button class="mm-btn" id="btn-esci-main"
+              aria-label="Esci e torna al gioco">
+        🚪 Esci
+      </button>
+    </nav>
+
+    <!-- Account info (bottom-right) -->
+    <div class="mm-account" aria-live="polite" aria-label="Informazioni account">
+      <div class="mm-av" id="mm-av" aria-hidden="true">?</div>
+      <div class="mm-user-info">
+        <div id="mm-username">Non connesso</div>
+        <div id="mm-credits">0 💰</div>
+      </div>
+    </div>
+
+  </div><!-- /#screen-mainmenu -->
+
+  <!-- ════════════════════════════════════════════════
+       SCREEN 2 — SINGLEPLAYER  (tabs at top)
+  ════════════════════════════════════════════════════ -->
+  <div id="screen-singleplayer" class="launcher-screen">
+
+    <!-- Header: ← back | tabs … | account -->
+    <header id="sp-header">
+      <button id="sp-back" aria-label="Torna al menu principale">←</button>
+
+      <nav id="sp-tabs" role="tablist" aria-label="Sezioni singleplayer">
+        <button class="sp-tab active" data-tab="gioca"
+                role="tab" aria-selected="true" aria-controls="sptab-gioca">
+          🎮 Gioca
+        </button>
+        <button class="sp-tab" data-tab="profilo"
+                role="tab" aria-selected="false" aria-controls="sptab-profilo">
+          👤 Profilo
+        </button>
+        <button class="sp-tab" data-tab="targhette"
+          role="tab" aria-selected="false" aria-controls="sptab-targhette">
+          🏷️ Targhette
+        </button>
+        <button class="sp-tab" data-tab="shop"
+          role="tab" aria-selected="false" aria-controls="sptab-shop">
+          🛒 Shop
+        </button>
+        <button class="sp-tab" data-tab="battlepass"
+                role="tab" aria-selected="false" aria-controls="sptab-battlepass">
+          🏆 Battle Pass
+        </button>
+        <button class="sp-tab" data-tab="sfide"
+                role="tab" aria-selected="false" aria-controls="sptab-sfide">
+          ⚡ Sfide
+        </button>
+        <button class="sp-tab" data-tab="top100"
+                role="tab" aria-selected="false" aria-controls="sptab-top100">
+          🥇 Top 100
+        </button>
+        <button class="sp-tab" data-tab="stagione"
+                role="tab" aria-selected="false" aria-controls="sptab-stagione">
+          📅 Stagione
+        </button>
+      </nav>
+
+      <div class="sp-account" aria-live="polite" aria-label="Account">
+        <div class="sp-av" id="sp-av" aria-hidden="true">?</div>
+        <div class="sp-user-info">
+          <div id="sp-username">—</div>
+          <div id="sp-credits">0 💰</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Scrollable tab content -->
+    <main id="sp-content" tabindex="-1">
+
+      <!-- ──────────── GIOCA ───────────────────────── -->
+      <section id="sptab-gioca" class="sp-tab-pane active"
+               role="tabpanel" aria-label="Gioca">
+
+        <div class="section-label">Modalita Rapide</div>
+        <div class="top100-filters" role="group" aria-label="Avvio rapido modalita offline">
+          <button class="top100-filter quick-mode-btn" data-quick-mode="ruba" aria-pressed="false">Ruba Mazzetto</button>
+          <button class="top100-filter quick-mode-btn" data-quick-mode="scala" aria-pressed="false">Scala 40</button>
+          <button class="top100-filter quick-mode-btn" data-quick-mode="poker" aria-pressed="false">Poker</button>
+          <button class="top100-filter quick-mode-btn" data-quick-mode="scopa" aria-pressed="false">Scopa</button>
+          <button class="top100-filter quick-mode-btn" data-quick-mode="burraco" aria-pressed="false">Burraco</button>
+          <button class="top100-filter quick-mode-btn" data-quick-mode="bj" aria-pressed="false">Blackjack</button>
+          <button class="top100-filter quick-mode-btn" data-quick-mode="millemiglia" aria-pressed="false">Mille Miglia</button>
+          <button class="top100-filter quick-mode-btn" data-quick-mode="uno_blitz" aria-pressed="false">UNO Blitz</button>
+          <button class="top100-filter quick-mode-btn" data-quick-mode="uno_chaos" aria-pressed="false">UNO Chaos</button>
+        </div>
+
+        <!-- News hub unico -->
+        <div class="section-label" id="news-label">Notizie &amp; Aggiornamenti</div>
+        <button class="news-hub-trigger" id="news-hub-trigger"
+                aria-haspopup="dialog"
+                aria-label="Apri hub notizie e aggiornamenti">
+          <span class="news-hub-dot" aria-hidden="true">●</span>
+          <span>
+            <strong>News Hub</strong>
+            <small id="news-hub-summary">Apri per vedere tutte le novità</small>
+          </span>
+          <span class="news-hub-open" aria-hidden="true">Apri ↗</span>
+        </button>
+
+        <!-- Hero cards + play card -->
+        <div class="home-center">
+          <div class="home-hero" aria-hidden="true">
+            <div class="hero-cards-wrap">
+              <div class="hero-card c1">7</div>
+              <div class="hero-card c2">+2</div>
+              <div class="hero-card c3">↺</div>
+              <div class="hero-card wild">W</div>
+            </div>
+          </div>
+
+          <div class="home-play-card" role="group" aria-label="Selezione partita">
+            <button class="play-sel-trigger" id="open-play-btn"
+                    aria-haspopup="dialog"
+                    aria-label="Apri popup per scegliere modalità e numero giocatori">
+              <div class="play-sel-hint">Modalità selezionata</div>
+              <div class="play-sel-mode" id="play-sel-mode">UNO</div>
+              <div class="play-sel-players" id="play-sel-players">1v1 (vs 1 AI)</div>
+              <div class="play-sel-chevron">▼ Cambia selezione</div>
+            </button>
+
+            <button class="comp-toggle casual" id="comp-toggle-btn"
+                    aria-pressed="false"
+                    aria-label="Modalità Casual — clicca per passare a Competitivo">
+              <span class="toggle-dot" aria-hidden="true"></span>
+              <span id="comp-toggle-label">CASUAL</span>
+            </button>
+
+            <button class="play-cta" id="play-cta-btn"
+                    aria-label="Avvia partita">
+              🎮 GIOCA ORA
+            </button>
+          </div>
+        </div>
+
+        <!-- Footer quick links -->
+        <div class="home-footer">
+          <button class="account-level-box" id="home-lv-box"
+                  data-tab="profilo"
+                  aria-label="Livello account — vai al profilo">
+            <div class="lv-label">Livello Account</div>
+            <div class="lv-num" id="home-lv">1</div>
+            <div class="lv-xp" id="home-xp">0 / 100 XP</div>
+            <div class="lv-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                 aria-valuenow="0" aria-label="Progresso XP">
+              <div class="lv-bar-fill" id="home-lv-fill" style="width:0%"></div>
+            </div>
+          </button>
+          <button class="bp-link-box" id="home-bp-box"
+                  data-tab="battlepass"
+                  aria-label="Battle Pass Stagione 3 — vai al battle pass">
+            <div class="bp-label">Battle Pass</div>
+            <div class="bp-name">Stagione 3</div>
+            <div class="bp-tier" id="home-bp-tier">Tier 1 / 50</div>
+          </button>
+        </div>
+      </section><!-- /#sptab-gioca -->
+
+      <!-- ──────────── PROFILO ─────────────────────── -->
+      <section id="sptab-profilo" class="sp-tab-pane"
+               role="tabpanel" aria-label="Profilo giocatore">
+        <div class="panel-title">Profilo</div>
+        <div class="panel-subtitle">Statistiche e armadietto cosmetico</div>
+
+        <div class="profile-hero">
+          <div class="profile-av" id="prof-av" aria-hidden="true">?</div>
+          <div class="profile-info">
+            <div class="profile-name" id="prof-name">—</div>
+            <div class="profile-rank" id="prof-rank">Bronze · 200 MMR</div>
+            <div class="profile-rank" id="prof-title" style="color:#F5C842">Titolo: —</div>
+            <div class="profile-rank" id="prof-cosmetics" style="color:#7EE4F8">Carta: default · Bordo: default · Effetto: default</div>
+            <div class="profile-stats-row" role="list" aria-label="Statistiche di gioco">
+              <div class="stat-chip" role="listitem">
+                <div class="stat-val" id="prof-games">0</div>
+                <div class="stat-label">Partite</div>
+              </div>
+              <div class="stat-chip" role="listitem">
+                <div class="stat-val" id="prof-wins">0</div>
+                <div class="stat-label">Vittorie</div>
+              </div>
+              <div class="stat-chip" role="listitem">
+                <div class="stat-val" id="prof-wr" style="color:#34D399">0%</div>
+                <div class="stat-label">Win Rate</div>
+              </div>
+              <div class="stat-chip" role="listitem">
+                <div class="stat-val" id="prof-mmr" style="color:#F5C842">200</div>
+                <div class="stat-label">MMR</div>
+              </div>
+              <div class="stat-chip" role="listitem">
+                <div class="stat-val" id="prof-streak">0</div>
+                <div class="stat-label">Streak</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="locker-title" id="locker-heading">Armadietto</div>
+        <div class="locker-grid" role="list" aria-labelledby="locker-heading">
+          <button class="locker-box" data-locker="targhette"
+                  aria-label="Targhette — apri armadietto">
+            <span class="locker-icon" aria-hidden="true">🏷️</span>
+            <span class="locker-name">Targhette</span>
+            <span class="locker-sub">Titoli sbloccati</span>
+          </button>
+          <button class="locker-box" data-locker="cornici"
+                  aria-label="Cornici Avatar — apri armadietto">
+            <span class="locker-icon" aria-hidden="true">🖼️</span>
+            <span class="locker-name">Cornici Avatar</span>
+            <span class="locker-sub">Bordi profilo</span>
+          </button>
+          <button class="locker-box" data-locker="carte"
+                  aria-label="Stile Carte — apri armadietto">
+            <span class="locker-icon" aria-hidden="true">🃏</span>
+            <span class="locker-name">Stile Carte</span>
+            <span class="locker-sub">Design mazzo</span>
+          </button>
+          <button class="locker-box" data-locker="avatar"
+                  aria-label="Avatar — apri armadietto">
+            <span class="locker-icon" aria-hidden="true">😎</span>
+            <span class="locker-name">Avatar</span>
+            <span class="locker-sub">Immagine profilo</span>
+          </button>
+          <button class="locker-box" data-locker="bordo"
+                  aria-label="Bordo — apri armadietto">
+            <span class="locker-icon" aria-hidden="true">✨</span>
+            <span class="locker-name">Bordo</span>
+            <span class="locker-sub">Colore bordo carta</span>
+          </button>
+          <button class="locker-box" data-locker="cornice-animata"
+                  aria-label="Cornice Animata — apri armadietto">
+            <span class="locker-icon" aria-hidden="true">🌟</span>
+            <span class="locker-name">Cornice Animata</span>
+            <span class="locker-sub">Effetti profilo</span>
+          </button>
+          <button class="locker-box" data-locker="effetti"
+                  aria-label="Effetti — apri armadietto">
+            <span class="locker-icon" aria-hidden="true">💫</span>
+            <span class="locker-name">Effetti</span>
+            <span class="locker-sub">VFX in partita</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ──────────── TARGHETTE ───────────────────── -->
+      <section id="sptab-targhette" class="sp-tab-pane"
+               role="tabpanel" aria-label="Targhette sbloccate">
+        <div class="panel-title">Targhette</div>
+        <div class="panel-subtitle">Seleziona il titolo da mostrare nel tuo profilo</div>
+        <div class="sfide-list" role="list" aria-label="Lista targhette" id="targhette-list">
+          <!-- populated by JS -->
+        </div>
+      </section>
+
+      <!-- ──────────── SHOP ────────────────────────── -->
+      <section id="sptab-shop" class="sp-tab-pane"
+               role="tabpanel" aria-label="Shop cosmetico">
+        <div class="panel-title">Shop</div>
+        <div class="panel-subtitle">Acquista cosmetici, targhette e contenuti stagionali</div>
+        <div class="sfide-list" role="list" aria-label="Catalogo shop" id="shop-list">
+          <!-- populated by JS -->
+        </div>
+      </section>
+
+      <!-- ──────────── BATTLE PASS ─────────────────── -->
+      <section id="sptab-battlepass" class="sp-tab-pane"
+               role="tabpanel" aria-label="Battle Pass Stagione 3">
+        <div class="bp-header">
+          <div>
+            <div class="panel-title">Battle Pass — Stagione 3</div>
+            <div class="panel-subtitle">Completa sfide per avanzare di tier</div>
+          </div>
+          <div class="bp-tier-badge" id="bp-tier-badge">Tier 1</div>
+        </div>
+        <div class="bp-track" role="list"
+             aria-label="Progressione battle pass" id="bp-track">
+          <!-- populated by JS -->
+        </div>
+      </section>
+
+      <!-- ──────────── SFIDE ───────────────────────── -->
+      <section id="sptab-sfide" class="sp-tab-pane"
+               role="tabpanel" aria-label="Sfide settimanali">
+        <div class="panel-title">Sfide</div>
+        <div class="panel-subtitle">Completa gli obiettivi per guadagnare XP</div>
+        <div class="sfide-list" role="list" aria-label="Lista sfide" id="sfide-list">
+          <!-- populated by JS -->
+        </div>
+      </section>
+
+      <!-- ──────────── TOP 100 ─────────────────────── -->
+      <section id="sptab-top100" class="sp-tab-pane"
+               role="tabpanel" aria-label="Classifica Top 100">
+        <div class="panel-title">Top 100</div>
+        <div class="panel-subtitle">Classifica globale — aggiornata in tempo reale</div>
+        <div class="top100-filters" role="group" aria-label="Filtro per modalità">
+          <button class="top100-filter active" data-mode="uno" aria-pressed="true">UNO</button>
+          <button class="top100-filter" data-mode="uno_blitz" aria-pressed="false">UNO Blitz</button>
+          <button class="top100-filter" data-mode="uno_chaos" aria-pressed="false">UNO Chaos</button>
+          <button class="top100-filter" data-mode="ruba" aria-pressed="false">Ruba Mazzetto</button>
+          <button class="top100-filter" data-mode="scala" aria-pressed="false">Scala 40</button>
+          <button class="top100-filter" data-mode="poker" aria-pressed="false">Poker</button>
+          <button class="top100-filter" data-mode="scopa" aria-pressed="false">Scopa</button>
+          <button class="top100-filter" data-mode="burraco" aria-pressed="false">Burraco</button>
+          <button class="top100-filter" data-mode="bj" aria-pressed="false">Blackjack</button>
+          <button class="top100-filter" data-mode="millemiglia" aria-pressed="false">Mille Miglia</button>
+        </div>
+        <div class="top100-filters" role="group" aria-label="Filtro numero giocatori">
+          <button class="top100-filter top100-pcount active" data-top-count="1" aria-pressed="true">1v1</button>
+          <button class="top100-filter top100-pcount" data-top-count="2" aria-pressed="false">3 Giocatori</button>
+          <button class="top100-filter top100-pcount" data-top-count="3" aria-pressed="false">4 Giocatori</button>
+        </div>
+        <div class="leaderboard" role="list"
+             aria-label="Classifica giocatori" id="leaderboard-list">
+          <!-- populated by JS -->
+        </div>
+      </section>
+
+      <!-- ──────────── STAGIONE ────────────────────── -->
+      <section id="sptab-stagione" class="sp-tab-pane"
+               role="tabpanel" aria-label="Stagione corrente">
+        <div class="season-hero">
+          <div class="season-num">Stagione 3</div>
+          <div class="season-name">Fuoco &amp; Ghiaccio</div>
+          <div class="season-timer" id="season-timer">Fine stagione: 45 giorni</div>
+        </div>
+        <div class="season-cards" role="list" aria-label="Statistiche stagionali">
+          <div class="season-card" role="listitem">
+            <div class="season-card-label">Il tuo MMR (1v1)</div>
+            <div class="season-card-val" id="s-mmr">200</div>
+            <div class="season-card-sub">Ranked 1v1</div>
+          </div>
+          <div class="season-card" role="listitem">
+            <div class="season-card-label">Rank attuale</div>
+            <div class="season-card-val" id="s-rank" style="color:#CD7F32">Bronze</div>
+            <div class="season-card-sub">Rank di fine stagione</div>
+          </div>
+          <div class="season-card" role="listitem">
+            <div class="season-card-label">Vittorie competitive</div>
+            <div class="season-card-val" id="s-wins">0</div>
+            <div class="season-card-sub">In questa stagione</div>
+          </div>
+          <div class="season-card" role="listitem">
+            <div class="season-card-label">Prossimo rank</div>
+            <div class="season-card-val" id="s-next-rank"
+                 style="color:#C0C0C0">Silver</div>
+            <div class="season-card-sub" id="s-next-mmr">Serve: 400 MMR</div>
+          </div>
+        </div>
+        <div class="season-info-box">
+          <div class="section-label">Come funziona il rank</div>
+          <p style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.7;margin-top:4px">
+            Vinci partite competitive per guadagnare MMR. Ogni modalità (1v1, 3P, 4P)
+            ha un MMR separato. A fine stagione ricevi ricompense in base al rank
+            massimo raggiunto: crediti, avatar esclusivi e titoli stagionali.
+          </p>
+        </div>
+      </section>
+
+    </main><!-- /#sp-content -->
+  </div><!-- /#screen-singleplayer -->
+
+  <!-- ════════════════════════════════════════════════
+       SCREEN 3 — IMPOSTAZIONI
+  ════════════════════════════════════════════════════ -->
+  <div id="screen-impostazioni" class="launcher-screen">
+    <header id="imp-header">
+      <button id="imp-back" aria-label="Torna al menu principale">←</button>
+      <span class="screen-title">Impostazioni</span>
+    </header>
+    <main id="imp-content">
+      <div class="panel-subtitle" style="margin-bottom:20px">
+        Gestione account, audio e accessibilità
+      </div>
+      <div class="settings-list" role="list">
+        <button class="settings-btn" id="btn-open-login"
+            aria-label="Apri profilo nella nuova UI">
+          <span aria-hidden="true">👤</span> Profilo
+        </button>
+        <button class="settings-btn" id="btn-open-shop"
+            aria-label="Apri shop nella nuova UI">
+          <span aria-hidden="true">🛒</span> Shop
+        </button>
+        <button class="settings-btn" id="btn-open-splash"
+            aria-label="Torna al menu principale della nuova UI">
+          <span aria-hidden="true">🏠</span> Menu principale
+        </button>
+        <button class="settings-btn" id="btn-open-locker"
+            aria-label="Apri targhette nella nuova UI">
+          <span aria-hidden="true">🎨</span> Targhette
+        </button>
+      </div>
+    </main>
+  </div><!-- /#screen-impostazioni -->
+
+  <!-- ════════════════════════════════════════════════
+       SCREEN 4 — MULTIPLAYER
+  ════════════════════════════════════════════════════ -->
+  <div id="screen-multiplayer" class="launcher-screen">
+
+    <header id="mp-header">
+      <button id="mp-back" aria-label="Torna al menu principale">←</button>
+
+      <nav id="mp-tabs" role="tablist" aria-label="Sezioni multiplayer">
+        <button class="mp-tab active" data-mptab="gioca"
+                role="tab" aria-selected="true" aria-controls="mptab-gioca">
+          🎮 Gioca
+        </button>
+        <button class="mp-tab" data-mptab="profilo"
+                role="tab" aria-selected="false" aria-controls="mptab-profilo">
+          👤 Profilo
+        </button>
+        <button class="mp-tab" data-mptab="sfide"
+                role="tab" aria-selected="false" aria-controls="mptab-sfide">
+          🎯 Sfide
+        </button>
+        <button class="mp-tab" data-mptab="top100"
+                role="tab" aria-selected="false" aria-controls="mptab-top100">
+          🏅 Top 100
+        </button>
+        <button class="mp-tab" data-mptab="tornei"
+                role="tab" aria-selected="false" aria-controls="mptab-tornei">
+          🏆 Torneo
+        </button>
+        <button class="mp-tab" data-mptab="amici"
+                role="tab" aria-selected="false" aria-controls="mptab-amici">
+          👥 Amici
+        </button>
+        <button class="mp-tab" data-mptab="club"
+                role="tab" aria-selected="false" aria-controls="mptab-club">
+          🏛️ Club
+        </button>
+      </nav>
+
+      <div class="sp-account" aria-live="polite" aria-label="Account">
+        <div class="sp-av" id="mp-av" aria-hidden="true">?</div>
+        <div class="sp-user-info">
+          <div id="mp-username">—</div>
+          <div id="mp-credits">0 💰</div>
+        </div>
+      </div>
+    </header>
+
+    <main id="mp-content" tabindex="-1">
+
+      <!-- ─── GIOCA ─────────────────────────────────────── -->
+      <section id="mptab-gioca" class="sp-tab-pane active"
+               role="tabpanel" aria-label="Gioca online">
+        <div class="panel-title">Lobby Multiplayer</div>
+        <div class="panel-subtitle">Crea il tuo tavolo: scegli modalità, invita amici e avvia la partita</div>
+
+        <div class="mp-lobby-layout">
+          <div class="mp-lobby-left">
+            <div class="mp-player-card me" id="mp-me-card" role="group" aria-label="La tua carta profilo">
+              <div class="mp-player-ribbon">LEADER</div>
+              <div class="mp-player-av" id="mp-lobby-av" aria-hidden="true">?</div>
+              <div class="mp-player-name" id="mp-lobby-name">Tu</div>
+              <div class="mp-player-meta" id="mp-lobby-title">Titolo: —</div>
+              <div class="mp-player-meta" id="mp-lobby-meta">Carta profilo collegata</div>
+            </div>
+
+            <div class="mp-team-row" id="mp-team-row" aria-label="Squadra invitata">
+              <button class="mp-invite-slot" data-slot="0" aria-label="Invita amico slot 1" aria-haspopup="dialog">+</button>
+              <button class="mp-invite-slot" data-slot="1" aria-label="Invita amico slot 2" aria-haspopup="dialog">+</button>
+              <button class="mp-invite-slot" data-slot="2" aria-label="Invita amico slot 3" aria-haspopup="dialog">+</button>
+              <button class="mp-invite-slot" data-slot="3" aria-label="Invita amico slot 4" aria-haspopup="dialog">+</button>
+            </div>
+          </div>
+
+          <aside class="mp-setup-box" aria-label="Setup partita online">
+            <div class="mp-setup-label">Modalità</div>
+            <button id="mp-mode-picker" class="mp-mode-picker" aria-haspopup="listbox" aria-expanded="false">
+              UNO
+            </button>
+            <div id="mp-mode-list" class="mp-mode-list" role="listbox" aria-label="Scegli modalità" hidden>
+              <button class="mp-mode-option active" data-mode="uno" role="option" aria-selected="true">🎴 UNO</button>
+              <button class="mp-mode-option" data-mode="ruba" role="option" aria-selected="false">🃏 Ruba Mazzetto</button>
+              <button class="mp-mode-option" data-mode="scala" role="option" aria-selected="false">🎴 Scala 40</button>
+              <button class="mp-mode-option" data-mode="bj" role="option" aria-selected="false">♠️ Blackjack</button>
+              <button class="mp-mode-option" data-mode="scopa" role="option" aria-selected="false">🧹 Scopa</button>
+              <button class="mp-mode-option" data-mode="poker" role="option" aria-selected="false">♣️ Poker</button>
+              <button class="mp-mode-option" data-mode="burraco" role="option" aria-selected="false">🎴 Burraco</button>
+              <button class="mp-mode-option" data-mode="millemiglia" role="option" aria-selected="false">🚗 Mille Miglia</button>
+            </div>
+
+            <div class="mp-options">
+              <div class="section-label">Numero Giocatori</div>
+              <div class="mp-pcount" role="group" aria-label="Seleziona numero giocatori">
+                <button class="pcount-btn selected" data-mpcount="1"
+                        aria-pressed="true" aria-label="1v1">
+                  1v1<div class="pcount-sub">2 giocatori</div>
+                </button>
+                <button class="pcount-btn" data-mpcount="2"
+                        aria-pressed="false" aria-label="3 giocatori">
+                  3P<div class="pcount-sub">3 giocatori</div>
+                </button>
+                <button class="pcount-btn" data-mpcount="3"
+                        aria-pressed="false" aria-label="4 giocatori">
+                  4P<div class="pcount-sub">4 giocatori</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="mp-action-row">
+              <button class="comp-toggle casual" id="mp-comp-toggle"
+                      aria-pressed="false"
+                      aria-label="Casual — clicca per Competitivo">
+                <span class="toggle-dot" aria-hidden="true"></span>
+                <span id="mp-comp-label">CASUAL</span>
+              </button>
+              <button class="play-cta" id="mp-play-btn"
+                      aria-label="Avvia partita online">
+                🌐 AVVIA PARTITA
+              </button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ─── PROFILO ─────────────────────────────────── -->
+      <section id="mptab-profilo" class="sp-tab-pane"
+               role="tabpanel" aria-label="Profilo multiplayer">
+        <div class="panel-title">Profilo</div>
+        <div class="panel-subtitle">Il tuo profilo usato nella lobby online</div>
+        <div class="mp-player-card me mp-profile-preview" role="group" aria-label="Anteprima carta profilo">
+          <div class="mp-player-ribbon">PROFILO</div>
+          <div class="mp-player-av" id="mp-profilo-av" aria-hidden="true">?</div>
+          <div class="mp-player-name" id="mp-profilo-name">—</div>
+          <div class="mp-player-meta" id="mp-profilo-title">Titolo: —</div>
+          <div class="mp-player-meta" id="mp-profilo-credits">0 crediti</div>
+        </div>
+      </section>
+
+      <!-- ─── SFIDE ───────────────────────────────────── -->
+      <section id="mptab-sfide" class="sp-tab-pane"
+               role="tabpanel" aria-label="Sfide multiplayer">
+        <div class="panel-title">Sfide</div>
+        <div class="panel-subtitle">Missioni online giornaliere e settimanali</div>
+        <div class="section-hint">Vinci 3 match online, invita 1 amico e completa una partita competitiva.</div>
+      </section>
+
+      <!-- ─── TOP 100 ─────────────────────────────────── -->
+      <section id="mptab-top100" class="sp-tab-pane"
+               role="tabpanel" aria-label="Top 100 multiplayer">
+        <div class="panel-title">Top 100</div>
+        <div class="panel-subtitle">Classifica online stagionale</div>
+        <div class="section-hint">La classifica dettagliata viene sincronizzata dal runtime durante la stagione.</div>
+      </section>
+
+      <!-- ─── TORNEI ──────────────────────────────────── -->
+      <section id="mptab-tornei" class="sp-tab-pane"
+               role="tabpanel" aria-label="Tornei">
+        <div class="panel-title">Tornei</div>
+        <div class="panel-subtitle">Competizioni strutturate con premi esclusivi</div>
+        <div class="torneo-grid" role="list" aria-label="Tornei disponibili">
+          <button class="torneo-card" data-torneo="t32"
+                  role="listitem" aria-label="Torneo 32 — 32 giocatori eliminazione diretta">
+            <div class="torneo-icon" aria-hidden="true">⚔️</div>
+            <div class="torneo-name">Torneo 32</div>
+            <div class="torneo-desc">32 giocatori, eliminazione diretta</div>
+            <div class="torneo-badge">4 slot liberi</div>
+          </button>
+          <button class="torneo-card" data-torneo="grandprix"
+                  role="listitem" aria-label="Grand Prix settimanale a punti">
+            <div class="torneo-icon" aria-hidden="true">🏎️</div>
+            <div class="torneo-name">Grand Prix</div>
+            <div class="torneo-desc">Circuito settimanale a punti</div>
+            <div class="torneo-badge">Aperto</div>
+          </button>
+          <button class="torneo-card" data-torneo="classico"
+                  role="listitem" aria-label="Torneo Classico sempre disponibile">
+            <div class="torneo-icon" aria-hidden="true">🎖️</div>
+            <div class="torneo-name">Classico</div>
+            <div class="torneo-desc">Formato standard, sempre disponibile</div>
+            <div class="torneo-badge">Sempre aperto</div>
+          </button>
+          <button class="torneo-card featured" data-torneo="ucs"
+                  role="listitem" aria-label="UCS Ultra Championship Series stagionale">
+            <div class="torneo-icon" aria-hidden="true">👑</div>
+            <div class="torneo-name">UCS</div>
+            <div class="torneo-desc">Ultra Championship Series — senza pentathlon</div>
+            <div class="torneo-badge gold">Stagionale</div>
+          </button>
+        </div>
+      </section>
+
+      <!-- ─── AMICI ───────────────────────────────────── -->
+      <section id="mptab-amici" class="sp-tab-pane"
+               role="tabpanel" aria-label="Amici">
+        <div class="panel-title">Amici</div>
+        <div class="panel-subtitle">Gestisci la tua lista amici e inviti</div>
+
+        <nav class="social-subnav" role="tablist" aria-label="Sottosezioni amici">
+          <button class="social-subtab active" data-subtab="lista"
+                  role="tab" aria-selected="true">Amici</button>
+          <button class="social-subtab" data-subtab="cerca"
+                  role="tab" aria-selected="false">Trova</button>
+          <button class="social-subtab" data-subtab="richieste"
+                  role="tab" aria-selected="false">Richieste
+            <span class="subtab-badge" id="richieste-badge">1</span>
+          </button>
+          <button class="social-subtab" data-subtab="bloccati"
+                  role="tab" aria-selected="false">Bloccati</button>
+        </nav>
+
+        <!-- Lista amici -->
+        <div id="amici-lista" class="social-subpane active"
+             role="region" aria-label="Lista amici">
+          <div class="friend-section-label">🟢 Online</div>
+          <div class="friend-list" id="friends-online">
+            <div class="friend-row" data-friend="NightKing">
+              <div class="friend-av" aria-hidden="true">N</div>
+              <div class="friend-info">
+                <div class="friend-name">NightKing</div>
+                <div class="friend-status status-online">In partita — UNO</div>
+              </div>
+              <button class="friend-action-btn" data-friend="NightKing"
+                      aria-label="Azioni per NightKing" aria-haspopup="menu">⋯</button>
+            </div>
+            <div class="friend-row" data-friend="AceVolta">
+              <div class="friend-av" aria-hidden="true">A</div>
+              <div class="friend-info">
+                <div class="friend-name">AceVolta</div>
+                <div class="friend-status status-online">Online — al menu</div>
+              </div>
+              <button class="friend-action-btn" data-friend="AceVolta"
+                      aria-label="Azioni per AceVolta" aria-haspopup="menu">⋯</button>
+            </div>
+          </div>
+          <div class="friend-section-label">⚫ Offline</div>
+          <div class="friend-list" id="friends-offline">
+            <div class="friend-row friend-offline" data-friend="BlazeRunner">
+              <div class="friend-av" aria-hidden="true">B</div>
+              <div class="friend-info">
+                <div class="friend-name">BlazeRunner</div>
+                <div class="friend-status">Offline</div>
+              </div>
+              <button class="friend-action-btn" data-friend="BlazeRunner"
+                      aria-label="Azioni per BlazeRunner" aria-haspopup="menu">⋯</button>
+            </div>
+            <div class="friend-row friend-offline" data-friend="IceQueen">
+              <div class="friend-av" aria-hidden="true">I</div>
+              <div class="friend-info">
+                <div class="friend-name">IceQueen</div>
+                <div class="friend-status">Offline</div>
+              </div>
+              <button class="friend-action-btn" data-friend="IceQueen"
+                      aria-label="Azioni per IceQueen" aria-haspopup="menu">⋯</button>
+            </div>
+            <div class="friend-row friend-offline" data-friend="ShadowPlay">
+              <div class="friend-av" aria-hidden="true">S</div>
+              <div class="friend-info">
+                <div class="friend-name">ShadowPlay</div>
+                <div class="friend-status">Offline · 2h fa</div>
+              </div>
+              <button class="friend-action-btn" data-friend="ShadowPlay"
+                      aria-label="Azioni per ShadowPlay" aria-haspopup="menu">⋯</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trova amici -->
+        <div id="amici-cerca" class="social-subpane"
+             role="region" aria-label="Trova amici">
+          <div class="search-row">
+            <input type="text" id="friend-search-input" class="search-input"
+                   placeholder="Nome giocatore…" maxlength="32"
+                   aria-label="Cerca giocatore per nome">
+            <button id="friend-search-btn" class="search-go-btn"
+                    aria-label="Cerca">🔍</button>
+          </div>
+          <div id="friend-search-results" class="friend-list"
+               aria-live="polite" aria-label="Risultati ricerca">
+          </div>
+        </div>
+
+        <!-- Richieste -->
+        <div id="amici-richieste" class="social-subpane"
+             role="region" aria-label="Richieste di amicizia">
+          <div class="friend-section-label">Richieste ricevute</div>
+          <div id="richieste-list" class="friend-list">
+            <div class="friend-row request-row" data-friend="VortexUno">
+              <div class="friend-av" aria-hidden="true">V</div>
+              <div class="friend-info">
+                <div class="friend-name">VortexUno</div>
+                <div class="friend-status">Vuole aggiungerti</div>
+              </div>
+              <div class="request-actions">
+                <button class="req-accept" data-friend="VortexUno"
+                        aria-label="Accetta richiesta di VortexUno">✓</button>
+                <button class="req-reject" data-friend="VortexUno"
+                        aria-label="Rifiuta richiesta di VortexUno">✕</button>
+              </div>
+            </div>
+          </div>
+          <div class="friend-section-label" style="margin-top:16px">Richieste inviate</div>
+          <div id="inviate-list" class="friend-list">
+            <div class="friend-row" data-friend="TheUltimate">
+              <div class="friend-av" aria-hidden="true">T</div>
+              <div class="friend-info">
+                <div class="friend-name">TheUltimate</div>
+                <div class="friend-status">In attesa…</div>
+              </div>
+              <button class="req-cancel" data-friend="TheUltimate"
+                      aria-label="Annulla richiesta a TheUltimate">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloccati -->
+        <div id="amici-bloccati" class="social-subpane"
+             role="region" aria-label="Utenti bloccati">
+          <div class="friend-section-label">Utenti bloccati</div>
+          <div id="bloccati-list" class="friend-list">
+            <div class="empty-state">Nessun utente bloccato</div>
+          </div>
+          <p class="section-hint">
+            Gli utenti bloccati non possono invitarti o inviarti richieste di amicizia.
+          </p>
+        </div>
+      </section>
+
+      <!-- ─── CLUB ────────────────────────────────────── -->
+      <section id="mptab-club" class="sp-tab-pane"
+               role="tabpanel" aria-label="Club">
+        <div class="panel-title">Club</div>
+        <div class="panel-subtitle">Area sociale per gruppi di giocatori</div>
+
+        <div class="club-hero" id="club-hero">
+          <div class="club-hero-icon" aria-hidden="true">🏛️</div>
+          <div class="club-hero-title">Non sei in nessun club</div>
+          <div class="club-hero-sub">Crea il tuo club o unisciti a uno esistente</div>
+          <div class="club-hero-actions">
+            <button class="club-btn-primary" id="btn-crea-club"
+                    aria-label="Crea un nuovo club" aria-haspopup="dialog">
+              + Crea Club
+            </button>
+            <button class="club-btn-secondary" id="btn-join-club"
+                    aria-label="Unisciti a un club esistente" aria-haspopup="dialog">
+              🔍 Unisciti
+            </button>
+          </div>
+        </div>
+
+        <div class="club-sfide-section">
+          <div class="section-label">Sfide Club</div>
+          <div class="club-sfide-list" role="list" aria-label="Sfide club disponibili">
+            <div class="club-sfida-row" role="listitem">
+              <div class="club-sfida-icon" aria-hidden="true">⚔️</div>
+              <div class="club-sfida-info">
+                <div class="club-sfida-name">Campionato Club</div>
+                <div class="club-sfida-desc">
+                  Il club con più vittorie questa settimana vince 1.000 crediti
+                </div>
+              </div>
+              <div class="club-sfida-badge">Disponibile</div>
+            </div>
+            <div class="club-sfida-row" role="listitem">
+              <div class="club-sfida-icon" aria-hidden="true">🎴</div>
+              <div class="club-sfida-info">
+                <div class="club-sfida-name">Sfida UNO Cumulativa</div>
+                <div class="club-sfida-desc">
+                  Accumula 500 vittorie di UNO come club
+                </div>
+              </div>
+              <div class="club-sfida-badge">0 / 500</div>
+            </div>
+            <div class="club-sfida-row" role="listitem">
+              <div class="club-sfida-icon" aria-hidden="true">🌀</div>
+              <div class="club-sfida-info">
+                <div class="club-sfida-name">Evento Multimodale</div>
+                <div class="club-sfida-desc">
+                  Gioca almeno 3 modalità diverse nel weekend
+                </div>
+              </div>
+              <div class="club-sfida-badge">Weekend</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div><!-- /#screen-multiplayer -->
+
+</div><!-- /#launcher -->
+
+<!-- ═══ PLAY POPUP (dialog) ══════════════════════════════ -->
+<dialog id="play-popup"
+        aria-label="Scegli modalità e numero di giocatori"
+        aria-modal="true">
+  <div class="popup-header">
+    <div class="popup-title" id="popup-title-txt">Seleziona partita</div>
+    <button class="popup-close" id="popup-close-btn"
+            aria-label="Chiudi popup">✕</button>
+  </div>
+
+  <div class="popup-tabs" role="tablist" aria-label="Schede selezione partita">
+    <button class="popup-tab active" role="tab"
+            aria-selected="true" aria-controls="pptab-mode" id="ptab-mode">
+      Modalità
+    </button>
+    <button class="popup-tab" role="tab"
+            aria-selected="false" aria-controls="pptab-players" id="ptab-players">
+      Giocatori
+    </button>
+  </div>
+
+  <!-- Tab: Modalità -->
+  <div id="pptab-mode" class="popup-tab-pane mode-grid active"
+       role="tabpanel" aria-labelledby="ptab-mode">
+    <button class="mode-card selected" data-mode="uno"
+            aria-pressed="true" aria-label="UNO — seleziona questa modalità">
+      <div class="mode-icon" aria-hidden="true">🎴</div>
+      <div class="mode-name">UNO</div>
+    </button>
+    <button class="mode-card" data-mode="ruba"
+            aria-pressed="false" aria-label="Ruba Mazzetto — seleziona questa modalità">
+      <div class="mode-icon" aria-hidden="true">🃏</div>
+      <div class="mode-name">Ruba Mazzetto</div>
+    </button>
+    <button class="mode-card" data-mode="scala"
+            aria-pressed="false" aria-label="Scala 40 — seleziona questa modalità">
+      <div class="mode-icon" aria-hidden="true">🎴</div>
+      <div class="mode-name">Scala 40</div>
+    </button>
+    <button class="mode-card" data-mode="bj"
+            aria-pressed="false" aria-label="Blackjack — seleziona questa modalità">
+      <div class="mode-icon" aria-hidden="true">♠️</div>
+      <div class="mode-name">Blackjack</div>
+    </button>
+    <button class="mode-card" data-mode="scopa"
+            aria-pressed="false" aria-label="Scopa — seleziona questa modalità">
+      <div class="mode-icon" aria-hidden="true">🧹</div>
+      <div class="mode-name">Scopa</div>
+    </button>
+    <button class="mode-card" data-mode="poker"
+            aria-pressed="false" aria-label="Poker — seleziona questa modalità">
+      <div class="mode-icon" aria-hidden="true">♣️</div>
+      <div class="mode-name">Poker</div>
+    </button>
+    <button class="mode-card" data-mode="burraco"
+            aria-pressed="false" aria-label="Burraco — seleziona questa modalità">
+      <div class="mode-icon" aria-hidden="true">🎴</div>
+      <div class="mode-name">Burraco</div>
+    </button>
+    <button class="mode-card" data-mode="millemiglia"
+            aria-pressed="false" aria-label="Mille Miglia — seleziona questa modalità">
+      <div class="mode-icon" aria-hidden="true">🚗</div>
+      <div class="mode-name">Mille Miglia</div>
+    </button>
+    <button class="mode-card" data-mode="uno_blitz"
+            aria-pressed="false" aria-label="UNO Blitz — seleziona questa modalità">
+      <div class="mode-icon" aria-hidden="true">⚡</div>
+      <div class="mode-name">UNO Blitz</div>
+    </button>
+    <button class="mode-card" data-mode="uno_chaos"
+            aria-pressed="false" aria-label="UNO Chaos — seleziona questa modalità">
+      <div class="mode-icon" aria-hidden="true">🌀</div>
+      <div class="mode-name">UNO Chaos</div>
+    </button>
+  </div>
+
+  <!-- Tab: Numero giocatori -->
+  <div id="pptab-players" class="popup-tab-pane pcount-grid"
+       role="tabpanel" aria-labelledby="ptab-players">
+    <button class="pcount-btn selected" data-count="1"
+            aria-pressed="true" aria-label="1v1: tu contro 1 AI">
+      1v1
+      <div class="pcount-sub">Tu vs 1 AI</div>
+    </button>
+    <button class="pcount-btn" data-count="2"
+            aria-pressed="false" aria-label="3 giocatori: tu e 2 AI">
+      3P
+      <div class="pcount-sub">Tu + 2 AI</div>
+    </button>
+    <button class="pcount-btn" data-count="3"
+            aria-pressed="false" aria-label="4 giocatori: tu e 3 AI">
+      4P
+      <div class="pcount-sub">Tu + 3 AI</div>
+    </button>
+  </div>
+
+  <button class="popup-confirm" id="popup-confirm-btn"
+          aria-label="Conferma selezione e avvia la partita">
+    🎮 GIOCA
+  </button>
+</dialog>
+
+<!-- ═══ SOCIAL POPUP (invite friends to a mode) ═════════════ -->
+<dialog id="social-popup"
+        aria-label="Invita amici alla partita"
+        aria-modal="true">
+  <div class="popup-header">
+    <div class="popup-title" id="social-popup-title">Invita Amici</div>
+    <button class="popup-close" id="social-popup-close"
+            aria-label="Chiudi">✕</button>
+  </div>
+  <div class="popup-tabs" role="tablist" aria-label="Schede sociali">
+    <button class="popup-tab active" role="tab"
+            aria-selected="true" aria-controls="spt-amici" id="spth-amici">
+      👥 Amici
+    </button>
+    <button class="popup-tab" role="tab"
+            aria-selected="false" aria-controls="spt-club" id="spth-club">
+      🏛️ Club
+    </button>
+  </div>
+  <div id="spt-amici" class="popup-tab-pane active" role="tabpanel"
+       aria-labelledby="spth-amici">
+    <div class="social-invite-list" id="social-invite-list" role="list">
+      <div class="social-invite-row" role="listitem" data-friend="NightKing">
+        <div class="friend-av" aria-hidden="true">N</div>
+        <div class="social-invite-info">
+          <div class="friend-name">NightKing</div>
+          <div class="friend-status status-online">Online</div>
+        </div>
+        <button class="invite-send-btn" data-friend="NightKing"
+                aria-label="Invita NightKing">Invita</button>
+      </div>
+      <div class="social-invite-row" role="listitem" data-friend="AceVolta">
+        <div class="friend-av" aria-hidden="true">A</div>
+        <div class="social-invite-info">
+          <div class="friend-name">AceVolta</div>
+          <div class="friend-status status-online">Online</div>
+        </div>
+        <button class="invite-send-btn" data-friend="AceVolta"
+                aria-label="Invita AceVolta">Invita</button>
+      </div>
+      <div class="social-invite-row friend-offline" role="listitem" data-friend="BlazeRunner">
+        <div class="friend-av" aria-hidden="true">B</div>
+        <div class="social-invite-info">
+          <div class="friend-name">BlazeRunner</div>
+          <div class="friend-status">Offline</div>
+        </div>
+        <button class="invite-send-btn" disabled
+                aria-label="BlazeRunner è offline">Offline</button>
+      </div>
+      <div class="social-invite-row friend-offline" role="listitem" data-friend="IceQueen">
+        <div class="friend-av" aria-hidden="true">I</div>
+        <div class="social-invite-info">
+          <div class="friend-name">IceQueen</div>
+          <div class="friend-status">Offline</div>
+        </div>
+        <button class="invite-send-btn" disabled
+                aria-label="IceQueen è offline">Offline</button>
+      </div>
+    </div>
+  </div>
+  <div id="spt-club" class="popup-tab-pane" role="tabpanel"
+       aria-labelledby="spth-club">
+    <div class="club-popup-content">
+      <div class="club-popup-hint">Condividi questo codice con i tuoi amici:</div>
+      <div class="club-code-box" id="social-club-code">ULTRA-0000</div>
+      <button class="play-cta" id="social-copy-code" style="margin-top:12px">
+        📋 Copia codice
+      </button>
+    </div>
+  </div>
+  <button class="popup-confirm" id="social-start-btn"
+          aria-label="Avvia partita online con gli amici invitati">
+    🌐 AVVIA PARTITA
+  </button>
+</dialog>
+
+<!-- ═══ FRIEND CONTEXT MENU ═════════════════════════════════ -->
+<div id="friend-ctx-menu" class="friend-ctx-menu" role="menu"
+     aria-label="Azioni amico" style="display:none">
+  <button class="ctx-item" id="ctx-invite" role="menuitem">
+    🎮 Invita a partita
+  </button>
+  <button class="ctx-item ctx-danger" id="ctx-block" role="menuitem">
+    🚫 Blocca
+  </button>
+  <button class="ctx-item ctx-danger" id="ctx-remove" role="menuitem">
+    👋 Rimuovi amico
+  </button>
+</div>
+
+<!-- ═══ CLUB — CREA POPUP ════════════════════════════════════ -->
+<dialog id="club-create-popup"
+        aria-label="Crea un nuovo club"
+        aria-modal="true">
+  <div class="popup-header">
+    <div class="popup-title">Crea Club</div>
+    <button class="popup-close" id="club-create-close"
+            aria-label="Chiudi">✕</button>
+  </div>
+  <div class="club-form">
+    <label for="club-name-input" class="club-form-label">Nome club (max 24 caratteri)</label>
+    <input type="text" id="club-name-input" class="club-form-input"
+           maxlength="24" placeholder="Il nome del tuo club…"
+           aria-label="Nome club" autocomplete="off">
+    <label for="club-tag-input" class="club-form-label">Tag identificativo (3 lettere)</label>
+    <input type="text" id="club-tag-input" class="club-form-input club-tag"
+           maxlength="3" placeholder="TAG"
+           aria-label="Tag club" autocomplete="off">
+  </div>
+  <button class="popup-confirm" id="club-create-confirm"
+          aria-label="Conferma creazione club">
+    ✅ Crea Club
+  </button>
+</dialog>
+
+<!-- ═══ CLUB — UNISCITI POPUP ════════════════════════════════ -->
+<dialog id="club-join-popup"
+        aria-label="Unisciti a un club"
+        aria-modal="true">
+  <div class="popup-header">
+    <div class="popup-title">Unisciti a un Club</div>
+    <button class="popup-close" id="club-join-close"
+            aria-label="Chiudi">✕</button>
+  </div>
+  <div class="club-form">
+    <label for="club-join-code" class="club-form-label">
+      Inserisci il codice club (es. ULTRA-1234)
+    </label>
+    <input type="text" id="club-join-code" class="club-form-input"
+           maxlength="12" placeholder="ULTRA-0000"
+           aria-label="Codice club" autocomplete="off">
+  </div>
+  <button class="popup-confirm" id="club-join-confirm"
+          aria-label="Conferma ingresso nel club">
+    🔍 Unisciti
+  </button>
+</dialog>
+
+<!-- ═══ NEWS HUB (unico punto notifiche/news) ═══════════════ -->
+<dialog id="news-hub-dialog"
+        aria-label="Hub notizie"
+        aria-modal="true">
+  <div class="popup-header">
+    <div class="popup-title">News Hub</div>
+    <button class="popup-close" id="news-hub-close" aria-label="Chiudi hub notizie">✕</button>
+  </div>
+  <div class="news-hub-scroll" id="news-hub-scroll" role="list" aria-label="Elenco notizie"></div>
+  <article class="news-hub-detail" id="news-hub-detail" aria-live="polite"></article>
+</dialog>
+
+<!-- ═══ LOCKER POPUP (cosmetici reali nuova UI) ═════════════ -->
+<dialog id="locker-popup"
+        aria-label="Armadietto cosmetici"
+        aria-modal="true">
+  <div class="popup-header">
+    <div class="popup-title" id="locker-popup-title">Armadietto</div>
+    <button class="popup-close" id="locker-popup-close" aria-label="Chiudi armadietto">✕</button>
+  </div>
+  <div class="popup-tabs" role="tablist" aria-label="Categorie armadietto">
+    <button class="popup-tab active locker-tab" data-locker-tab="targhette" aria-selected="true">Targhette</button>
+    <button class="popup-tab locker-tab" data-locker-tab="cornici" aria-selected="false">Cornici</button>
+    <button class="popup-tab locker-tab" data-locker-tab="carte" aria-selected="false">Carte</button>
+    <button class="popup-tab locker-tab" data-locker-tab="avatar" aria-selected="false">Avatar</button>
+    <button class="popup-tab locker-tab" data-locker-tab="bordo" aria-selected="false">Bordo</button>
+    <button class="popup-tab locker-tab" data-locker-tab="cornice-animata" aria-selected="false">Cornice Animata</button>
+    <button class="popup-tab locker-tab" data-locker-tab="effetti" aria-selected="false">Effetti</button>
+  </div>
+  <div class="locker-popup-list" id="locker-popup-list" role="list" aria-label="Elementi equipaggiabili"></div>
+</dialog>
+
 <script type="module" src="./js/main.js"></script>
+<script type="module">
+import { createPeerId, createRoomCode, createTransport, createPresenceChannel } from './js/multiplayer.js';
+
+// ═══════════════════════════════════════════════════════════════
+//  UNO ULTRA — Launcher Script  (runs only in index.html shell)
+//  Flow: Runtime login → Main Menu → Singleplayer (tabs at top)
+// ═══════════════════════════════════════════════════════════════
+
+// ── Constants ─────────────────────────────────────────────────
+const RUNTIME_FORCE_PATH = './legacy/index-runtime.html';
+const RUNTIME_URL = new URL(RUNTIME_FORCE_PATH, window.location.href).href;
+
+const MODE_LABELS = {
+  uno:'UNO', ruba:'Ruba Mazzetto', scala:'Scala 40',
+  bj:'Blackjack', scopa:'Scopa', poker:'Poker',
+  burraco:'Burraco', millemiglia:'Mille Miglia',
+  uno_blitz:'UNO Blitz', uno_chaos:'UNO Chaos'
+};
+const PCOUNT_LABELS = { 1:'1v1 (vs 1 AI)', 2:'3 Giocatori', 3:'4 Giocatori' };
+
+// ── State ──────────────────────────────────────────────────────
+let _selectedMode  = 'uno';
+let _selectedCount = 1;
+let _isCompetitive = false;
+let _runtimeReady  = false;
+let _loginPoller   = null;
+let _monitorStarted= false;
+let _activeMatch   = null;
+let _matchLog      = [];
+
+// ── DOM refs ───────────────────────────────────────────────────
+const launcher      = document.getElementById('launcher');
+const ingameBar     = document.getElementById('ingame-bar');
+const ingameBack    = document.getElementById('ingame-back');
+const a11yLive      = document.getElementById('a11y-live');
+const playPopup     = document.getElementById('play-popup');
+const compToggleBtn = document.getElementById('comp-toggle-btn');
+const compLabel     = document.getElementById('comp-toggle-label');
+const openPlayBtn   = document.getElementById('open-play-btn');
+const playCta       = document.getElementById('play-cta-btn');
+const popupConfirm  = document.getElementById('popup-confirm-btn');
+const popupClose    = document.getElementById('popup-close-btn');
+const bpTrack       = document.getElementById('bp-track');
+const sfideList     = document.getElementById('sfide-list');
+const targhetteList = document.getElementById('targhette-list');
+const shopList      = document.getElementById('shop-list');
+const lbList        = document.getElementById('leaderboard-list');
+const lockerPopup   = document.getElementById('locker-popup');
+const lockerPopupList = document.getElementById('locker-popup-list');
+const lockerPopupTitle = document.getElementById('locker-popup-title');
+
+// ── Screens ────────────────────────────────────────────────────
+const SCREENS = {
+  mainmenu:     document.getElementById('screen-mainmenu'),
+  singleplayer: document.getElementById('screen-singleplayer'),
+  multiplayer:  document.getElementById('screen-multiplayer'),
+  impostazioni: document.getElementById('screen-impostazioni'),
+};
+
+function showScreen(name) {
+  Object.values(SCREENS).forEach(s => s.classList.remove('active'));
+  if (SCREENS[name]) SCREENS[name].classList.add('active');
+}
+
+// ── Announce (screen reader) ───────────────────────────────────
+function announce(msg) {
+  if (!a11yLive) return;
+  a11yLive.textContent = '';
+  setTimeout(() => { a11yLive.textContent = msg; }, 50);
+}
+
+// ── Launcher visibility ────────────────────────────────────────
+function showLauncher() {
+  const frame = document.getElementById('app-frame');
+  if (frame) {
+    frame.style.visibility = 'hidden';
+    frame.style.pointerEvents = 'none';
+  }
+  launcher.style.display = '';
+  ingameBar.classList.remove('visible');
+}
+function hideLauncher(showBar = false) {
+  if (playPopup?.open) playPopup.close();
+  const frame = document.getElementById('app-frame');
+  if (frame) {
+    frame.style.visibility = 'visible';
+    frame.style.pointerEvents = 'auto';
+  }
+  launcher.style.display = 'none';
+  ingameBar.classList.toggle('visible', !!showBar);
+}
+
+// ── Iframe utility ─────────────────────────────────────────────
+function getFrameWin() {
+  try {
+    const f = document.getElementById('app-frame');
+    return f ? f.contentWindow : null;
+  } catch (_) { return null; }
+}
+
+function nowISO() {
+  return new Date().toISOString();
+}
+
+function nextMatchId() {
+  return 'm-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+}
+
+function appendMatchLog(entry) {
+  _matchLog.push(entry);
+  if (_matchLog.length > 100) _matchLog = _matchLog.slice(-100);
+  try {
+    localStorage.setItem('uno-ultra-match-log-v2', JSON.stringify(_matchLog));
+  } catch (_) {}
+}
+
+function beginMatchLifecycle(kind, payload = {}) {
+  const record = {
+    id: nextMatchId(),
+    kind,
+    state: 'started',
+    createdAt: nowISO(),
+    startedAt: nowISO(),
+    endedAt: null,
+    reason: null,
+    payload,
+  };
+  _activeMatch = record;
+  appendMatchLog({ type:'match:start', at:record.startedAt, id:record.id, kind:record.kind, payload });
+  return record;
+}
+
+const SHELL_PROFILE_KEY = 'uno-ultra-shell-profile-v1';
+
+function loadShellProfile() {
+  try {
+    const raw = localStorage.getItem(SHELL_PROFILE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function saveShellProfile(profile) {
+  if (!profile || typeof profile !== 'object') return;
+  try {
+    localStorage.setItem(SHELL_PROFILE_KEY, JSON.stringify(profile));
+  } catch (_) {}
+}
+
+function ensureRuntimeProfile(fw) {
+  if (!fw) return null;
+  if (fw.P && typeof fw.P === 'object') return fw.P;
+
+  const seed = loadShellProfile() || {};
+  const fallbackName = seed.name || ('Player' + String(Math.floor(Math.random() * 900) + 100));
+  const fallback = {
+    name: fallbackName,
+    credits: Number(seed.credits) || 0,
+    level: Number(seed.level) || 1,
+    xp: Number(seed.xp) || 0,
+    xpNext: Number(seed.xpNext) || 200,
+    mmr: Number(seed.mmr) || 200,
+    battlePassTier: Number(seed.battlePassTier) || 1,
+    bpTier: Number(seed.bpTier) || 1,
+    accountVersion: Number(seed.accountVersion) || 2,
+    challengeCycleVersion: Number(seed.challengeCycleVersion) || 2,
+    selectedTitle: seed.selectedTitle || 't1',
+    ownedShopItems: Array.isArray(seed.ownedShopItems) ? seed.ownedShopItems : [],
+    locker: seed.locker || {
+      cardback: 'default',
+      border: 'default',
+      effect: 'default',
+      avatar: 'classic',
+      frameFx: 'none'
+    },
+  };
+
+  try {
+    fw.P = fallback;
+  } catch (_) {
+    return null;
+  }
+  saveShellProfile(fallback);
+  return fw.P;
+}
+
+function openRuntimeLoginScreen() {
+  showScreen('singleplayer');
+  activateTab('profilo');
+  announce('Profilo aperto nella nuova UI');
+}
+
+function openRuntimeShopScreen() {
+  showScreen('singleplayer');
+  activateTab('shop');
+  announce('Shop aperto nella nuova UI');
+}
+
+// ── Main Menu buttons ──────────────────────────────────────────
+document.getElementById('btn-singleplayer').addEventListener('click', () => {
+  syncSingleplayerFromRuntimeOffline();
+  showScreen('singleplayer');
+  activateTab('gioca');
+  announce('Singleplayer aperto');
+});
+
+document.getElementById('btn-multiplayer').addEventListener('click', () => {
+  openMultiplayerV2();
+});
+
+document.getElementById('btn-impostazioni').addEventListener('click', () => {
+  showScreen('impostazioni');
+  announce('Impostazioni aperto');
+});
+
+document.getElementById('btn-esci-main').addEventListener('click', () => {
+  cleanupActiveMatch('menu-exit');
+  showScreen('mainmenu');
+  showLauncher();
+  announce('Schermata legacy disattivata: resta nella nuova UI');
+});
+
+// ── Back buttons ───────────────────────────────────────────────
+document.getElementById('sp-back').addEventListener('click', () => {
+  cleanupActiveMatch('singleplayer-back');
+  showScreen('mainmenu');
+  syncProfile();
+  announce('Menu principale');
+});
+document.getElementById('imp-back').addEventListener('click', () => {
+  showScreen('mainmenu');
+  announce('Menu principale');
+});
+
+// ── Settings buttons ───────────────────────────────────────────
+document.getElementById('btn-open-login')?.addEventListener('click', () => {
+  openRuntimeLoginScreen();
+});
+document.getElementById('btn-open-shop')?.addEventListener('click', () => {
+  openRuntimeShopScreen();
+});
+document.getElementById('btn-open-splash')?.addEventListener('click', () => {
+  showScreen('mainmenu');
+  showLauncher();
+  announce('Schermata legacy rimossa');
+});
+document.getElementById('btn-open-locker')?.addEventListener('click', () => {
+  showScreen('singleplayer');
+  activateTab('targhette');
+  announce('Targhette aperte nella nuova UI');
+});
+
+// ── Singleplayer tabs ──────────────────────────────────────────
+const spTabs     = document.querySelectorAll('.sp-tab[data-tab]');
+const spTabPanes = document.querySelectorAll('.sp-tab-pane');
+
+function activateTab(tabName) {
+  spTabs.forEach(t => {
+    const on = t.dataset.tab === tabName;
+    t.classList.toggle('active', on);
+    t.setAttribute('aria-selected', on);
+  });
+  spTabPanes.forEach(p => p.classList.toggle('active', p.id === 'sptab-' + tabName));
+
+  // Lazy-render on first visit (use childElementCount to skip comment nodes)
+  if (tabName === 'targhette' && targhetteList.childElementCount === 0) renderTarghette();
+  if (tabName === 'shop'      && shopList.childElementCount === 0)      renderShop();
+  if (tabName === 'battlepass' && bpTrack.childElementCount === 0)   renderBP();
+  if (tabName === 'sfide'      && sfideList.childElementCount === 0)  renderSfide();
+  if (tabName === 'top100'     && lbList.childElementCount === 0)     renderTop100('uno1v1');
+  if (tabName === 'profilo')   syncProfile();
+  if (tabName === 'stagione')  { syncProfile(); syncStagione(); }
+}
+
+spTabs.forEach(t => t.addEventListener('click', () => activateTab(t.dataset.tab)));
+
+// Footer quick-links in Gioca tab
+document.getElementById('home-lv-box')?.addEventListener('click', () => activateTab('profilo'));
+document.getElementById('home-bp-box')?.addEventListener('click', () => activateTab('battlepass'));
+
+// ── Locker boxes ───────────────────────────────────────────────
+document.querySelectorAll('.locker-box').forEach(box => {
+  box.addEventListener('click', () => {
+    openLockerSection(box.dataset.locker || 'targhette');
+    announce('Armadietto aperto: ' + (box.dataset.locker || 'targhette'));
+  });
+});
+
+document.getElementById('locker-popup-close')?.addEventListener('click', () => lockerPopup?.close());
+lockerPopup?.addEventListener('click', e => { if (e.target === lockerPopup) lockerPopup.close(); });
+document.querySelectorAll('.locker-tab').forEach(btn => {
+  btn.addEventListener('click', () => openLockerSection(btn.dataset.lockerTab || 'targhette'));
+});
+
+// ── Competitive toggle ─────────────────────────────────────────
+compToggleBtn.addEventListener('click', () => {
+  _isCompetitive = !_isCompetitive;
+  compToggleBtn.classList.toggle('competitive', _isCompetitive);
+  compToggleBtn.classList.toggle('casual',      !_isCompetitive);
+  compLabel.textContent = _isCompetitive ? 'COMPETITIVO' : 'CASUAL';
+  compToggleBtn.setAttribute('aria-pressed', _isCompetitive);
+  compToggleBtn.setAttribute('aria-label',
+    `Modalità: ${_isCompetitive ? 'Competitivo' : 'Casual'}. Clicca per cambiare.`);
+  announce(`Modalità ${_isCompetitive ? 'competitiva' : 'casual'} attivata`);
+  const fw = getFrameWin();
+  if (fw && _runtimeReady) {
+    try { fw.currentMode = _isCompetitive ? 'ranked' : 'casual'; } catch (_) {}
+  }
+  syncSelectionToRuntime();
+});
+
+function mapShellModeToRuntimeMode() {
+  if (_selectedMode === 'uno_blitz') return 'blitz';
+  if (_selectedMode === 'uno_chaos') return 'chaos';
+  if (_selectedMode === 'uno') return _isCompetitive ? 'ranked' : 'casual';
+  return {
+    ruba:'ruba',
+    scala:'scala',
+    bj:'bj',
+    scopa:'scopa',
+    poker:'poker',
+    burraco:'burraco',
+    millemiglia:'millemiglia',
+  }[_selectedMode] || (_isCompetitive ? 'ranked' : 'casual');
+}
+
+function updateCompetitiveToggleAvailability() {
+  const canToggleCompetitive = _selectedMode === 'uno';
+  compToggleBtn.disabled = !canToggleCompetitive;
+  compToggleBtn.classList.toggle('disabled', !canToggleCompetitive);
+  compToggleBtn.setAttribute('aria-disabled', String(!canToggleCompetitive));
+  if (!canToggleCompetitive) {
+    compLabel.textContent = 'MODALITA FISSA';
+    compToggleBtn.setAttribute(
+      'aria-label',
+      'Questa modalita usa una playlist fissa e non supporta il toggle Casual o Competitivo'
+    );
+    return;
+  }
+  compLabel.textContent = _isCompetitive ? 'COMPETITIVO' : 'CASUAL';
+  compToggleBtn.setAttribute(
+    'aria-label',
+    `Modalita: ${_isCompetitive ? 'Competitivo' : 'Casual'}. Clicca per cambiare.`
+  );
+}
+
+function syncSelectionToRuntime() {
+  const fw = getFrameWin();
+  if (!fw || !_runtimeReady) return;
+
+  const runtimeHomeMode = mapShellModeToRuntimeMode();
+  fw._homePlayerCount = _selectedCount;
+  fw._homeMode = runtimeHomeMode;
+  try {
+    fw.currentMode = runtimeHomeMode;
+    const sel = fw.document.getElementById('sel-players');
+    if (sel) sel.value = String(_selectedCount);
+    if (typeof fw.homeSelectMode === 'function') {
+      fw.homeSelectMode(runtimeHomeMode, fw.document.getElementById('hmt-' + runtimeHomeMode));
+    }
+    if (typeof fw.homeSelectPlayerCount === 'function') {
+      fw.homeSelectPlayerCount(_selectedCount);
+    }
+    if (typeof fw.onPlaylistChange === 'function') fw.onPlaylistChange();
+    if (typeof fw.homeRefresh === 'function') fw.homeRefresh();
+  } catch (_) {}
+}
+
+function syncSingleplayerFromRuntimeOffline() {
+  const fw = getFrameWin();
+  if (!fw || !_runtimeReady) return;
+
+  let runtimeMode = 'casual';
+  let runtimeCount = 1;
+  try {
+    runtimeMode = fw._homeMode || fw.currentMode || 'casual';
+    const selPlayers = fw.document.getElementById('sel-players');
+    runtimeCount = parseInt(fw._homePlayerCount || selPlayers?.value || 1, 10);
+  } catch (_) {}
+
+  if (runtimeMode === 'ranked') {
+    _selectedMode = 'uno';
+    _isCompetitive = true;
+  } else if (runtimeMode === 'casual') {
+    _selectedMode = 'uno';
+    _isCompetitive = false;
+  } else if (runtimeMode === 'blitz') {
+    _selectedMode = 'uno_blitz';
+    _isCompetitive = false;
+  } else if (runtimeMode === 'chaos') {
+    _selectedMode = 'uno_chaos';
+    _isCompetitive = false;
+  } else {
+    _selectedMode = MODE_LABELS[runtimeMode] ? runtimeMode : 'uno';
+    _isCompetitive = false;
+  }
+
+  _selectedCount = Number.isFinite(runtimeCount)
+    ? Math.min(3, Math.max(1, runtimeCount))
+    : 1;
+
+  document.querySelectorAll('.mode-card[data-mode]').forEach(card => {
+    const selected = card.dataset.mode === _selectedMode;
+    card.classList.toggle('selected', selected);
+    card.setAttribute('aria-pressed', selected ? 'true' : 'false');
+  });
+
+  document.querySelectorAll('.pcount-btn[data-count]').forEach(btn => {
+    const selected = parseInt(btn.dataset.count, 10) === _selectedCount;
+    btn.classList.toggle('selected', selected);
+    btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
+  });
+
+  updatePlayDisplay();
+  syncSelectionToRuntime();
+}
+
+// ── Play popup ─────────────────────────────────────────────────
+openPlayBtn.addEventListener('click', () => playPopup.showModal());
+playCta.addEventListener('click',     () => {
+  if (playPopup?.open) playPopup.close();
+  launchGame();
+});
+popupClose.addEventListener('click',  () => playPopup.close());
+playPopup.addEventListener('click', e => { if (e.target === playPopup) playPopup.close(); });
+
+// Popup tabs
+const popupTabs  = document.querySelectorAll('.popup-tab');
+const popupPanes = document.querySelectorAll('.popup-tab-pane');
+popupTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    popupTabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+    tab.classList.add('active'); tab.setAttribute('aria-selected','true');
+    const tid = tab.getAttribute('aria-controls');
+    popupPanes.forEach(p => p.classList.toggle('active', p.id === tid));
+  });
+});
+
+// Mode cards
+document.querySelectorAll('.mode-card[data-mode]').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.mode-card').forEach(c => {
+      c.classList.remove('selected'); c.setAttribute('aria-pressed','false');
+    });
+    card.classList.add('selected'); card.setAttribute('aria-pressed','true');
+    _selectedMode = card.dataset.mode;
+    updatePlayDisplay();
+    syncSelectionToRuntime();
+  });
+});
+
+// Player count
+document.querySelectorAll('.pcount-btn[data-count]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pcount-btn').forEach(b => {
+      b.classList.remove('selected'); b.setAttribute('aria-pressed','false');
+    });
+    btn.classList.add('selected'); btn.setAttribute('aria-pressed','true');
+    _selectedCount = parseInt(btn.dataset.count);
+    updatePlayDisplay();
+    syncSelectionToRuntime();
+  });
+});
+
+function updatePlayDisplay() {
+  const mEl = document.getElementById('play-sel-mode');
+  const pEl = document.getElementById('play-sel-players');
+  if (mEl) mEl.textContent = MODE_LABELS[_selectedMode] || _selectedMode;
+  if (pEl) pEl.textContent = PCOUNT_LABELS[_selectedCount] || '';
+  updateCompetitiveToggleAvailability();
+}
+
+const OFFLINE_DIRECT_MODES = new Set([
+  'ruba', 'scala', 'poker', 'scopa', 'burraco', 'bj', 'millemiglia', 'uno_blitz', 'uno_chaos'
+]);
+
+document.querySelectorAll('.quick-mode-btn[data-quick-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    _selectedMode = btn.dataset.quickMode;
+    _isCompetitive = false;
+    updatePlayDisplay();
+    syncSelectionToRuntime();
+    if (playPopup?.open) playPopup.close();
+    launchGame();
+  });
+});
+
+popupConfirm.addEventListener('click', () => { playPopup.close(); launchGame(); });
+
+// ── Game launch ────────────────────────────────────────────────
+function launchGame(context = null) {
+  const fw = getFrameWin();
+  if (!fw || !_runtimeReady) {
+    announce('Attendere — il runtime non è ancora pronto. Riprova.');
+    return;
+  }
+
+  // Avoid surfacing legacy login screens: bootstrap a shell profile when missing.
+  if (!fw.P && !ensureRuntimeProfile(fw)) {
+    announce('Impossibile inizializzare il profilo locale. Riprova.');
+    return;
+  }
+
+  syncSelectionToRuntime();
+
+  if (_activeMatch) cleanupActiveMatch('replaced-by-new-match');
+
+  if (context?.lobby) {
+    fw._onlineRoomCode = context.lobby.roomCode;
+    fw._onlineHostPeerId = context.lobby.hostPeerId;
+    fw._onlineLobbyConfig = {
+      source: context.lobby.source,
+      mode: context.lobby.mode,
+      players: context.lobby.players,
+      isCompetitive: context.lobby.isCompetitive,
+      invited: context.lobby.invited,
+    };
+  }
+
+  hideLauncher(true);
+  const matchKind = context?.lobby ? 'multiplayer' : 'singleplayer';
+  beginMatchLifecycle(matchKind, {
+    mode: _selectedMode,
+    playerCount: _selectedCount,
+    competitive: _isCompetitive,
+    roomCode: context?.lobby?.roomCode || null,
+  });
+  if (context?.lobby) {
+    announce('Lobby ' + context.lobby.roomCode + ' pronta: avvio ' + (MODE_LABELS[_selectedMode]||_selectedMode));
+  } else {
+    announce('Avvio ' + (MODE_LABELS[_selectedMode]||_selectedMode));
+  }
+
+  try {
+    if (!startRuntimeModeDirect(fw, _selectedMode, _selectedCount)) {
+      showLauncher();
+      announce('Errore: funzione di avvio non disponibile.');
+    }
+  } catch (err) {
+    console.error('[UNO Shell] launchGame error:', err);
+    showLauncher();
+  }
+}
+
+function startRuntimeModeDirect(fw, shellMode, playerCount) {
+  const nAI = Math.min(3, Math.max(1, parseInt(playerCount, 10) || 1));
+  try { fw._homePlayerCount = nAI; } catch (_) {}
+
+  if (shellMode === 'ruba' && typeof fw.startRubaGame === 'function') {
+    fw.startRubaGame();
+    return true;
+  }
+  if (shellMode === 'scala' && typeof fw.startScalaGame === 'function') {
+    fw.startScalaGame();
+    return true;
+  }
+  if (shellMode === 'bj' && typeof fw.startBJGame === 'function') {
+    fw.startBJGame(nAI);
+    return true;
+  }
+  if (shellMode === 'scopa' && typeof fw.startScopaGame === 'function') {
+    fw.startScopaGame(nAI);
+    return true;
+  }
+  if (shellMode === 'poker' && typeof fw.startPokerGame === 'function') {
+    fw.startPokerGame(nAI);
+    return true;
+  }
+  if (shellMode === 'burraco' && typeof fw.startBurracoGame === 'function') {
+    fw.startBurracoGame(nAI);
+    return true;
+  }
+  if (shellMode === 'millemiglia' && typeof fw.startMMGame === 'function') {
+    fw.startMMGame(nAI);
+    return true;
+  }
+
+  if (typeof fw.homeStartGame === 'function') {
+    fw.homeStartGame();
+    return true;
+  }
+  return false;
+}
+
+// ── Ingame back button ─────────────────────────────────────────
+ingameBack.addEventListener('click', () => {
+  cleanupActiveMatch('ingame-back');
+  showLauncher();
+  showScreen('mainmenu');
+  announce('Tornato alla nuova UI principale');
+});
+
+// ══════════════════════════════════════════════════════════════
+// MULTIPLAYER SCREEN
+// ══════════════════════════════════════════════════════════════
+
+// ── MP State ───────────────────────────────────────────────────
+let _mpSelectedMode  = 'uno';
+let _mpSelectedCount = 1;
+let _mpIsCompetitive = false;
+let _socialPopupMode = 'uno';
+let _blockedFriends  = new Set();
+let _ctxFriendTarget = null;
+let _mpManualCountSelection = false;
+
+const MP_PLAYERS_TOTAL = { 1:2, 2:3, 3:4 };
+let _mpLobbyServer = null;
+let _mpLastLobbySnapshot = '';
+let _presenceChannel = null;
+
+function getOrCreatePresenceChannel() {
+  if (_presenceChannel) return _presenceChannel;
+  const profile = loadShellProfile() || {};
+  const userName = profile.name || 'Guest';
+  try {
+    _presenceChannel = createPresenceChannel(null, userName);
+  } catch (_) {
+    _presenceChannel = null;
+  }
+  return _presenceChannel;
+}
+
+function setRealtimePresence(presence, meta = {}) {
+  const channel = getOrCreatePresenceChannel();
+  if (!channel) return;
+  try {
+    channel.send('presence:set', {
+      presence,
+      roomCode: meta.roomCode ?? null,
+      mode: meta.mode ?? null,
+    });
+  } catch (_) {
+    // noop
+  }
+}
+
+// ── MP back ────────────────────────────────────────────────────
+document.getElementById('mp-back').addEventListener('click', () => {
+  cleanupActiveMatch('multiplayer-back');
+  closeMPLobbyServer();
+  showScreen('mainmenu');
+  syncProfile();
+  announce('Menu principale');
+});
+
+// ── MP Tabs ────────────────────────────────────────────────────
+const mpTabs     = document.querySelectorAll('.mp-tab[data-mptab]');
+const mpTabPanes = document.querySelectorAll('#mp-content .sp-tab-pane');
+
+function activateMPTab(tabName) {
+  mpTabs.forEach(t => {
+    const on = t.dataset.mptab === tabName;
+    t.classList.toggle('active', on);
+    t.setAttribute('aria-selected', on);
+  });
+  mpTabPanes.forEach(p => p.classList.toggle('active', p.id === 'mptab-' + tabName));
+  if (tabName === 'profilo') syncProfile();
+}
+mpTabs.forEach(t => t.addEventListener('click', () => activateMPTab(t.dataset.mptab)));
+
+// ── MP Lobby setup ─────────────────────────────────────────────
+const socialPopupEl    = document.getElementById('social-popup');
+const socialPopupTitle = document.getElementById('social-popup-title');
+const socialPopupClose = document.getElementById('social-popup-close');
+const socialStartBtn   = document.getElementById('social-start-btn');
+const mpModePicker     = document.getElementById('mp-mode-picker');
+const mpModeList       = document.getElementById('mp-mode-list');
+
+let _pendingInviteSlot = null;
+let _mpInvitedSlots    = [null, null, null, null];
+const FRIEND_PRESENCE = {
+  ONLINE: 'online',
+  LOBBY: 'lobby',
+  MATCH: 'match',
+  OFFLINE: 'offline',
+};
+const _friendPresence = new Map();
+
+function classifyPresenceFromText(text) {
+  const value = String(text || '').toLowerCase();
+  if (value.includes('offline')) return FRIEND_PRESENCE.OFFLINE;
+  if (value.includes('lobby')) return FRIEND_PRESENCE.LOBBY;
+  if (value.includes('in partita')) return FRIEND_PRESENCE.MATCH;
+  return FRIEND_PRESENCE.ONLINE;
+}
+
+function getFriendPresence(name) {
+  if (!name) return FRIEND_PRESENCE.OFFLINE;
+  return _friendPresence.get(name) || FRIEND_PRESENCE.ONLINE;
+}
+
+function setFriendPresence(name, presence) {
+  if (!name) return;
+  _friendPresence.set(name, presence);
+}
+
+function isFriendInviteable(name) {
+  return getFriendPresence(name) === FRIEND_PRESENCE.ONLINE;
+}
+
+function getPresenceLabel(name) {
+  const presence = getFriendPresence(name);
+  if (presence === FRIEND_PRESENCE.OFFLINE) return 'Offline';
+  if (presence === FRIEND_PRESENCE.LOBBY) return 'In lobby';
+  if (presence === FRIEND_PRESENCE.MATCH) return 'In partita — ' + (MODE_LABELS[_mpSelectedMode] || _mpSelectedMode || 'UNO');
+  return 'Online — al menu';
+}
+
+function syncFriendPresenceUI() {
+  document.querySelectorAll('.friend-row[data-friend]').forEach(row => {
+    const name = row.dataset.friend;
+    const statusEl = row.querySelector('.friend-status');
+    if (!name || !statusEl) return;
+    const presence = getFriendPresence(name);
+    statusEl.textContent = getPresenceLabel(name);
+    statusEl.classList.toggle('status-online', presence !== FRIEND_PRESENCE.OFFLINE);
+    row.classList.toggle('friend-offline', presence === FRIEND_PRESENCE.OFFLINE);
+  });
+
+  document.querySelectorAll('#social-invite-list .social-invite-row[data-friend]').forEach(row => {
+    const name = row.dataset.friend;
+    const statusEl = row.querySelector('.friend-status');
+    const inviteBtn = row.querySelector('.invite-send-btn[data-friend]');
+    if (!name || !statusEl || !inviteBtn) return;
+
+    const presence = getFriendPresence(name);
+    const isInviteable = presence === FRIEND_PRESENCE.ONLINE;
+    statusEl.textContent = getPresenceLabel(name);
+    statusEl.classList.toggle('status-online', isInviteable);
+    row.classList.toggle('friend-offline', !isInviteable);
+
+    inviteBtn.disabled = !isInviteable;
+    if (isInviteable) {
+      inviteBtn.textContent = 'Invita';
+      inviteBtn.setAttribute('aria-label', 'Invita ' + name);
+    } else {
+      const blockedLabel = presence === FRIEND_PRESENCE.OFFLINE ? 'Offline' : (presence === FRIEND_PRESENCE.LOBBY ? 'In lobby' : 'In partita');
+      inviteBtn.textContent = blockedLabel;
+      inviteBtn.setAttribute('aria-label', name + ' non è invitabile: ' + blockedLabel);
+    }
+  });
+}
+
+function addFriendToLobby(name, sourceBtn = null) {
+  if (!name) return false;
+  if (_mpInvitedSlots.some(s => s?.name === name)) {
+    announce(name + ' è già in lobby');
+    return false;
+  }
+  if (!isFriendInviteable(name)) {
+    announce(name + ' non è invitabile in questo momento');
+    return false;
+  }
+
+  let slotIndex = _pendingInviteSlot;
+  if (slotIndex == null || _mpInvitedSlots[slotIndex]) slotIndex = firstEmptyInviteSlot();
+  if (slotIndex < 0) {
+    announce('Lobby piena: rimuovi uno slot per invitare un altro amico.');
+    return false;
+  }
+
+  const av = String(name)[0]?.toUpperCase() || '?';
+  _mpInvitedSlots[slotIndex] = { name, av };
+  setFriendPresence(name, FRIEND_PRESENCE.LOBBY);
+  _pendingInviteSlot = null;
+
+  const fw = getFrameWin();
+  const target = fw?.P || ensureRuntimeProfile(fw);
+  if (target) target.mpInvitesSent = (target.mpInvitesSent || 0) + 1;
+
+  if (sourceBtn) {
+    sourceBtn.textContent = 'Accettato ✓';
+    sourceBtn.classList.add('sent');
+    setTimeout(() => {
+      sourceBtn.classList.remove('sent');
+      syncFriendPresenceUI();
+    }, 1200);
+  }
+
+  renderInviteSlots();
+  updateMPCountFromLobby();
+  ensureMPLobbyServer('lobby');
+  broadcastMPLobbyUpdate('member-accepted');
+  syncFriendPresenceUI();
+  announce(name + ' ha accettato l\'invito ed è entrato in lobby');
+  return true;
+}
+
+function initFriendPresenceFromUI() {
+  document.querySelectorAll('.friend-row[data-friend]').forEach(row => {
+    const name = row.dataset.friend;
+    const statusText = row.querySelector('.friend-status')?.textContent || '';
+    if (!name) return;
+    setFriendPresence(name, classifyPresenceFromText(statusText));
+  });
+  document.querySelectorAll('#social-invite-list .social-invite-row[data-friend]').forEach(row => {
+    const name = row.dataset.friend;
+    const statusText = row.querySelector('.friend-status')?.textContent || '';
+    if (!name || _friendPresence.has(name)) return;
+    setFriendPresence(name, classifyPresenceFromText(statusText));
+  });
+  syncFriendPresenceUI();
+}
+
+function resetMPLobbyState() {
+  _mpInvitedSlots.filter(Boolean).forEach(friend => {
+    if (friend?.name && getFriendPresence(friend.name) !== FRIEND_PRESENCE.OFFLINE) {
+      setFriendPresence(friend.name, FRIEND_PRESENCE.ONLINE);
+    }
+  });
+  _mpInvitedSlots = [null, null, null, null];
+  _pendingInviteSlot = null;
+  _mpManualCountSelection = false;
+  _mpSelectedCount = 1;
+  document.querySelectorAll('.pcount-btn[data-mpcount]').forEach(b => {
+    const on = parseInt(b.dataset.mpcount, 10) === 1;
+    b.classList.toggle('selected', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  renderInviteSlots();
+  syncFriendPresenceUI();
+}
+
+function cleanupActiveMatch(reason = 'user-exit') {
+  if (!_activeMatch) {
+    closeMPLobbyServer();
+    resetMPLobbyState();
+    setRealtimePresence('online', { roomCode: null, mode: null });
+    return;
+  }
+
+  _activeMatch.state = 'ended';
+  _activeMatch.endedAt = nowISO();
+  _activeMatch.reason = reason;
+  appendMatchLog({
+    type:'match:end',
+    at:_activeMatch.endedAt,
+    id:_activeMatch.id,
+    kind:_activeMatch.kind,
+    reason,
+  });
+
+  if (_activeMatch.kind === 'multiplayer' && _mpLobbyServer?.transport) {
+    try {
+      _mpLobbyServer.transport.send({
+        type:'match:end',
+        reason,
+        id:_activeMatch.id,
+        lobby:{ roomCode:_mpLobbyServer.roomCode, hostPeerId:_mpLobbyServer.hostPeerId }
+      });
+      _mpLobbyServer.transport.send({
+        type:'lobby:closed',
+        reason,
+        lobby:{ roomCode:_mpLobbyServer.roomCode, hostPeerId:_mpLobbyServer.hostPeerId }
+      });
+    } catch (_) {}
+  }
+
+  _mpInvitedSlots.filter(Boolean).forEach(friend => {
+    if (friend?.name && getFriendPresence(friend.name) !== FRIEND_PRESENCE.OFFLINE) {
+      setFriendPresence(friend.name, FRIEND_PRESENCE.ONLINE);
+    }
+  });
+
+  closeMPLobbyServer();
+  resetMPLobbyState();
+  _activeMatch = null;
+  setRealtimePresence('online', { roomCode: null, mode: null });
+}
+
+function buildMPLobbySnapshot(source = 'lobby') {
+  const invited = _mpInvitedSlots.filter(Boolean).map(p => ({ name:p.name, av:p.av }));
+  const totalPlayers = MP_PLAYERS_TOTAL[_mpSelectedCount] || 2;
+  return {
+    source,
+    mode:_mpSelectedMode,
+    modeLabel: MODE_LABELS[_mpSelectedMode] || _mpSelectedMode,
+    playerCount: _mpSelectedCount,
+    players: totalPlayers,
+    isCompetitive: _mpIsCompetitive,
+    invited,
+  };
+}
+
+function closeMPLobbyServer() {
+  if (_mpLobbyServer?.transport) {
+    try { _mpLobbyServer.transport.close(); } catch (_) {}
+  }
+  _mpLobbyServer = null;
+  _mpLastLobbySnapshot = '';
+}
+
+function ensureMPLobbyServer(source = 'lobby') {
+  const snapshot = buildMPLobbySnapshot(source);
+  const key = JSON.stringify(snapshot);
+  if (_mpLobbyServer && _mpLastLobbySnapshot === key) return _mpLobbyServer;
+
+  closeMPLobbyServer();
+  const roomCode = createRoomCode();
+  const hostPeerId = createPeerId();
+  const transport = createTransport(roomCode, hostPeerId, (payload) => {
+    if (!payload || payload.fromPeer === hostPeerId) return;
+    if (payload.type === 'lobby:join-request') {
+      transport.send({
+        type:'lobby:join-ack',
+        toPeer: payload.fromPeer,
+        lobby: {
+          roomCode,
+          hostPeerId,
+          mode: snapshot.mode,
+          players: snapshot.players,
+          isCompetitive: snapshot.isCompetitive,
+        },
+      });
+    }
+  });
+
+  _mpLobbyServer = { roomCode, hostPeerId, transport };
+  _mpLastLobbySnapshot = key;
+  setRealtimePresence('in_lobby', { roomCode, mode: snapshot.mode });
+
+  const clubCodeEl = document.getElementById('social-club-code');
+  if (clubCodeEl) clubCodeEl.textContent = roomCode;
+
+  transport.send({
+    type:'lobby:created',
+    lobby: {
+      roomCode,
+      hostPeerId,
+      mode: snapshot.mode,
+      players: snapshot.players,
+      isCompetitive: snapshot.isCompetitive,
+      invited: snapshot.invited,
+      source,
+    },
+  });
+  return _mpLobbyServer;
+}
+
+function broadcastMPLobbyUpdate(reason = 'update') {
+  if (!_mpLobbyServer?.transport) return;
+  const snapshot = buildMPLobbySnapshot('lobby');
+  _mpLastLobbySnapshot = JSON.stringify(snapshot);
+  _mpLobbyServer.transport.send({
+    type:'lobby:update',
+    reason,
+    lobby: {
+      roomCode: _mpLobbyServer.roomCode,
+      hostPeerId: _mpLobbyServer.hostPeerId,
+      mode: snapshot.mode,
+      players: snapshot.players,
+      isCompetitive: snapshot.isCompetitive,
+      invited: snapshot.invited,
+    },
+  });
+}
+
+function canStartMPLobbyMatch() {
+  const totalPlayers = MP_PLAYERS_TOTAL[_mpSelectedCount] || 2;
+  const minInvited = totalPlayers - 1;
+  const invitedCount = _mpInvitedSlots.filter(Boolean).length;
+  if (invitedCount < minInvited) {
+    announce('Servono ' + minInvited + ' amici invitati per avviare ' + totalPlayers + ' giocatori.');
+    return false;
+  }
+  return true;
+}
+
+function startMultiplayerMatchFromLobby(source = 'lobby') {
+  if (!canStartMPLobbyMatch()) return;
+
+  const server = ensureMPLobbyServer(source);
+  const snapshot = buildMPLobbySnapshot(source);
+  _selectedMode  = _mpSelectedMode;
+  _selectedCount = _mpSelectedCount;
+  _isCompetitive = _mpIsCompetitive;
+
+  if (server?.transport) {
+    server.transport.send({
+      type:'match:start',
+      lobby: {
+        roomCode: server.roomCode,
+        hostPeerId: server.hostPeerId,
+        mode: snapshot.mode,
+        players: snapshot.players,
+        isCompetitive: snapshot.isCompetitive,
+        invited: snapshot.invited,
+        source,
+      },
+    });
+  }
+
+  _mpInvitedSlots.filter(Boolean).forEach(friend => {
+    if (friend?.name) setFriendPresence(friend.name, FRIEND_PRESENCE.MATCH);
+  });
+  syncFriendPresenceUI();
+  setRealtimePresence('in_match', { roomCode: server.roomCode, mode: snapshot.mode });
+
+  launchGame({
+    lobby: {
+      source,
+      roomCode: server.roomCode,
+      hostPeerId: server.hostPeerId,
+      mode: snapshot.mode,
+      players: snapshot.players,
+      isCompetitive: snapshot.isCompetitive,
+      invited: snapshot.invited,
+    },
+  });
+}
+
+function firstEmptyInviteSlot() {
+  return _mpInvitedSlots.findIndex(v => !v);
+}
+
+function updateMPCountFromLobby() {
+  if (_mpManualCountSelection) return;
+  const invitedCount = _mpInvitedSlots.filter(Boolean).length;
+  if (invitedCount <= 0) return;
+  const total = Math.min(4, 1 + invitedCount);
+  _mpSelectedCount = (total === 2) ? 1 : (total === 3 ? 2 : 3);
+  document.querySelectorAll('.pcount-btn[data-mpcount]').forEach(b => {
+    const on = parseInt(b.dataset.mpcount, 10) === _mpSelectedCount;
+    b.classList.toggle('selected', on);
+    b.setAttribute('aria-pressed', on);
+  });
+}
+
+function renderInviteSlots() {
+  document.querySelectorAll('.mp-invite-slot').forEach(slotBtn => {
+    const slotIndex = parseInt(slotBtn.dataset.slot, 10);
+    const invited = _mpInvitedSlots[slotIndex];
+    if (!invited) {
+      slotBtn.classList.remove('filled');
+      slotBtn.removeAttribute('data-friend');
+      slotBtn.innerHTML = '+';
+      slotBtn.setAttribute('aria-label', 'Invita amico slot ' + (slotIndex + 1));
+      return;
+    }
+    slotBtn.classList.add('filled');
+    slotBtn.dataset.friend = invited.name;
+    slotBtn.innerHTML =
+      `<span class="mp-slot-av" aria-hidden="true">${invited.av}</span>` +
+      `<span class="mp-slot-meta"><span class="mp-slot-name">${invited.name}</span>` +
+      `<span class="mp-slot-state">Connesso</span></span>` +
+      `<span class="mp-slot-remove" aria-hidden="true">✕</span>`;
+    slotBtn.setAttribute('aria-label', invited.name + ' è in lobby. Clicca per rimuovere');
+  });
+}
+
+document.querySelectorAll('.mp-invite-slot').forEach(slotBtn => {
+  slotBtn.addEventListener('click', () => {
+    const idx = parseInt(slotBtn.dataset.slot, 10);
+    if (_mpInvitedSlots[idx]) {
+      const removed = _mpInvitedSlots[idx].name;
+      _mpInvitedSlots[idx] = null;
+      if (removed && getFriendPresence(removed) !== FRIEND_PRESENCE.OFFLINE) {
+        setFriendPresence(removed, FRIEND_PRESENCE.ONLINE);
+      }
+      renderInviteSlots();
+      updateMPCountFromLobby();
+      broadcastMPLobbyUpdate('member-removed');
+      syncFriendPresenceUI();
+      announce(removed + ' rimosso dalla lobby');
+      return;
+    }
+    _pendingInviteSlot = idx;
+    _socialPopupMode = _mpSelectedMode;
+    if (socialPopupTitle) {
+      socialPopupTitle.textContent = 'Invita Amici — ' + (MODE_LABELS[_socialPopupMode] || _socialPopupMode);
+    }
+    syncFriendPresenceUI();
+    socialPopupEl?.showModal();
+  });
+});
+
+mpModePicker?.addEventListener('click', () => {
+  const isOpen = !mpModeList?.hasAttribute('hidden');
+  if (isOpen) {
+    mpModeList?.setAttribute('hidden', '');
+    mpModePicker.setAttribute('aria-expanded', 'false');
+  } else {
+    mpModeList?.removeAttribute('hidden');
+    mpModePicker.setAttribute('aria-expanded', 'true');
+  }
+});
+
+document.querySelectorAll('.mp-mode-option[data-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    _mpSelectedMode = btn.dataset.mode;
+    if (mpModePicker) mpModePicker.textContent = MODE_LABELS[_mpSelectedMode] || _mpSelectedMode;
+    document.querySelectorAll('.mp-mode-option').forEach(opt => {
+      const on = opt === btn;
+      opt.classList.toggle('active', on);
+      opt.setAttribute('aria-selected', on);
+    });
+    mpModeList?.setAttribute('hidden', '');
+    mpModePicker?.setAttribute('aria-expanded', 'false');
+    ensureMPLobbyServer('lobby');
+    broadcastMPLobbyUpdate('mode-changed');
+    announce('Modalità selezionata: ' + (MODE_LABELS[_mpSelectedMode] || _mpSelectedMode));
+  });
+});
+
+document.addEventListener('click', e => {
+  if (!mpModeList || !mpModePicker) return;
+  if (mpModeList.hasAttribute('hidden')) return;
+  if (!mpModeList.contains(e.target) && e.target !== mpModePicker) {
+    mpModeList.setAttribute('hidden', '');
+    mpModePicker.setAttribute('aria-expanded', 'false');
+  }
+});
+
+document.querySelectorAll('.mp-invite-btn[data-mode]').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    _socialPopupMode = btn.dataset.mode;
+    // Auto-select the mode too
+    const modeCard = btn.closest('.mp-mode-card');
+    document.querySelectorAll('.mp-mode-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.mp-mode-sel').forEach(b => b.setAttribute('aria-pressed','false'));
+    if (modeCard) {
+      modeCard.classList.add('selected');
+      const sel = modeCard.querySelector('.mp-mode-sel');
+      if (sel) sel.setAttribute('aria-pressed','true');
+    }
+    _mpSelectedMode = _socialPopupMode;
+    if (socialPopupTitle) socialPopupTitle.textContent =
+      'Invita Amici — ' + (MODE_LABELS[_socialPopupMode] || _socialPopupMode);
+    if (socialPopupEl) socialPopupEl.showModal();
+    announce('Popup invita aperto per ' + (MODE_LABELS[_socialPopupMode] || _socialPopupMode));
+  });
+});
+
+socialPopupClose?.addEventListener('click', () => socialPopupEl?.close());
+socialPopupEl?.addEventListener('click', e => { if (e.target === socialPopupEl) socialPopupEl.close(); });
+
+// Social popup internal tabs
+const socialPopupTabs  = document.querySelectorAll('#social-popup .popup-tab');
+const socialPopupPanes = document.querySelectorAll('#social-popup .popup-tab-pane');
+socialPopupTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    socialPopupTabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+    tab.classList.add('active'); tab.setAttribute('aria-selected','true');
+    const tid = tab.getAttribute('aria-controls');
+    socialPopupPanes.forEach(p => p.classList.toggle('active', p.id === tid));
+  });
+});
+
+// Invite send buttons inside social popup
+document.querySelectorAll('.invite-send-btn[data-friend]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    const name = btn.dataset.friend;
+    addFriendToLobby(name, btn);
+  });
+});
+
+// Social start → launch with MP mode
+socialStartBtn?.addEventListener('click', () => {
+  socialPopupEl?.close();
+  startMultiplayerMatchFromLobby('invite-popup');
+});
+
+// Copy club code
+document.getElementById('social-copy-code')?.addEventListener('click', () => {
+  const code = document.getElementById('social-club-code')?.textContent || 'ULTRA-0000';
+  navigator.clipboard?.writeText(code).catch(() => {});
+  announce('Codice copiato: ' + code);
+});
+
+// ── MP Player count ────────────────────────────────────────────
+document.querySelectorAll('.pcount-btn[data-mpcount]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    _mpManualCountSelection = true;
+    document.querySelectorAll('.pcount-btn[data-mpcount]').forEach(b => {
+      b.classList.remove('selected'); b.setAttribute('aria-pressed','false');
+    });
+    btn.classList.add('selected'); btn.setAttribute('aria-pressed','true');
+    _mpSelectedCount = parseInt(btn.dataset.mpcount);
+    ensureMPLobbyServer('lobby');
+    broadcastMPLobbyUpdate('players-changed');
+  });
+});
+
+// ── MP Competitive toggle ──────────────────────────────────────
+const mpCompToggle = document.getElementById('mp-comp-toggle');
+const mpCompLabel  = document.getElementById('mp-comp-label');
+mpCompToggle?.addEventListener('click', () => {
+  _mpIsCompetitive = !_mpIsCompetitive;
+  mpCompToggle.classList.toggle('competitive', _mpIsCompetitive);
+  mpCompToggle.classList.toggle('casual', !_mpIsCompetitive);
+  if (mpCompLabel) mpCompLabel.textContent = _mpIsCompetitive ? 'COMPETITIVO' : 'CASUAL';
+  mpCompToggle.setAttribute('aria-pressed', _mpIsCompetitive);
+  ensureMPLobbyServer('lobby');
+  broadcastMPLobbyUpdate('competitive-changed');
+  announce('Modalità ' + (_mpIsCompetitive ? 'competitiva' : 'casual') + ' attivata');
+});
+
+// ── MP Play button ─────────────────────────────────────────────
+document.getElementById('mp-play-btn')?.addEventListener('click', () => {
+  startMultiplayerMatchFromLobby('lobby-direct');
+});
+
+window.addEventListener('beforeunload', () => {
+  cleanupActiveMatch('page-unload');
+  const channel = getOrCreatePresenceChannel();
+  if (channel) {
+    try { channel.close(); } catch (_) {}
+  }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && _activeMatch) {
+    cleanupActiveMatch('page-hidden-cleanup');
+  }
+});
+
+// ── Torneo cards ───────────────────────────────────────────────
+const TORNEO_LABELS = {
+  t32:'Torneo 32', grandprix:'Grand Prix',
+  classico:'Torneo Classico', ucs:'UCS Championship'
+};
+document.querySelectorAll('.torneo-card[data-torneo]').forEach(card => {
+  card.addEventListener('click', () => {
+    const t = card.dataset.torneo;
+    announce('Apertura ' + (TORNEO_LABELS[t] || t));
+    openMultiplayerV2();
+  });
+});
+
+// ── Social subtabs (Amici section) ────────────────────────────
+const socialSubtabs  = document.querySelectorAll('.social-subtab[data-subtab]');
+const socialSubpanes = document.querySelectorAll('.social-subpane');
+
+socialSubtabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    socialSubtabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+    tab.classList.add('active'); tab.setAttribute('aria-selected','true');
+    const paneId = 'amici-' + tab.dataset.subtab;
+    socialSubpanes.forEach(p => p.classList.toggle('active', p.id === paneId));
+  });
+});
+
+// ── Friend action context menu ─────────────────────────────────
+const friendCtxMenu = document.getElementById('friend-ctx-menu');
+
+function hideFriendCtx() {
+  if (friendCtxMenu) friendCtxMenu.style.display = 'none';
+  _ctxFriendTarget = null;
+}
+document.addEventListener('click', e => {
+  if (friendCtxMenu && friendCtxMenu.style.display !== 'none' &&
+      !friendCtxMenu.contains(e.target)) {
+    hideFriendCtx();
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') hideFriendCtx();
+});
+
+document.querySelectorAll('.friend-action-btn[data-friend]').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    _ctxFriendTarget = btn.dataset.friend;
+    const rect = btn.getBoundingClientRect();
+    if (friendCtxMenu) {
+      friendCtxMenu.style.display = 'block';
+      const menuW = 180;
+      const left = Math.min(rect.right - menuW, window.innerWidth - menuW - 8);
+      friendCtxMenu.style.left = Math.max(8, left) + 'px';
+      friendCtxMenu.style.top  = (rect.bottom + 4) + 'px';
+    }
+    announce('Menu azioni per ' + _ctxFriendTarget);
+  });
+});
+
+document.getElementById('ctx-invite')?.addEventListener('click', () => {
+  if (_ctxFriendTarget) {
+    if (!isFriendInviteable(_ctxFriendTarget)) {
+      announce(_ctxFriendTarget + ' non è invitabile in questo momento');
+    } else {
+      _pendingInviteSlot = firstEmptyInviteSlot();
+      if (_pendingInviteSlot < 0) {
+        announce('Lobby piena: rimuovi uno slot per invitare un altro amico.');
+      } else {
+        addFriendToLobby(_ctxFriendTarget);
+      }
+    }
+  }
+  hideFriendCtx();
+});
+
+document.getElementById('ctx-block')?.addEventListener('click', () => {
+  if (!_ctxFriendTarget) { hideFriendCtx(); return; }
+  const name = _ctxFriendTarget;
+  _blockedFriends.add(name);
+  // Remove row from friend lists
+  document.querySelectorAll(`.friend-row[data-friend="${name}"]`).forEach(r => r.remove());
+  // Add to bloccati list
+  const bloccatiList = document.getElementById('bloccati-list');
+  const emptyState = bloccatiList?.querySelector('.empty-state');
+  if (emptyState) emptyState.remove();
+  if (bloccatiList) {
+    const row = document.createElement('div');
+    row.className = 'friend-row';
+    row.dataset.friend = name;
+    row.innerHTML =
+      `<div class="friend-av">${name[0]}</div>` +
+      `<div class="friend-info"><div class="friend-name">${name}</div><div class="friend-status">Bloccato</div></div>` +
+      `<button class="req-cancel unblock-btn" data-friend="${name}" aria-label="Sblocca ${name}">⊘</button>`;
+    bloccatiList.appendChild(row);
+    row.querySelector('.unblock-btn').addEventListener('click', () => unblockFriend(name, row));
+  }
+  announce(name + ' bloccato');
+  hideFriendCtx();
+});
+
+document.getElementById('ctx-remove')?.addEventListener('click', () => {
+  if (!_ctxFriendTarget) { hideFriendCtx(); return; }
+  const name = _ctxFriendTarget;
+  document.querySelectorAll(`.friend-row[data-friend="${name}"]`).forEach(r => r.remove());
+  announce(name + ' rimosso dalla lista amici');
+  hideFriendCtx();
+});
+
+function unblockFriend(name, row) {
+  _blockedFriends.delete(name);
+  row.remove();
+  const bloccatiList = document.getElementById('bloccati-list');
+  if (bloccatiList && bloccatiList.children.length === 0) {
+    bloccatiList.innerHTML = '<div class="empty-state">Nessun utente bloccato</div>';
+  }
+  announce(name + ' sbloccato');
+}
+
+initFriendPresenceFromUI();
+
+// ── Friend request accept / reject / cancel ────────────────────
+document.querySelectorAll('.req-accept[data-friend]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const name = btn.dataset.friend;
+    const row = btn.closest('.friend-row');
+    // Move to online friends
+    const onlineList = document.getElementById('friends-online');
+    if (onlineList) {
+      const newRow = document.createElement('div');
+      newRow.className = 'friend-row';
+      newRow.dataset.friend = name;
+      newRow.innerHTML =
+        `<div class="friend-av">${name[0]}</div>` +
+        `<div class="friend-info"><div class="friend-name">${name}</div>` +
+        `<div class="friend-status status-online">Online</div></div>` +
+        `<button class="friend-action-btn" data-friend="${name}" aria-label="Azioni per ${name}" aria-haspopup="menu">⋯</button>`;
+      onlineList.appendChild(newRow);
+      newRow.querySelector('.friend-action-btn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        _ctxFriendTarget = name;
+        const rect = this.getBoundingClientRect();
+        if (friendCtxMenu) {
+          friendCtxMenu.style.display = 'block';
+          const menuW = 180;
+          const left = Math.min(rect.right - menuW, window.innerWidth - menuW - 8);
+          friendCtxMenu.style.left = Math.max(8, left) + 'px';
+          friendCtxMenu.style.top  = (rect.bottom + 4) + 'px';
+        }
+      });
+    }
+    row?.remove();
+    // Update badge
+    const badge = document.getElementById('richieste-badge');
+    if (badge) {
+      const n = Math.max(0, parseInt(badge.textContent||'0') - 1);
+      badge.textContent = n;
+      badge.style.display = n > 0 ? '' : 'none';
+    }
+    announce('Richiesta di amicizia accettata: ' + name);
+  });
+});
+
+document.querySelectorAll('.req-reject[data-friend], .req-cancel[data-friend]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const name = btn.dataset.friend;
+    btn.closest('.friend-row')?.remove();
+    const badge = document.getElementById('richieste-badge');
+    if (badge && btn.classList.contains('req-reject')) {
+      const n = Math.max(0, parseInt(badge.textContent||'0') - 1);
+      badge.textContent = n;
+      badge.style.display = n > 0 ? '' : 'none';
+    }
+    announce('Richiesta rifiutata/annullata: ' + name);
+  });
+});
+
+// ── Cerca amici (search) ───────────────────────────────────────
+const friendSearchInput = document.getElementById('friend-search-input');
+const friendSearchBtn   = document.getElementById('friend-search-btn');
+const friendSearchRes   = document.getElementById('friend-search-results');
+
+const SAMPLE_PLAYERS = [
+  'RedCyclone','GhostDraw','VortexUno','TheUltimate','NightKing',
+  'AceVolta','BlazeRunner','IceQueen','ShadowPlay','FlameMaster',
+  'WildCard99','UnoKing','BlitzPlayer','CardShark','RoyalFlush'
+];
+
+function doFriendSearch() {
+  if (!friendSearchRes || !friendSearchInput) return;
+  const q = friendSearchInput.value.trim().toLowerCase();
+  if (q.length < 2) { friendSearchRes.innerHTML = '<div class="empty-state">Inserisci almeno 2 caratteri</div>'; return; }
+  const matches = SAMPLE_PLAYERS.filter(p => p.toLowerCase().includes(q) &&
+    !_blockedFriends.has(p)).slice(0, 5);
+  if (matches.length === 0) { friendSearchRes.innerHTML = '<div class="empty-state">Nessun giocatore trovato</div>'; return; }
+  friendSearchRes.innerHTML = '';
+  matches.forEach(name => {
+    const row = document.createElement('div');
+    row.className = 'friend-row';
+    row.innerHTML =
+      `<div class="friend-av">${name[0]}</div>` +
+      `<div class="friend-info"><div class="friend-name">${name}</div><div class="friend-status">Giocatore</div></div>` +
+      `<button class="invite-send-btn add-friend-btn" data-friend="${name}" aria-label="Aggiungi ${name} agli amici">+ Aggiungi</button>`;
+    row.querySelector('.add-friend-btn').addEventListener('click', function() {
+      this.textContent = 'Richiesta inviata';
+      this.classList.add('sent');
+      this.disabled = true;
+      // Add to inviate list
+      const invList = document.getElementById('inviate-list');
+      if (invList) {
+        const r2 = document.createElement('div');
+        r2.className = 'friend-row';
+        r2.dataset.friend = name;
+        r2.innerHTML =
+          `<div class="friend-av">${name[0]}</div>` +
+          `<div class="friend-info"><div class="friend-name">${name}</div><div class="friend-status">In attesa…</div></div>` +
+          `<button class="req-cancel" data-friend="${name}" aria-label="Annulla richiesta a ${name}">✕</button>`;
+        invList.appendChild(r2);
+        r2.querySelector('.req-cancel').addEventListener('click', () => { r2.remove(); });
+      }
+      announce('Richiesta di amicizia inviata a ' + name);
+    });
+    friendSearchRes.appendChild(row);
+  });
+}
+
+friendSearchBtn?.addEventListener('click', doFriendSearch);
+friendSearchInput?.addEventListener('keydown', e => { if (e.key === 'Enter') doFriendSearch(); });
+
+// ── Club dialogs ───────────────────────────────────────────────
+const clubCreatePopup = document.getElementById('club-create-popup');
+const clubJoinPopup   = document.getElementById('club-join-popup');
+
+document.getElementById('btn-crea-club')?.addEventListener('click', () => clubCreatePopup?.showModal());
+document.getElementById('btn-join-club')?.addEventListener('click', () => clubJoinPopup?.showModal());
+document.getElementById('club-create-close')?.addEventListener('click', () => clubCreatePopup?.close());
+document.getElementById('club-join-close')?.addEventListener('click', () => clubJoinPopup?.close());
+clubCreatePopup?.addEventListener('click', e => { if (e.target === clubCreatePopup) clubCreatePopup.close(); });
+clubJoinPopup?.addEventListener('click',   e => { if (e.target === clubJoinPopup)   clubJoinPopup.close(); });
+
+document.getElementById('club-create-confirm')?.addEventListener('click', () => {
+  const nameInput = document.getElementById('club-name-input');
+  const tagInput  = document.getElementById('club-tag-input');
+  const cName = nameInput?.value.trim();
+  const cTag  = tagInput?.value.trim().toUpperCase();
+  if (!cName || cName.length < 2) { announce('Inserisci un nome club valido (minimo 2 caratteri)'); return; }
+  if (!cTag  || cTag.length  < 2) { announce('Inserisci un tag di almeno 2 caratteri'); return; }
+  // Simulate club creation
+  const heroEl = document.getElementById('club-hero');
+  if (heroEl) {
+    const code = cTag + '-' + Math.floor(1000+Math.random()*8999);
+    const socialCode = document.getElementById('social-club-code');
+    if (socialCode) socialCode.textContent = code;
+    heroEl.innerHTML =
+      `<div class="club-hero-icon">🏛️</div>` +
+      `<div class="club-hero-title">${cName} [${cTag}]</div>` +
+      `<div class="club-hero-sub">Il tuo club è stato creato! Codice: <strong style="color:#22D3EE">${code}</strong></div>` +
+      `<div class="club-hero-actions">` +
+        `<button class="club-btn-secondary" id="btn-leave-club">🚪 Lascia club</button>` +
+      `</div>`;
+    document.getElementById('btn-leave-club')?.addEventListener('click', resetClubHero);
+  }
+  clubCreatePopup?.close();
+  announce('Club ' + cName + ' creato con successo');
+});
+
+document.getElementById('club-join-confirm')?.addEventListener('click', () => {
+  const codeInput = document.getElementById('club-join-code');
+  const code = codeInput?.value.trim().toUpperCase();
+  if (!code || code.length < 4) { announce('Inserisci un codice club valido'); return; }
+  const heroEl = document.getElementById('club-hero');
+  if (heroEl) {
+    heroEl.innerHTML =
+      `<div class="club-hero-icon">🏛️</div>` +
+      `<div class="club-hero-title">Club ${code}</div>` +
+      `<div class="club-hero-sub">Sei entrato nel club! Codice: <strong style="color:#22D3EE">${code}</strong></div>` +
+      `<div class="club-hero-actions">` +
+        `<button class="club-btn-secondary" id="btn-leave-club">🚪 Lascia club</button>` +
+      `</div>`;
+    document.getElementById('btn-leave-club')?.addEventListener('click', resetClubHero);
+  }
+  clubJoinPopup?.close();
+  announce('Sei entrato nel club con codice ' + code);
+});
+
+function resetClubHero() {
+  const heroEl = document.getElementById('club-hero');
+  if (heroEl) {
+    heroEl.innerHTML =
+      `<div class="club-hero-icon">🏛️</div>` +
+      `<div class="club-hero-title">Non sei in nessun club</div>` +
+      `<div class="club-hero-sub">Crea il tuo club o unisciti a uno esistente</div>` +
+      `<div class="club-hero-actions">` +
+        `<button class="club-btn-primary" id="btn-crea-club" aria-haspopup="dialog">+ Crea Club</button>` +
+        `<button class="club-btn-secondary" id="btn-join-club" aria-haspopup="dialog">🔍 Unisciti</button>` +
+      `</div>`;
+    document.getElementById('btn-crea-club')?.addEventListener('click', () => clubCreatePopup?.showModal());
+    document.getElementById('btn-join-club')?.addEventListener('click', () => clubJoinPopup?.showModal());
+  }
+  announce('Hai lasciato il club');
+}
+
+// ── Runtime bridge ─────────────────────────────────────────────
+function installFallbacks(frame) {
+  let fw, doc;
+  try { fw = frame.contentWindow; doc = frame.contentDocument || fw?.document; } catch { return; }
+  if (!fw || !doc || fw._indexShellStatsWrapped) return;
+
+  const _origStats = typeof fw.renderStatsPanel === 'function'
+    ? fw.renderStatsPanel.bind(fw) : null;
+  fw.renderStatsPanel = function () {
+    if (_origStats) _origStats();
+    const root = doc.getElementById('stats-panel-root');
+    if (root && root.innerText.trim().length === 0) root.innerHTML = makeStatsHtml(fw.P||{});
+  };
+
+  fw.renderBondsPanel = function () {
+    const root = doc.getElementById('bonds-panel-root');
+    if (root) root.innerHTML =
+      '<div style="padding:14px;color:rgba(255,255,255,.4);font-size:12px">' +
+      'Le affinità bot sono state rimosse in questa versione.</div>';
+  };
+
+  if (typeof fw.switchNav === 'function') {
+    const _orig = fw.switchNav.bind(fw);
+    fw.switchNav = function (id, btn) {
+      const r = _orig(id, btn);
+      if (id === 'stats') setTimeout(() => fw.renderStatsPanel(), 60);
+      if (id === 'bonds') setTimeout(() => fw.renderBondsPanel(), 60);
+      return r;
+    };
+  }
+  fw._indexShellStatsWrapped = true;
+}
+
+function makeStatsHtml(p) {
+  const wins   = (p.wins||0)+(p.winsRanked||0)+(p.winsCasual||0)+(p.winsBlitz||0)+(p.winsChaos||0);
+  const losses = (p.losses||0)+(p.lossesRanked||0)+(p.lossesCasual||0)+(p.lossesBlitz||0)+(p.lossesChaos||0);
+  const total  = Math.max(p.games||0, wins+losses);
+  const wr     = total ? Math.round((wins/total)*100) : 0;
+  return `<div style="padding:14px;background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(192,132,252,.08));border:1px solid rgba(34,211,238,.18);border-radius:16px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.35);text-transform:uppercase">Statistiche</div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px">
+      <div style="padding:10px;border-radius:12px;background:rgba(15,23,42,.42)"><div style="font-size:10px;color:rgba(255,255,255,.45)">Partite</div><div style="font-size:18px;font-weight:900;color:#22D3EE">${total}</div></div>
+      <div style="padding:10px;border-radius:12px;background:rgba(15,23,42,.42)"><div style="font-size:10px;color:rgba(255,255,255,.45)">Win Rate</div><div style="font-size:18px;font-weight:900;color:${wr>=50?'#34D399':'#F43F5E'}">${wr}%</div></div>
+      <div style="padding:10px;border-radius:12px;background:rgba(15,23,42,.42)"><div style="font-size:10px;color:rgba(255,255,255,.45)">UNO dichiarati</div><div style="font-size:18px;font-weight:900;color:#fff">${p.unoDeclared||0}</div></div>
+      <div style="padding:10px;border-radius:12px;background:rgba(15,23,42,.42)"><div style="font-size:10px;color:rgba(255,255,255,.45)">Wild +4</div><div style="font-size:18px;font-weight:900;color:#fff">${p.draw4Played||0}</div></div>
+    </div></div>`;
+}
+
+// Force the iframe to load index-runtime.html
+function forceRuntime() {
+  const frame = document.getElementById('app-frame');
+  if (!frame) return false;
+  if (frame.src !== RUNTIME_URL) frame.src = RUNTIME_URL;
+  frame.addEventListener('load', () => {
+    _runtimeReady = true;
+    installFallbacks(frame);
+    checkForLogin();
+    startMonitor();
+    if (launcher.style.display !== 'none') showLauncher();
+  }, { once: true });
+  document.documentElement.dataset.unoUltraBridge = 'shell-launcher';
+  window.__UNO_ULTRA_PORT = {
+    source:'index.html', mode:'shell-iframe-host',
+    bridge:'shell-launcher', runtime:'index-runtime.html'
+  };
+  return true;
+}
+
+if (!forceRuntime()) {
+  const obs = new MutationObserver(() => { if (forceRuntime()) obs.disconnect(); });
+  obs.observe(document.body, { childList:true, subtree:true });
+}
+
+// ── Login detection ────────────────────────────────────────────
+// The runtime shows its own login screen inside the iframe.
+// Once the player logs in, fw.P gets set and we switch to the main menu.
+function checkForLogin() {
+  const fw = getFrameWin();
+  if (!fw) return;
+  if (fw.P) {
+    // Player is logged in — show launcher with main menu
+    if (_loginPoller) { clearInterval(_loginPoller); _loginPoller = null; }
+    if (launcher.style.display === 'none') {
+      showLauncher();
+      showScreen('mainmenu');
+    }
+    syncProfile();
+  }
+}
+
+// Poll until login is detected (starts after iframe load)
+function startLoginPoller() {
+  if (_loginPoller) return;
+  _loginPoller = setInterval(checkForLogin, 600);
+}
+
+// ── Screen monitor ─────────────────────────────────────────────
+// If runtime goes back to splash while in-game → restore launcher
+function startMonitor() {
+  if (_monitorStarted) return;
+  _monitorStarted = true;
+  startLoginPoller();
+  setInterval(() => {
+    if (launcher.style.display !== 'none') return;
+    const fw = getFrameWin();
+    if (!fw) return;
+    try {
+      const active = fw.document.querySelector('.scr.on');
+      if (active && active.id === 'splash' && fw.P) {
+        cleanupActiveMatch('runtime-return-splash');
+        showLauncher();
+        showScreen('mainmenu');
+      }
+    } catch (_) {}
+  }, 800);
+}
+
+updatePlayDisplay();
+
+// ── Profile sync ───────────────────────────────────────────────
+function getRankName(mmr) {
+  if (mmr>=2800) return 'SSL';
+  if (mmr>=2400) return 'Grand Champion';
+  if (mmr>=2000) return 'Champion';
+  if (mmr>=1600) return 'Diamond';
+  if (mmr>=1200) return 'Platinum';
+  if (mmr>=800)  return 'Gold';
+  if (mmr>=400)  return 'Silver';
+  return 'Bronze';
+}
+function getRankColor(mmr) {
+  if (mmr>=2800) return '#FFFFFF';
+  if (mmr>=2400) return '#FF4081';
+  if (mmr>=2000) return '#4A9CE1';
+  if (mmr>=1600) return '#7EE4F8';
+  if (mmr>=1200) return '#D2E4E3';
+  if (mmr>=800)  return '#D39940';
+  if (mmr>=400)  return '#C0C0C0';
+  return '#CD7F32';
+}
+
+// ── Unified profile view (single source projection) ───────────
+const CARD_BACK_PALETTE = {
+  default:'linear-gradient(135deg,#E8003D,#6b001a)',
+  teal:'linear-gradient(135deg,#00E5FF,#004d66)',
+  gold:'linear-gradient(135deg,#8B6914,#F5C842)',
+  midnight:'linear-gradient(135deg,#0a0a2e,#1a1a5e)',
+  flame:'linear-gradient(135deg,#ff5500,#3d0000)',
+  carbon:'linear-gradient(135deg,#1a1a1a,#3a3a3a)',
+  neon:'linear-gradient(135deg,#4B0082,#9B59B6)',
+  crimson:'linear-gradient(135deg,#8B0000,#DC143C)',
+  emerald:'linear-gradient(135deg,#004d1a,#00b35c)',
+  rainbow:'linear-gradient(135deg,#E8003D,#FF7700,#F5C842,#00b35c,#0057E7,#9B59B6)'
+};
+
+const BORDER_PALETTE = {
+  default:'rgba(255,255,255,.22)',
+  neon:'#00E5FF',
+  gold:'#FFD700',
+  cosmic:'#FF4081',
+  crystal:'#7EE4F8',
+  fire:'#ff5500'
+};
+
+const EFFECT_TINT = {
+  default:'transparent',
+  sparks:'rgba(255,255,255,.06)',
+  flame:'rgba(255,90,0,.12)',
+  electric:'rgba(34,211,238,.12)',
+  rainbow:'rgba(192,132,252,.12)'
+};
+
+const AVATAR_CATALOG = [
+  { id:'classic', icon:'🙂', name:'Classico' },
+  { id:'pro', icon:'😎', name:'Pro Player' },
+  { id:'wild', icon:'🤠', name:'Wild Ranger' },
+  { id:'neon', icon:'🤖', name:'Neon Bot' },
+  { id:'royal', icon:'👑', name:'Royal Ace' },
+];
+
+const FRAMEFX_CATALOG = [
+  { id:'none', icon:'⏺️', name:'Nessuna' },
+  { id:'pulse', icon:'💫', name:'Pulse' },
+  { id:'aurora', icon:'🌈', name:'Aurora' },
+  { id:'flare', icon:'🔥', name:'Flare' },
+];
+
+const NEWS_ITEMS = [
+  {
+    id:'season3',
+    badge:'EVENTO',
+    title:'Stagione 3 — Fuoco & Ghiaccio',
+    summary:'Battle Pass rinnovato con reward stagionali e cosmetic estesi.',
+    body:'Nuove reward stagionali, progressione account aggiornata e contenuti equipaggiabili nella nuova UI.',
+  },
+  {
+    id:'patch-v52',
+    badge:'PATCH',
+    title:'v52 — Bilanciamento AI',
+    summary:'Migliorata l AI in tutte le modalita e stabilizzato il launch flow.',
+    body:'Fix sul routing di avvio, riduzione errori runtime e migliore consistenza delle scelte modalita e giocatori.',
+  },
+  {
+    id:'mp-lobby',
+    badge:'MULTI',
+    title:'Lobby Multiplayer Stabilizzata',
+    summary:'Pulizia sessioni e prevenzione match fantasma in uscita partita.',
+    body:'Ogni match ora registra start/end e chiude il server lobby al termine o in uscita utente.',
+  },
+  {
+    id:'locker-v2',
+    badge:'NUOVO',
+    title:'Armadietto V2',
+    summary:'Cornici, avatar, stile carte, bordo, cornice animata ed effetti equipaggiabili.',
+    body:'Tutti i box armadietto ora aprono sezioni reali e aggiornano il profilo persistente.',
+  },
+];
+
+const CHALLENGE_TEMPLATES = [
+  { id:'sp-games', icon:'🎮', name:'Nuovo Inizio', desc:'Completa 3 partite', type:'games', target:3, xp:200, credits:50 },
+  { id:'sp-wins', icon:'🏆', name:'Vittorie Lampo', desc:'Vinci 2 partite', type:'wins', target:2, xp:250, credits:80 },
+  { id:'mp-invite', icon:'👥', name:'Social Start', desc:'Invita 1 amico in lobby', type:'invites', target:1, xp:120, credits:40 },
+  { id:'mmr-step', icon:'📈', name:'Road To Silver', desc:'Raggiungi 400 MMR', type:'mmr', target:400, xp:300, credits:120 },
+];
+
+function ensureChallengeCycle(profile) {
+  if (!profile) return null;
+  if (profile.challengeCycleVersion !== 2 || !Array.isArray(profile.challengesV2)) {
+    profile.challengeCycleVersion = 2;
+    profile.challengeCycleStartedAt = Date.now();
+    profile.challengesV2 = CHALLENGE_TEMPLATES.map(t => ({
+      id:t.id,
+      progress:0,
+      target:t.target,
+      xp:t.xp,
+      credits:t.credits,
+      claimed:false,
+    }));
+  }
+  return profile.challengesV2;
+}
+
+function getChallengeValue(profile, type) {
+  if (!profile) return 0;
+  const wins = (profile.wins||0)+(profile.winsRanked||0)+(profile.winsCasual||0)+(profile.winsBlitz||0)+(profile.winsChaos||0);
+  if (type === 'games') return profile.games || 0;
+  if (type === 'wins') return wins;
+  if (type === 'invites') return profile.mpInvitesSent || 0;
+  if (type === 'mmr') return profile.mmr || 200;
+  return 0;
+}
+
+function getLockerCatalog(section) {
+  if (section === 'targhette') {
+    return TARGHETTE.map(it => ({ id:it.id, icon:'🏷️', name:it.name, desc:it.desc, field:'selectedTitle' }));
+  }
+  if (section === 'cornici' || section === 'bordo') {
+    return Object.keys(BORDER_PALETTE).map(id => ({ id, icon:'🖼️', name:'Bordo ' + id, desc:'Cornice profilo', field:'border' }));
+  }
+  if (section === 'carte') {
+    return Object.keys(CARD_BACK_PALETTE).map(id => ({ id, icon:'🃏', name:'Carta ' + id, desc:'Stile dorso carte', field:'cardback' }));
+  }
+  if (section === 'avatar') {
+    return AVATAR_CATALOG.map(it => ({ ...it, desc:'Avatar profilo', field:'avatar' }));
+  }
+  if (section === 'cornice-animata') {
+    return FRAMEFX_CATALOG.map(it => ({ ...it, desc:'Cornice animata', field:'frameFx' }));
+  }
+  if (section === 'effetti') {
+    return Object.keys(EFFECT_TINT).map(id => ({ id, icon:'💫', name:'Effetto ' + id, desc:'Overlay profilo', field:'effect' }));
+  }
+  return [];
+}
+
+function getCurrentLockerValue(profile, field) {
+  if (field === 'selectedTitle') return profile?.selectedTitle || 't1';
+  return profile?.locker?.[field] || (field === 'avatar' ? 'classic' : field === 'frameFx' ? 'none' : 'default');
+}
+
+function setCurrentLockerValue(profile, field, value) {
+  if (!profile) return;
+  if (field === 'selectedTitle') {
+    profile.selectedTitle = value;
+    return;
+  }
+  profile.locker = profile.locker || {};
+  profile.locker[field] = value;
+}
+
+function renderLockerSection(section) {
+  if (!lockerPopupList) return;
+  const fw = getFrameWin();
+  const profile = fw?.P || ensureRuntimeProfile(fw);
+  if (!profile) return;
+
+  const items = getLockerCatalog(section);
+  lockerPopupList.innerHTML = '';
+
+  items.forEach(item => {
+    const current = getCurrentLockerValue(profile, item.field);
+    const selected = current === item.id;
+    const row = document.createElement('button');
+    row.className = 'locker-item-row' + (selected ? ' selected' : '');
+    row.type = 'button';
+    row.setAttribute('role', 'listitem');
+    row.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    row.innerHTML =
+      '<div class="locker-item-icon" aria-hidden="true">' + (item.icon || '✨') + '</div>' +
+      '<div class="locker-item-info">' +
+        '<div class="locker-item-name">' + item.name + (selected ? ' · Equipaggiato' : '') + '</div>' +
+        '<div class="locker-item-desc">' + (item.desc || '') + '</div>' +
+      '</div>' +
+      '<div class="locker-item-cta">' + (selected ? 'Attivo' : 'Equipaggia') + '</div>';
+
+    row.addEventListener('click', () => {
+      setCurrentLockerValue(profile, item.field, item.id);
+      syncProfile();
+      renderLockerSection(section);
+      announce(item.name + ' equipaggiato');
+    });
+
+    lockerPopupList.appendChild(row);
+  });
+}
+
+function openLockerSection(section) {
+  if (!lockerPopup) return;
+  const tab = section || 'targhette';
+  document.querySelectorAll('.locker-tab').forEach(btn => {
+    const on = btn.dataset.lockerTab === tab;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  if (lockerPopupTitle) lockerPopupTitle.textContent = 'Armadietto — ' + (tab === 'targhette' ? 'Targhette' : tab);
+  renderLockerSection(tab);
+  lockerPopup.showModal();
+}
+
+const newsHubDialog = document.getElementById('news-hub-dialog');
+const newsHubScroll = document.getElementById('news-hub-scroll');
+const newsHubDetail = document.getElementById('news-hub-detail');
+
+function renderNewsHub(activeId = null) {
+  if (!newsHubScroll || !newsHubDetail) return;
+  const current = NEWS_ITEMS.find(n => n.id === (activeId || NEWS_ITEMS[0].id)) || NEWS_ITEMS[0];
+  newsHubScroll.innerHTML = '';
+  NEWS_ITEMS.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'news-hub-card' + (item.id === current.id ? ' active' : '');
+    btn.type = 'button';
+    btn.setAttribute('role', 'listitem');
+    btn.innerHTML =
+      '<span class="news-badge">' + item.badge + '</span>' +
+      '<h3>' + item.title + '</h3>' +
+      '<p>' + item.summary + '</p>';
+    btn.addEventListener('click', () => renderNewsHub(item.id));
+    newsHubScroll.appendChild(btn);
+  });
+  newsHubDetail.innerHTML =
+    '<h3>' + current.title + '</h3>' +
+    '<p>' + current.body + '</p>';
+  const summary = document.getElementById('news-hub-summary');
+  if (summary) summary.textContent = current.title;
+}
+
+document.getElementById('news-hub-trigger')?.addEventListener('click', () => {
+  renderNewsHub();
+  newsHubDialog?.showModal();
+});
+document.getElementById('news-hub-close')?.addEventListener('click', () => newsHubDialog?.close());
+newsHubDialog?.addEventListener('click', e => { if (e.target === newsHubDialog) newsHubDialog.close(); });
+
+function getTitleLabelFromRuntime(fw, P){
+  const titleId = P?.selectedTitle || 't1';
+  try {
+    const list = fw?.ALL_TITLES;
+    if (Array.isArray(list)) {
+      const hit = list.find(t => t.id === titleId);
+      if (hit?.txt) return hit.txt;
+    }
+  } catch (_) {}
+  return titleId;
+}
+
+function projectUnifiedProfileView(P, fw){
+  const locker = P?.locker || {};
+  const cardback = locker.cardback || 'default';
+  const border = locker.border || 'default';
+  const effect = locker.effect || 'default';
+  const avatar = locker.avatar || 'classic';
+  const frameFx = locker.frameFx || 'none';
+  return {
+    av: P ? (P.name || '?')[0].toUpperCase() : '?',
+    name: P?.name || '—',
+    credits: P ? (P.credits || 0) : 0,
+    level: P?.level || 1,
+    mmr: P?.mmr || 200,
+    titleId: P?.selectedTitle || 't1',
+    titleLabel: getTitleLabelFromRuntime(fw, P),
+    locker: {
+      cardback,
+      border,
+      effect,
+      avatar,
+      frameFx,
+      cardBg: CARD_BACK_PALETTE[cardback] || CARD_BACK_PALETTE.default,
+      borderColor: BORDER_PALETTE[border] || BORDER_PALETTE.default,
+      tint: EFFECT_TINT[effect] || EFFECT_TINT.default
+    }
+  };
+}
+
+function applyUnifiedCardLook(el, view){
+  if (!el || !view) return;
+  el.style.setProperty('--u-card-bg', view.locker.cardBg);
+  el.style.setProperty('--u-card-border', view.locker.borderColor);
+  el.style.setProperty('--u-card-tint', view.locker.tint);
+}
+
+function syncProfile() {
+  const fw  = getFrameWin();
+  const P   = fw?.P || ensureRuntimeProfile(fw) || null;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  const view = projectUnifiedProfileView(P, fw);
+
+  // Main menu account chip
+  set('mm-av',       view.av);
+  set('mm-username', P ? view.name : 'Non connesso');
+  set('mm-credits',  P ? (view.credits+' 💰') : '— 💰');
+
+  // SP header account
+  set('sp-av',       view.av);
+  set('sp-username', view.name);
+  set('sp-credits',  view.credits+' 💰');
+
+  // MP header account
+  set('mp-av',       view.av);
+  set('mp-username', view.name);
+  set('mp-credits',  view.credits+' 💰');
+  set('mp-lobby-av', view.av);
+  set('mp-lobby-name', view.name === '—' ? 'Tu' : view.name);
+  set('mp-lobby-title', 'Titolo: ' + (P ? view.titleLabel : '—'));
+  set('mp-lobby-meta', P ? ('Livello ' + view.level + ' · Carta ' + view.locker.cardback + ' · Bordo ' + view.locker.border) : 'Carta profilo collegata');
+  set('mp-profilo-av', view.av);
+  set('mp-profilo-name', view.name);
+  set('mp-profilo-title', 'Titolo: ' + (P ? view.titleLabel : '—'));
+  set('mp-profilo-credits', view.credits + ' crediti');
+
+  applyUnifiedCardLook(document.getElementById('mp-me-card'), view);
+  applyUnifiedCardLook(document.querySelector('.mp-profile-preview'), view);
+  applyUnifiedCardLook(document.querySelector('.profile-hero'), view);
+
+  if (!P) return;
+
+  // Home/Gioca footer
+  const lv     = P.level || 1;
+  const xp     = P.xp    || 0;
+  const xpNext = P.xpNext|| (lv*100+100);
+  const pct    = Math.min(100, Math.round((xp/xpNext)*100));
+  set('home-lv', lv);
+  set('home-xp', xp+' / '+xpNext+' XP');
+  const fillEl = document.getElementById('home-lv-fill');
+  if (fillEl) fillEl.style.width = pct+'%';
+  const lvBar = document.querySelector('.lv-bar');
+  if (lvBar) lvBar.setAttribute('aria-valuenow', pct);
+  const tier = P.battlePassTier || P.bpTier || 1;
+  set('home-bp-tier',  'Tier '+tier+' / 50');
+  set('bp-tier-badge', 'Tier '+tier);
+
+  // Profile panel
+  const wins   = (P.wins||0)+(P.winsRanked||0)+(P.winsCasual||0)+(P.winsBlitz||0)+(P.winsChaos||0);
+  const losses = (P.losses||0)+(P.lossesRanked||0)+(P.lossesCasual||0)+(P.lossesBlitz||0)+(P.lossesChaos||0);
+  const total  = Math.max(P.games||0, wins+losses);
+  const wr     = total ? Math.round((wins/total)*100) : 0;
+  const mmr    = P.mmr || 200;
+
+  const profAv = document.getElementById('prof-av');
+  if (profAv) profAv.textContent = (P.name||'?')[0].toUpperCase();
+  set('prof-name',   P.name||'—');
+  set('prof-rank',   getRankName(mmr)+' · '+mmr+' MMR');
+  set('prof-title',  'Titolo: ' + (view.titleLabel || '—'));
+  set('prof-cosmetics', 'Carta: ' + view.locker.cardback + ' · Bordo: ' + view.locker.border + ' · Effetto: ' + view.locker.effect + ' · Avatar: ' + view.locker.avatar + ' · Cornice: ' + view.locker.frameFx);
+  set('prof-games',  total);
+  set('prof-wins',   wins);
+  set('prof-wr',     wr+'%');
+  set('prof-mmr',    mmr);
+  set('prof-streak', P.streak||P.winStreak||0);
+
+  // Stagione
+  set('s-mmr',  mmr);
+  const sRankEl = document.getElementById('s-rank');
+  if (sRankEl) { sRankEl.textContent = getRankName(mmr); sRankEl.style.color = getRankColor(mmr); }
+  set('s-wins', P.winsRanked||0);
+
+  saveShellProfile({
+    name: P.name,
+    credits: P.credits,
+    level: P.level,
+    xp: P.xp,
+    xpNext: P.xpNext,
+    mmr: P.mmr,
+    battlePassTier: P.battlePassTier,
+    bpTier: P.bpTier,
+    accountVersion: P.accountVersion,
+    challengeCycleVersion: P.challengeCycleVersion,
+    selectedTitle: P.selectedTitle,
+    ownedShopItems: P.ownedShopItems,
+    locker: P.locker,
+  });
+}
+
+function syncStagione() {
+  const P = getFrameWin()?.P;
+  if (!P) return;
+  const mmr = P.mmr || 200;
+  const thresholds = [400,800,1200,1600,2000,2400,2800];
+  const names      = ['Silver','Gold','Platinum','Diamond','Champion','Grand Champion','SSL'];
+  const nrEl = document.getElementById('s-next-rank');
+  const nmEl = document.getElementById('s-next-mmr');
+  for (let i=0; i<thresholds.length; i++) {
+    if (mmr < thresholds[i]) {
+      if (nrEl) nrEl.textContent = names[i];
+      if (nmEl) nmEl.textContent = 'Serve: '+thresholds[i]+' MMR (+'+(thresholds[i]-mmr)+')';
+      break;
+    }
+  }
+}
+
+// ── Battle Pass ────────────────────────────────────────────────
+const BP_REWARDS = [
+  {lv:1, icon:'💰',name:'50 Crediti'},  {lv:3, icon:'🏷️',name:'Targhetta'},
+  {lv:5, icon:'🃏',name:'Mazzo Base'},  {lv:8, icon:'💰',name:'100 Crediti'},
+  {lv:10,icon:'🖼️',name:'Cornice'},    {lv:12,icon:'⚡', name:'Effetto'},
+  {lv:15,icon:'😎',name:'Avatar'},      {lv:18,icon:'💰',name:'200 Crediti'},
+  {lv:20,icon:'🌟',name:'Mazzo Epico'},{lv:25,icon:'🏆',name:'Targhetta Gold'},
+  {lv:30,icon:'💰',name:'300 Crediti'},{lv:35,icon:'🔥',name:'Cornice Fuoco'},
+  {lv:40,icon:'😎',name:'Avatar Leg.'},{lv:45,icon:'💰',name:'500 Crediti'},
+  {lv:50,icon:'👑',name:'Titolo Stagione'},
+];
+function renderBP() {
+  if (!bpTrack) return;
+  const tier = getFrameWin()?.P?.battlePassTier || getFrameWin()?.P?.bpTier || 1;
+  BP_REWARDS.forEach(r => {
+    const unlocked = r.lv <= tier;
+    const current  = r.lv === tier;
+    const node = document.createElement('div');
+    node.className = 'bp-node'+(unlocked?' unlocked':'')+(current?' current':'');
+    node.setAttribute('role','listitem');
+    node.setAttribute('aria-label','Tier '+r.lv+': '+r.name+(unlocked?' — sbloccato':' — bloccato'));
+    node.innerHTML =
+      `<div class="bp-bubble">${unlocked?r.icon:'🔒'}</div>` +
+      `<div class="bp-bubble-lv">T${r.lv}</div>` +
+      `<div class="bp-reward-name">${r.name}</div>`;
+    bpTrack.appendChild(node);
+  });
+}
+
+// ── Sfide ──────────────────────────────────────────────────────
+const SFIDE = [
+  {icon:'🎴',name:'Primo Sangue',   desc:'Vinci 3 partite di UNO questa settimana',    xp:'+500 XP',prog:.33},
+  {icon:'♠️',name:'Bluff Maestro',  desc:'Vinci 5 mani di Blackjack',                  xp:'+300 XP',prog:.6 },
+  {icon:'⚡',name:'Wild Master',    desc:'Usa Wild+4 in 10 partite diverse',            xp:'+400 XP',prog:.2 },
+  {icon:'🏆',name:'UNO Vero',       desc:'Vinci con UNO dichiarato e 1 carta rimasta', xp:'+200 XP',prog:1  },
+  {icon:'🌀',name:'Maratoneta',     desc:'Completa un torneo da 32 giocatori',          xp:'+800 XP',prog:0  },
+  {icon:'🃏',name:'Ladro di Mazzi', desc:'Vinci 5 partite di Ruba Mazzetto',            xp:'+350 XP',prog:.4 },
+];
+function renderSfide() {
+  if (!sfideList) return;
+  const fw = getFrameWin();
+  const p = fw?.P || ensureRuntimeProfile(fw);
+  if (!p) return;
+  const cycle = ensureChallengeCycle(p);
+  sfideList.innerHTML = '';
+
+  CHALLENGE_TEMPLATES.forEach(template => {
+    const state = cycle.find(c => c.id === template.id);
+    if (!state) return;
+    const actual = getChallengeValue(p, template.type);
+    state.progress = Math.min(state.target, actual);
+    const pct = Math.min(100, Math.round((state.progress / state.target) * 100));
+    const done = state.progress >= state.target;
+
+    const row = document.createElement('button');
+    row.className = 'sfida-row';
+    row.type = 'button';
+    row.disabled = !done || !!state.claimed;
+    row.setAttribute('role','listitem');
+    row.setAttribute('aria-label', template.name + '. Progresso ' + state.progress + ' su ' + state.target);
+    row.innerHTML =
+      `<div class="sfida-icon" aria-hidden="true">${template.icon}</div>` +
+      `<div class="sfida-info">` +
+        `<div class="sfida-name">${template.name}${state.claimed ? ' · Riscattata' : ''}</div>` +
+        `<div class="sfida-desc">${template.desc} · Ricompensa: +${state.xp} XP · +${state.credits} crediti</div>` +
+        `<div class="sfida-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">` +
+          `<div class="sfida-fill" style="width:${pct}%"></div></div>` +
+      `</div>` +
+      `<div class="sfida-xp">${state.claimed ? 'Claimed' : (done ? 'Riscatta' : (state.progress + '/' + state.target))}</div>`;
+
+    row.addEventListener('click', () => {
+      if (!done || state.claimed) return;
+      state.claimed = true;
+      p.xp = (p.xp || 0) + state.xp;
+      p.credits = (p.credits || 0) + state.credits;
+      syncProfile();
+      renderSfide();
+      announce('Ricompensa sfida riscattata: ' + template.name);
+    });
+
+    sfideList.appendChild(row);
+  });
+}
+
+// ── Targhette ────────────────────────────────────────────────
+const TARGHETTE = [
+  { id:'t1', name:'Recluta UNO', desc:'Titolo base', unlock:'Default' },
+  { id:'t2', name:'Stratega', desc:'Vinci 25 partite', unlock:'25 vittorie' },
+  { id:'t3', name:'MVP Stagionale', desc:'Top 10 settimanale', unlock:'Classifica' },
+  { id:'t4', name:'Signore del Caos', desc:'Vinci 20 UNO Chaos', unlock:'Evento Chaos' },
+  { id:'t5', name:'Maestro Blitz', desc:'Vinci 20 UNO Blitz', unlock:'Evento Blitz' },
+];
+
+function renderTarghette() {
+  if (!targhetteList) return;
+  const fw = getFrameWin();
+  const p = fw?.P || ensureRuntimeProfile(fw) || {};
+  const selectedTitle = p.selectedTitle || 't1';
+  targhetteList.innerHTML = '';
+
+  TARGHETTE.forEach(item => {
+    const isSelected = item.id === selectedTitle;
+    const row = document.createElement('button');
+    row.className = 'sfida-row';
+    row.type = 'button';
+    row.setAttribute('role', 'listitem');
+    row.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    row.setAttribute('aria-label', item.name + '. ' + item.desc + '. Sblocco: ' + item.unlock);
+    row.innerHTML =
+      '<div class="sfida-icon" aria-hidden="true">🏷️</div>' +
+      '<div class="sfida-info">' +
+        '<div class="sfida-name">' + item.name + (isSelected ? ' · Selezionata' : '') + '</div>' +
+        '<div class="sfida-desc">' + item.desc + ' · Sblocco: ' + item.unlock + '</div>' +
+      '</div>' +
+      '<div class="sfida-xp">' + (isSelected ? 'Attiva' : 'Seleziona') + '</div>';
+
+    row.addEventListener('click', () => {
+      if (!fw) return;
+      const target = fw.P || ensureRuntimeProfile(fw);
+      if (!target) return;
+      target.selectedTitle = item.id;
+      syncProfile();
+      renderTarghette();
+      announce('Targhetta selezionata: ' + item.name);
+    });
+
+    targhetteList.appendChild(row);
+  });
+}
+
+// ── Shop ─────────────────────────────────────────────────────
+const SHOP_ITEMS = [
+  { id:'shop-title-elite', icon:'🏷️', name:'Targhetta Elite', price:250, type:'title', value:'t5' },
+  { id:'shop-cardback-gold', icon:'🃏', name:'Cardback Gold', price:500, type:'cardback', value:'gold' },
+  { id:'shop-border-neon', icon:'✨', name:'Bordo Neon', price:450, type:'border', value:'neon' },
+  { id:'shop-effect-electric', icon:'⚡', name:'Effetto Electric', price:600, type:'effect', value:'electric' },
+  { id:'shop-credits-mini', icon:'💰', name:'Pacchetto Crediti +200', price:0, type:'credits', value:200 },
+];
+
+function renderShop() {
+  if (!shopList) return;
+  const fw = getFrameWin();
+  const p = fw?.P || ensureRuntimeProfile(fw);
+  if (!p) return;
+
+  const owned = p.ownedShopItems || [];
+  shopList.innerHTML = '';
+
+  SHOP_ITEMS.forEach(item => {
+    const isOwned = owned.includes(item.id);
+    const canBuy = isOwned || item.price === 0 || (p.credits || 0) >= item.price;
+    const row = document.createElement('button');
+    row.className = 'sfida-row';
+    row.type = 'button';
+    row.disabled = !canBuy;
+    row.setAttribute('role', 'listitem');
+    row.setAttribute('aria-label', item.name + '. Costo ' + item.price + ' crediti');
+    row.innerHTML =
+      '<div class="sfida-icon" aria-hidden="true">' + item.icon + '</div>' +
+      '<div class="sfida-info">' +
+        '<div class="sfida-name">' + item.name + (isOwned ? ' · Acquistato' : '') + '</div>' +
+        '<div class="sfida-desc">' + (item.price === 0 ? 'Ricompensa gratuita giornaliera' : 'Costo: ' + item.price + ' crediti') + '</div>' +
+      '</div>' +
+      '<div class="sfida-xp">' + (isOwned ? 'Owned' : (item.price === 0 ? 'Claim' : 'Compra')) + '</div>';
+
+    row.addEventListener('click', () => {
+      const target = fw?.P || ensureRuntimeProfile(fw);
+      if (!target) return;
+      target.ownedShopItems = Array.isArray(target.ownedShopItems) ? target.ownedShopItems : [];
+      if (target.ownedShopItems.includes(item.id)) {
+        announce(item.name + ' già disponibile');
+        return;
+      }
+
+      if (item.price > 0) {
+        target.credits = Math.max(0, (target.credits || 0) - item.price);
+      }
+
+      if (item.type === 'title') target.selectedTitle = item.value;
+      if (item.type === 'cardback') {
+        target.locker = target.locker || {};
+        target.locker.cardback = item.value;
+      }
+      if (item.type === 'border') {
+        target.locker = target.locker || {};
+        target.locker.border = item.value;
+      }
+      if (item.type === 'effect') {
+        target.locker = target.locker || {};
+        target.locker.effect = item.value;
+      }
+      if (item.type === 'credits') {
+        target.credits = (target.credits || 0) + Number(item.value || 0);
+      }
+
+      target.ownedShopItems.push(item.id);
+      syncProfile();
+      renderShop();
+      announce('Acquisto completato: ' + item.name);
+    });
+
+    shopList.appendChild(row);
+  });
+}
+
+// ── Top 100 ────────────────────────────────────────────────────
+const LB_BASE = [
+  {n:'NightKing',mmr:3100,r:'SSL'}, {n:'AceVolta',mmr:2950,r:'SSL'},
+  {n:'Fuegofuego',mmr:2820,r:'SSL'}, {n:'BlazeRunner',mmr:2650,r:'Grand Champ'},
+  {n:'IceQueen',mmr:2580,r:'Grand Champ'}, {n:'ShadowPlay',mmr:2510,r:'Grand Champ'},
+  {n:'VortexUno',mmr:2420,r:'Grand Champ'}, {n:'TheUltimate',mmr:2310,r:'Champion'},
+  {n:'RedCyclone',mmr:2280,r:'Champion'},   {n:'GhostDraw',mmr:2210,r:'Champion'},
+];
+let _top100Mode = 'uno';
+let _top100Count = 1;
+
+function renderTop100(mode, topCount = 1) {
+  if (!lbList) return;
+  lbList.innerHTML = '';
+  const myName = getFrameWin()?.P?.name || null;
+  const modePenaltyMap = {
+    uno:0, uno_blitz:45, uno_chaos:60,
+    ruba:80, scala:90, poker:110, scopa:95,
+    burraco:105, bj:70, millemiglia:85,
+  };
+  const modePenalty = modePenaltyMap[mode] || 0;
+  const countPenalty = topCount === 1 ? 0 : (topCount === 2 ? 25 : 50);
+  LB_BASE.forEach((e,i) => {
+    const pos   = i+1;
+    const isMe  = myName && e.n === myName;
+    const mmrV  = Math.max(200, e.mmr - modePenalty - countPenalty - Math.floor(i * 12));
+    const pCls  = pos===1?'gold':pos===2?'silver':pos===3?'bronze':'';
+    const row   = document.createElement('div');
+    row.className = 'lb-row'+(isMe?' me':'');
+    row.setAttribute('role','listitem');
+    row.setAttribute('aria-label','Pos '+pos+': '+e.n+(isMe?' (tu)':'')+', '+mmrV+' MMR, '+e.r);
+    row.innerHTML =
+      `<div class="lb-pos ${pCls}" aria-hidden="true">${pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':pos}</div>` +
+      `<div class="lb-av" aria-hidden="true">${e.n[0]}</div>` +
+      `<div class="lb-name">${e.n}${isMe?' <em style="color:#22D3EE">(tu)</em>':''}</div>` +
+      `<div class="lb-mmr">${mmrV}</div>` +
+      `<div class="lb-rank">${e.r}</div>`;
+    lbList.appendChild(row);
+  });
+}
+document.querySelectorAll('.top100-filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.classList.contains('top100-pcount') || btn.classList.contains('quick-mode-btn')) return;
+    document.querySelectorAll('.top100-filter[data-mode]').forEach(b => {
+      b.classList.remove('active'); b.setAttribute('aria-pressed','false');
+    });
+    btn.classList.add('active'); btn.setAttribute('aria-pressed','true');
+    _top100Mode = btn.dataset.mode;
+    renderTop100(_top100Mode, _top100Count);
+  });
+});
+
+document.querySelectorAll('.top100-pcount').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.top100-pcount').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed','false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed','true');
+    _top100Count = parseInt(btn.dataset.topCount, 10) || 1;
+    renderTop100(_top100Mode, _top100Count);
+  });
+});
+
+// ── Multiplayer v2 (rebuilt from scratch) ────────────────────
+let _mp2Mode = 'uno';
+let _mp2Count = 1;
+let _mp2Competitive = false;
+let _mp2ActiveTab = 'gioca';
+let _mp2ActiveSocialTab = 'amici';
+let _mp2InviteTargetSlot = null;
+let _mp2InvitedSlots = [null, null, null];
+let _mp2BlockedPlayers = [{ name:'ToxicWolf', av:'T' }];
+const _mp2FriendsOnline = [
+  { name:'NightKing', av:'N', status:'In partita - UNO' },
+  { name:'AceVolta', av:'A', status:'Online - menu' },
+  { name:'CopilotTest', av:'C', status:'Online - lobby' },
+];
+const _mp2FriendsOffline = [
+  { name:'BlazeRunner', av:'B', status:'Offline' },
+  { name:'IceQueen', av:'I', status:'Offline - 2h fa' },
+  { name:'ShadowPlay', av:'S', status:'Offline - ieri' },
+];
+let _mp2FriendRequests = [
+  { name:'VortexUno', av:'V' },
+  { name:'TheUltimate', av:'T' },
+];
+let _mp2PartyRequests = [
+  { name:'RankMaster', mode:'UNO', players:'3 Giocatori' },
+  { name:'SpeedFox', mode:'Ruba Mazzetto', players:'1v1' },
+];
+
+function buildRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'ULTRA-';
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+function updateMP2Display() {
+  const modeName = document.getElementById('mp2-sel-mode');
+  const countName = document.getElementById('mp2-sel-players');
+  const toggle = document.getElementById('mp2-comp-toggle');
+  const toggleLabel = document.getElementById('mp2-comp-label');
+  const startBtn = document.getElementById('mp2-start');
+  const selectorState = document.getElementById('mp2-selector-state');
+  const profileName = document.getElementById('mp2-profile-name');
+  const lobbyName = document.getElementById('mp2-lobby-name');
+  const isUnoOnline = _mp2Mode === 'uno';
+  const view = buildProfileView();
+
+  if (modeName) modeName.textContent = MODE_LABELS[_mp2Mode] || _mp2Mode;
+  if (countName) countName.textContent = isUnoOnline
+    ? (PCOUNT_LABELS[_mp2Count] || '1v1 (vs 1 AI)')
+    : 'Offline vs AI';
+  if (startBtn) startBtn.textContent = isUnoOnline ? '🌐 CREA E AVVIA' : '🎮 AVVIO OFFLINE';
+  if (selectorState) selectorState.textContent = (MODE_LABELS[_mp2Mode] || _mp2Mode) + ' · ' + (isUnoOnline ? (PCOUNT_LABELS[_mp2Count] || '') : 'Offline vs AI');
+  if (profileName) profileName.textContent = view.name;
+  if (lobbyName) lobbyName.textContent = view.name;
+
+  if (toggle && toggleLabel) {
+    const canToggle = isUnoOnline;
+    toggle.disabled = !canToggle;
+    toggle.classList.toggle('disabled', !canToggle);
+    if (!canToggle) {
+      _mp2Competitive = false;
+      toggle.classList.remove('competitive');
+      toggle.classList.add('casual');
+      toggleLabel.textContent = 'MODALITA FISSA';
+      toggle.setAttribute('aria-pressed', 'false');
+    } else {
+      toggle.classList.toggle('competitive', _mp2Competitive);
+      toggle.classList.toggle('casual', !_mp2Competitive);
+      toggleLabel.textContent = _mp2Competitive ? 'COMPETITIVO' : 'CASUAL';
+      toggle.setAttribute('aria-pressed', _mp2Competitive ? 'true' : 'false');
+    }
+  }
+}
+
+function activateMP2Tab(tabName) {
+  _mp2ActiveTab = tabName || 'gioca';
+  document.querySelectorAll('.mp2-tab').forEach(btn => {
+    const on = btn.dataset.mp2Tab === _mp2ActiveTab;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  document.querySelectorAll('.mp2-pane').forEach(pane => {
+    pane.classList.toggle('active', pane.id === 'mp2-pane-' + _mp2ActiveTab);
+  });
+}
+
+function startMP2Match(source, roomCode) {
+  _selectedMode = _mp2Mode;
+  _selectedCount = _mp2Count;
+  _isCompetitive = _mp2Competitive;
+  syncSelectionToRuntime();
+
+  if (OFFLINE_DIRECT_MODES.has(_mp2Mode)) {
+    launchGame();
+    announce('Avvio offline diretto: ' + (MODE_LABELS[_mp2Mode] || _mp2Mode));
+    return;
+  }
+
+  const code = (roomCode || '').trim() || buildRoomCode();
+  const players = (_mp2Count || 1) + 1;
+  launchGame({
+    lobby: {
+      source,
+      roomCode: code,
+      hostPeerId: 'host-local',
+      mode: _mp2Mode,
+      players,
+      isCompetitive: _mp2Competitive,
+      invited: [],
+    },
+  });
+}
+
+function initMultiplayerV2() {
+  const screen = document.getElementById('screen-multiplayer');
+  if (!screen) return;
+
+  screen.innerHTML = `
+    <header id="mp2-header">
+      <button id="mp2-back" aria-label="Torna al menu principale">←</button>
+      <nav id="mp2-tabs" role="tablist" aria-label="Sezioni multiplayer">
+        <button class="sp-tab mp2-tab active" data-mp2-tab="gioca" role="tab" aria-selected="true">🎮 Gioca</button>
+        <button class="sp-tab mp2-tab" data-mp2-tab="profilo" role="tab" aria-selected="false">👤 Profilo</button>
+        <button class="sp-tab mp2-tab" data-mp2-tab="battlepass" role="tab" aria-selected="false">🏆 Battle Pass</button>
+        <button class="sp-tab mp2-tab" data-mp2-tab="sfide" role="tab" aria-selected="false">⚡ Sfide</button>
+        <button class="sp-tab mp2-tab" data-mp2-tab="top100" role="tab" aria-selected="false">🥇 Top 100</button>
+        <button class="sp-tab mp2-tab" data-mp2-tab="stagione" role="tab" aria-selected="false">📅 Stagione</button>
+        <button class="sp-tab mp2-tab" data-mp2-tab="club" role="tab" aria-selected="false">🏛️ Club</button>
+      </nav>
+      <div class="sp-account" aria-live="polite" aria-label="Account">
+        <div class="sp-av" id="mp-av" aria-hidden="true">?</div>
+        <div class="sp-user-info">
+          <div id="mp-username">—</div>
+          <div id="mp-credits">0 💰</div>
+        </div>
+      </div>
+    </header>
+    <main id="mp2-content">
+      <section id="mp2-pane-gioca" class="sp-tab-pane mp2-pane active" role="tabpanel" aria-label="Gioca multiplayer">
+
+        <div class="home-center" style="margin-top:10px">
+          <div class="home-hero" aria-hidden="true">
+            <div class="hero-cards-wrap">
+              <div class="hero-card c1">7</div>
+              <div class="hero-card c2">+2</div>
+              <div class="hero-card c3">↺</div>
+              <div class="hero-card wild">W</div>
+            </div>
+          </div>
+
+          <div class="home-play-card" role="group" aria-label="Selezione multiplayer">
+            <button class="play-sel-trigger" id="mp2-open-play-btn" aria-label="Modalita e giocatori selezionati">
+              <div class="play-sel-hint">Modalita selezionata</div>
+              <div class="play-sel-mode" id="mp2-sel-mode">UNO</div>
+              <div class="play-sel-players" id="mp2-sel-players">1v1 (vs 1 AI)</div>
+              <div class="play-sel-chevron" id="mp2-selector-state">UNO · 1v1</div>
+            </button>
+
+            <button class="comp-toggle casual" id="mp2-comp-toggle" aria-pressed="false">
+              <span class="toggle-dot" aria-hidden="true"></span>
+              <span id="mp2-comp-label">CASUAL</span>
+            </button>
+
+            <button class="settings-btn" id="mp2-selector-btn" aria-label="Apri selezione modalita e giocatori" style="align-self:flex-end;width:44px;height:44px;border-radius:12px;padding:0;font-size:22px">▣</button>
+            <button class="play-cta" id="mp2-start">🌐 CREA E AVVIA</button>
+          </div>
+        </div>
+
+        <div class="home-footer">
+          <div class="season-info-box" style="flex:1">
+            <div class="section-label" style="margin-bottom:8px">Lobby Team</div>
+            <div class="mp-player-card me" style="margin-bottom:8px">
+              <div class="mp-player-ribbon">LEADER</div>
+              <div class="mp-player-av" id="mp2-lobby-av" aria-hidden="true">?</div>
+              <div class="mp-player-name" id="mp2-lobby-name">Tu</div>
+              <div class="mp-player-meta">Carta profilo collegata</div>
+            </div>
+            <div class="mp-team-row" id="mp2-team-row" aria-label="Slot invito squadra">
+              <button class="mp-invite-slot" data-slot="0" aria-label="Invita amico slot 1">+</button>
+              <button class="mp-invite-slot" data-slot="1" aria-label="Invita amico slot 2">+</button>
+              <button class="mp-invite-slot" data-slot="2" aria-label="Invita amico slot 3">+</button>
+            </div>
+          </div>
+          <div class="season-info-box" style="flex:1">
+            <div class="section-label" style="margin-bottom:8px">Social</div>
+            <nav class="social-subnav" role="tablist" aria-label="Sezioni social multiplayer">
+              <button class="social-subtab active" data-mp2-social="amici" role="tab" aria-selected="true">Amici</button>
+              <button class="social-subtab" data-mp2-social="richieste" role="tab" aria-selected="false">Richieste</button>
+              <button class="social-subtab" data-mp2-social="blocca" role="tab" aria-selected="false">Blocca</button>
+            </nav>
+
+            <div id="mp2-social-amici" class="social-subpane active" role="region" aria-label="Amici">
+              <div class="friend-section-label">🟢 Online</div>
+              <div class="friend-list" id="mp2-friends-online"></div>
+              <div class="friend-section-label">⚫ Offline</div>
+              <div class="friend-list" id="mp2-friends-offline"></div>
+            </div>
+
+            <div id="mp2-social-richieste" class="social-subpane" role="region" aria-label="Richieste">
+              <div class="friend-section-label">Richieste amicizia</div>
+              <div class="friend-list" id="mp2-friend-requests"></div>
+              <div class="friend-section-label" style="margin-top:10px">Richieste di unirsi alla partita</div>
+              <div class="friend-list" id="mp2-party-requests"></div>
+            </div>
+
+            <div id="mp2-social-blocca" class="social-subpane" role="region" aria-label="Giocatori bloccati">
+              <div class="friend-section-label">Giocatori bannati</div>
+              <div class="friend-list" id="mp2-blocked-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="mp2-pane-profilo" class="sp-tab-pane mp2-pane" role="tabpanel" aria-label="Profilo multiplayer">
+        <div class="panel-title">Profilo</div>
+        <div class="panel-subtitle">Da qui puoi selezionare cosmetici e impostazioni profilo</div>
+        <div class="profile-hero" style="margin-bottom:14px">
+          <div class="profile-av" id="mp2-profile-av" aria-hidden="true">?</div>
+          <div class="profile-info">
+            <div class="profile-name" id="mp2-profile-name">—</div>
+            <div class="profile-rank" id="mp2-profile-rank">Bronze · 200 MMR</div>
+            <div class="profile-rank">Tocca una categoria per selezionarla</div>
+          </div>
+        </div>
+        <div class="locker-grid" role="list" aria-label="Selezione profilo multiplayer">
+          <button class="locker-box" data-mp2-locker="avatar" role="listitem"><span class="locker-icon">😎</span><span class="locker-name">Avatar</span><span class="locker-sub">Seleziona avatar</span></button>
+          <button class="locker-box" data-mp2-locker="cornici" role="listitem"><span class="locker-icon">🖼️</span><span class="locker-name">Cornici</span><span class="locker-sub">Seleziona cornice</span></button>
+          <button class="locker-box" data-mp2-locker="carte" role="listitem"><span class="locker-icon">🃏</span><span class="locker-name">Stile carte</span><span class="locker-sub">Seleziona mazzo</span></button>
+          <button class="locker-box" data-mp2-locker="effetti" role="listitem"><span class="locker-icon">✨</span><span class="locker-name">Effetti</span><span class="locker-sub">Seleziona VFX</span></button>
+        </div>
+      </section>
+
+      <section id="mp2-pane-battlepass" class="sp-tab-pane mp2-pane" role="tabpanel" aria-label="Battle Pass multiplayer">
+        <div class="panel-title">Battle Pass</div>
+        <div class="panel-subtitle">Progressione online sincronizzata</div>
+        <div class="season-info-box">Completa partite online per salire di livello nel pass stagionale.</div>
+      </section>
+
+      <section id="mp2-pane-sfide" class="sp-tab-pane mp2-pane" role="tabpanel" aria-label="Sfide multiplayer">
+        <div class="panel-title">Sfide</div>
+        <div class="panel-subtitle">Obiettivi online giornalieri e settimanali</div>
+        <div class="section-hint">Vinci 3 partite online, accetta una richiesta e invita un amico.</div>
+      </section>
+
+      <section id="mp2-pane-top100" class="sp-tab-pane mp2-pane" role="tabpanel" aria-label="Top 100 multiplayer">
+        <div class="panel-title">Top 100</div>
+        <div class="panel-subtitle">Classifica competitiva online</div>
+        <div class="section-hint">Le classifiche vengono aggiornate in base alla modalita selezionata.</div>
+      </section>
+
+      <section id="mp2-pane-stagione" class="sp-tab-pane mp2-pane" role="tabpanel" aria-label="Stagione multiplayer">
+        <div class="panel-title">Stagione</div>
+        <div class="panel-subtitle">Stato stagione corrente</div>
+        <div class="season-info-box">Fine stagione tra 45 giorni. Gioca competitivo per salire di rank.</div>
+      </section>
+
+      <section id="mp2-pane-club" class="sp-tab-pane mp2-pane" role="tabpanel" aria-label="Club multiplayer">
+        <div class="panel-title">Club</div>
+        <div class="panel-subtitle">Gestione club, inviti e sfide interne</div>
+        <div class="season-info-box">Crea un club o unisciti a un club esistente per giocare in team.</div>
+      </section>
+    </main>
+
+    <dialog id="mp2-selector-popup" aria-label="Seleziona modalita multiplayer" aria-modal="true">
+      <div class="popup-header">
+        <div class="popup-title">Selezione Multiplayer</div>
+        <button class="popup-close" id="mp2-selector-close" aria-label="Chiudi">✕</button>
+      </div>
+      <div class="section-label">Modalita</div>
+      <div class="mode-grid" role="group" aria-label="Modalita multiplayer">
+        <button class="mode-card selected" data-mp2-mode-popup="uno" aria-pressed="true"><div class="mode-name">UNO</div></button>
+        <button class="mode-card" data-mp2-mode-popup="uno_blitz" aria-pressed="false"><div class="mode-name">UNO Blitz</div></button>
+        <button class="mode-card" data-mp2-mode-popup="uno_chaos" aria-pressed="false"><div class="mode-name">UNO Chaos</div></button>
+        <button class="mode-card" data-mp2-mode-popup="ruba" aria-pressed="false"><div class="mode-name">Ruba Mazzetto</div></button>
+        <button class="mode-card" data-mp2-mode-popup="scala" aria-pressed="false"><div class="mode-name">Scala 40</div></button>
+        <button class="mode-card" data-mp2-mode-popup="scopa" aria-pressed="false"><div class="mode-name">Scopa</div></button>
+        <button class="mode-card" data-mp2-mode-popup="poker" aria-pressed="false"><div class="mode-name">Poker</div></button>
+        <button class="mode-card" data-mp2-mode-popup="burraco" aria-pressed="false"><div class="mode-name">Burraco</div></button>
+        <button class="mode-card" data-mp2-mode-popup="bj" aria-pressed="false"><div class="mode-name">Blackjack</div></button>
+        <button class="mode-card" data-mp2-mode-popup="millemiglia" aria-pressed="false"><div class="mode-name">Mille Miglia</div></button>
+      </div>
+      <div class="section-label" style="margin-top:10px">Giocatori</div>
+      <div class="pcount-grid" role="group" aria-label="Numero giocatori multiplayer">
+        <button class="pcount-btn selected" data-mp2-count-popup="1" aria-pressed="true">1v1<div class="pcount-sub">2 giocatori</div></button>
+        <button class="pcount-btn" data-mp2-count-popup="2" aria-pressed="false">3P<div class="pcount-sub">3 giocatori</div></button>
+        <button class="pcount-btn" data-mp2-count-popup="3" aria-pressed="false">4P<div class="pcount-sub">4 giocatori</div></button>
+      </div>
+      <button class="popup-confirm" id="mp2-selector-confirm">Conferma</button>
+    </dialog>
+  `;
+
+  document.getElementById('mp2-back')?.addEventListener('click', () => {
+    showScreen('mainmenu');
+    syncProfile();
+    announce('Menu principale');
+  });
+
+  document.getElementById('mp2-open-play-btn')?.addEventListener('click', () => {
+    document.getElementById('mp2-selector-popup')?.showModal();
+  });
+
+  document.getElementById('mp2-selector-btn')?.addEventListener('click', () => {
+    document.getElementById('mp2-selector-popup')?.showModal();
+  });
+
+  document.getElementById('mp2-selector-close')?.addEventListener('click', () => {
+    document.getElementById('mp2-selector-popup')?.close();
+  });
+
+  document.getElementById('mp2-selector-confirm')?.addEventListener('click', () => {
+    document.getElementById('mp2-selector-popup')?.close();
+    updateMP2Display();
+  });
+
+  document.querySelectorAll('[data-mp2-mode-popup]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-mp2-mode-popup]').forEach(node => {
+        node.classList.remove('selected');
+        node.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('selected');
+      btn.setAttribute('aria-pressed', 'true');
+      _mp2Mode = btn.dataset.mp2ModePopup;
+      updateMP2Display();
+    });
+  });
+
+  document.querySelectorAll('[data-mp2-count-popup]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-mp2-count-popup]').forEach(node => {
+        node.classList.remove('selected');
+        node.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('selected');
+      btn.setAttribute('aria-pressed', 'true');
+      _mp2Count = parseInt(btn.dataset.mp2CountPopup, 10);
+      updateMP2Display();
+    });
+  });
+
+  document.querySelectorAll('.mp2-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activateMP2Tab(btn.dataset.mp2Tab);
+      updateMP2Display();
+    });
+  });
+
+  document.querySelectorAll('[data-slot]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _mp2InviteTargetSlot = parseInt(btn.dataset.slot, 10);
+      _mp2ActiveSocialTab = 'amici';
+      renderMP2SocialLists();
+      announce('Seleziona un amico online per invitare nello slot ' + (_mp2InviteTargetSlot + 1));
+    });
+  });
+
+  document.querySelectorAll('[data-mp2-social]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _mp2ActiveSocialTab = btn.dataset.mp2Social;
+      renderMP2SocialLists();
+    });
+  });
+
+  document.querySelectorAll('[data-mp2-locker]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      announce('Selezionato: ' + btn.dataset.mp2Locker);
+    });
+  });
+
+  document.getElementById('mp2-comp-toggle')?.addEventListener('click', () => {
+    if (_mp2Mode !== 'uno') return;
+    _mp2Competitive = !_mp2Competitive;
+    updateMP2Display();
+  });
+
+  document.getElementById('mp2-start')?.addEventListener('click', () => {
+    startMP2Match('mp2-create', '');
+  });
+
+  const view = buildProfileView();
+  const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  setText('mp-av', view.av);
+  setText('mp-username', view.name);
+  setText('mp-credits', view.credits + ' 💰');
+  setText('mp2-lobby-av', view.av);
+  setText('mp2-lobby-name', view.name);
+  setText('mp2-profile-av', view.av);
+  setText('mp2-profile-name', view.name);
+  setText('mp2-profile-rank', getRankName(view.mmr) + ' · ' + view.mmr + ' MMR');
+
+  renderMP2TeamSlots();
+  renderMP2SocialLists();
+  activateMP2Tab('gioca');
+  updateMP2Display();
+}
+
+function renderMP2TeamSlots() {
+  const row = document.getElementById('mp2-team-row');
+  if (!row) return;
+  row.querySelectorAll('[data-slot]').forEach(btn => {
+    const idx = parseInt(btn.dataset.slot, 10);
+    const invited = _mp2InvitedSlots[idx];
+    if (!invited) {
+      btn.classList.remove('filled');
+      btn.textContent = '+';
+      btn.setAttribute('aria-label', 'Invita amico slot ' + (idx + 1));
+      return;
+    }
+    btn.classList.add('filled');
+    btn.innerHTML = '<span class="mp-slot-av">' + invited.av + '</span><span class="mp-slot-name">' + invited.name + '</span>';
+    btn.setAttribute('aria-label', invited.name + ' nello slot ' + (idx + 1));
+  });
+}
+
+function renderMP2SocialLists() {
+  document.querySelectorAll('[data-mp2-social]').forEach(btn => {
+    const on = btn.dataset.mp2Social === _mp2ActiveSocialTab;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  ['amici','richieste','blocca'].forEach(tab => {
+    const pane = document.getElementById('mp2-social-' + tab);
+    if (pane) pane.classList.toggle('active', tab === _mp2ActiveSocialTab);
+  });
+
+  const online = document.getElementById('mp2-friends-online');
+  if (online) {
+    online.innerHTML = _mp2FriendsOnline.map(f => (
+      '<div class="friend-row" data-friend="' + f.name + '">' +
+        '<div class="friend-av" aria-hidden="true">' + f.av + '</div>' +
+        '<div class="friend-info">' +
+          '<div class="friend-name">' + f.name + '</div>' +
+          '<div class="friend-status status-online">' + f.status + '</div>' +
+        '</div>' +
+        '<button class="friend-action-btn" data-mp2-invite="' + f.name + '">Invita</button>' +
+      '</div>'
+    )).join('');
+  }
+
+  const offline = document.getElementById('mp2-friends-offline');
+  if (offline) {
+    offline.innerHTML = _mp2FriendsOffline.map(f => (
+      '<div class="friend-row friend-offline">' +
+        '<div class="friend-av" aria-hidden="true">' + f.av + '</div>' +
+        '<div class="friend-info">' +
+          '<div class="friend-name">' + f.name + '</div>' +
+          '<div class="friend-status">' + f.status + '</div>' +
+        '</div>' +
+      '</div>'
+    )).join('');
+  }
+
+  const fr = document.getElementById('mp2-friend-requests');
+  if (fr) {
+    fr.innerHTML = _mp2FriendRequests.length
+      ? _mp2FriendRequests.map((r, i) => (
+          '<div class="friend-row request-row">' +
+            '<div class="friend-av" aria-hidden="true">' + r.av + '</div>' +
+            '<div class="friend-info"><div class="friend-name">' + r.name + '</div><div class="friend-status">Vuole aggiungerti</div></div>' +
+            '<div class="request-actions">' +
+              '<button class="req-accept" data-mp2-acc-fr="' + i + '">✓</button>' +
+              '<button class="req-reject" data-mp2-rej-fr="' + i + '">✕</button>' +
+            '</div>' +
+          '</div>'
+        )).join('')
+      : '<div class="empty-state">Nessuna richiesta amicizia</div>';
+  }
+
+  const pr = document.getElementById('mp2-party-requests');
+  if (pr) {
+    pr.innerHTML = _mp2PartyRequests.length
+      ? _mp2PartyRequests.map((r, i) => (
+          '<div class="friend-row request-row">' +
+            '<div class="friend-av" aria-hidden="true">' + r.name[0] + '</div>' +
+            '<div class="friend-info"><div class="friend-name">' + r.name + '</div><div class="friend-status">Ti invita in ' + r.mode + ' · ' + r.players + '</div></div>' +
+            '<div class="request-actions">' +
+              '<button class="req-accept" data-mp2-acc-pr="' + i + '">Entra</button>' +
+              '<button class="req-reject" data-mp2-rej-pr="' + i + '">Rifiuta</button>' +
+            '</div>' +
+          '</div>'
+        )).join('')
+      : '<div class="empty-state">Nessuna richiesta di partita</div>';
+  }
+
+  const blocked = document.getElementById('mp2-blocked-list');
+  if (blocked) {
+    blocked.innerHTML = _mp2BlockedPlayers.length
+      ? _mp2BlockedPlayers.map((p, i) => (
+          '<div class="friend-row friend-offline">' +
+            '<div class="friend-av" aria-hidden="true">' + p.av + '</div>' +
+            '<div class="friend-info"><div class="friend-name">' + p.name + '</div><div class="friend-status">Giocatore bloccato</div></div>' +
+            '<button class="req-accept" data-mp2-unblock="' + i + '">Sblocca</button>' +
+          '</div>'
+        )).join('')
+      : '<div class="empty-state">Nessun giocatore bloccato</div>';
+  }
+
+  document.querySelectorAll('[data-mp2-invite]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (_mp2InviteTargetSlot === null) {
+        announce('Clicca prima un + nella carta lobby');
+        return;
+      }
+      const name = btn.dataset.mp2Invite;
+      const found = _mp2FriendsOnline.find(f => f.name === name);
+      if (!found) return;
+      _mp2InvitedSlots[_mp2InviteTargetSlot] = found;
+      renderMP2TeamSlots();
+      announce(name + ' invitato nello slot ' + (_mp2InviteTargetSlot + 1));
+    });
+  });
+
+  document.querySelectorAll('[data-mp2-acc-fr]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.mp2AccFr, 10);
+      const req = _mp2FriendRequests[idx];
+      if (!req) return;
+      _mp2FriendsOnline.push({ name:req.name, av:req.av, status:'Online - menu' });
+      _mp2FriendRequests.splice(idx, 1);
+      renderMP2SocialLists();
+      announce('Richiesta amicizia accettata: ' + req.name);
+    });
+  });
+
+  document.querySelectorAll('[data-mp2-rej-fr]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.mp2RejFr, 10);
+      _mp2FriendRequests.splice(idx, 1);
+      renderMP2SocialLists();
+      announce('Richiesta amicizia rimossa');
+    });
+  });
+
+  document.querySelectorAll('[data-mp2-acc-pr]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.mp2AccPr, 10);
+      const req = _mp2PartyRequests[idx];
+      if (!req) return;
+      announce('Richiesta partita accettata: ' + req.name);
+      _mp2PartyRequests.splice(idx, 1);
+      renderMP2SocialLists();
+    });
+  });
+
+  document.querySelectorAll('[data-mp2-rej-pr]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.mp2RejPr, 10);
+      _mp2PartyRequests.splice(idx, 1);
+      renderMP2SocialLists();
+    });
+  });
+
+  document.querySelectorAll('[data-mp2-unblock]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.mp2Unblock, 10);
+      const target = _mp2BlockedPlayers[idx];
+      if (!target) return;
+      _mp2BlockedPlayers.splice(idx, 1);
+      renderMP2SocialLists();
+      announce('Giocatore sbloccato: ' + target.name);
+    });
+  });
+}
+
+function openMultiplayerV2() {
+  showScreen('multiplayer');
+  syncProfile();
+  setRealtimePresence('in_lobby', { roomCode: _mpLobbyServer?.roomCode || null, mode: _mpSelectedMode });
+  announce('Multiplayer online aperto');
+}
+
+// ── Init ───────────────────────────────────────────────────────
+updatePlayDisplay();
+renderTop100('uno', 1);
+renderNewsHub();
+// Keep the stable multiplayer screen enabled by default.
+// MP2 is experimental and currently not feature-complete.
+
+// Periodic profile sync
+setInterval(syncProfile, 3000);
+// Also poll for login state every 600ms (stopped once login detected)
+// — startLoginPoller() is called from startMonitor() after iframe loads
+// — but also start immediately in case iframe already loaded
+startLoginPoller();
+</script>
 </body>
 </html>

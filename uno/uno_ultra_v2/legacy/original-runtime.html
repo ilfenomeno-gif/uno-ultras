@@ -4,6 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>UNO ULTRA v49 — Online</title>
+<script>
+// Hard guard: this legacy runtime should not be used as live entrypoint.
+// Allow bypass only for explicit maintenance/debug with ?allowLegacy=1.
+(function(){
+  try{
+    var qs = new URLSearchParams(window.location.search || '');
+    if(qs.get('allowLegacy') === '1') return;
+    var target = new URL('../index.html', window.location.href);
+    target.search = window.location.search || '';
+    target.hash = window.location.hash || '';
+    if(window.top && window.top !== window){
+      window.top.location.replace(target.href);
+    } else {
+      window.location.replace(target.href);
+    }
+  }catch(_){ }
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js" onerror="
   // FIX: fallback CDN if unpkg is unavailable
@@ -2929,6 +2947,11 @@ button,.btn-play,.btn-tourney,.pause-btn,.cbtn,
 .replay-result.win{color:#00ff88}
 .replay-result.loss{color:var(--crimson)}
 .replay-moves{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.uno-live-log{display:flex;flex-direction:column;gap:6px;min-width:220px;max-width:280px;padding:10px 12px;border-radius:14px;background:rgba(7,17,30,.82);border:1px solid rgba(34,211,238,.18);box-shadow:0 12px 30px rgba(0,0,0,.24);backdrop-filter:blur(12px)}
+.uno-live-log-title{font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:rgba(34,211,238,.9)}
+.uno-live-log-entries{display:flex;flex-direction:column;gap:4px;min-height:72px}
+.uno-live-log-entry{font-size:11px;line-height:1.4;color:rgba(255,255,255,.78)}
+.uno-live-log-empty{font-size:11px;color:rgba(255,255,255,.32)}
 .rm-card{font-size:10px;padding:2px 7px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1)}
 .rm-you{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.08)}
 .rm-ai{border-color:rgba(232,0,61,.25);background:rgba(232,0,61,.06)}
@@ -6527,7 +6550,12 @@ function nvdaAnnounce(msg, priority){
       </div>
       <div class="hand" id="player-hand"></div>
     </div>
-    <div class="zone-se"></div>
+    <div class="zone-se">
+      <div class="uno-live-log" aria-labelledby="uno-live-log-title">
+        <div class="uno-live-log-title" id="uno-live-log-title">Log Partita</div>
+        <div class="uno-live-log-entries" id="uno-live-log" role="log" aria-live="polite" aria-atomic="false" aria-relevant="additions text"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -7962,8 +7990,17 @@ const _SRO_TIER={
 function _sroQueue(titleObjs, opts){
   const items=(Array.isArray(titleObjs)?titleObjs:[titleObjs]).filter(Boolean);
   if(!items.length) return;
-  items.forEach((t,i)=>_SRO.queue.push({titleObj:t,peakMMR:opts?.peakMMR||null,newSeason:opts?.newSeason||null,showReset:opts?.showReset&&i===items.length-1,onConfirm:opts?.onConfirm&&i===items.length-1?opts.onConfirm:null}));
-  if(!_SRO.current) _sroShowNext();
+  // Popup reward stagionale disabilitato: preserva lo stato senza mostrare overlay.
+  _SRO.queue.length = 0;
+  _SRO.current = null;
+  const ov=document.getElementById('season-reward-overlay');
+  if(ov){
+    ov.classList.remove('on','fade-in');
+    ov.style.display='none';
+  }
+  if(typeof opts?.onConfirm==='function'){
+    try{ opts.onConfirm(); }catch(e){}
+  }
 }
 
 function _sroShowNext(){
@@ -8133,6 +8170,15 @@ function _showSeasonEndPopup(onConfirm){
       _ST_RANK_NAMES.find(r=> t.feat && t.feat.includes(r.name.replace(/ /g,'').toLowerCase())) : null;
     return r ? peakMMR >= r.min : false;
   }).slice(0,3); // mostra max 3 titoli nell'anteprima
+
+  // Popup fine stagione disabilitato: applica assegnazione titoli e continua il flusso.
+  try{
+    if(typeof grantSeasonTitles === 'function') grantSeasonTitles(peakMMR, seasonNum);
+  }catch(e){ console.warn('[SeasonEnd] grantSeasonTitles error:', e); }
+  if(typeof onConfirm==='function'){
+    setTimeout(()=>{ try{ onConfirm(); }catch(e){} }, 0);
+  }
+  return;
 
   // Colore principale basato sul rank di picco
   const mainCol = peakRank.col || '#fff';
@@ -8464,13 +8510,40 @@ const CUPS=[
 // ══════════════════════════════════════════════════════
 const STORAGE_KEY    = 'uno-ultra-profiles-v8';  // dizionario { username: {profile, pinHash} }
 const SESSION_KEY    = 'uno-ultra-session-v8';   // { username }
+const AUTO_BACKUP_KEY = 'uno-ultra-auto-backup';
 
 let _saveTimer   = null;
 let _cloudStatus = 'ok';
 
 // ── Helpers localStorage ───────────────────────────────
+function _recoverDBFromAutoBackup(parseError){
+  try{
+    const rawBackup=localStorage.getItem(AUTO_BACKUP_KEY)||'';
+    if(!rawBackup) return null;
+    const backup=JSON.parse(rawBackup);
+    if(!backup||typeof backup!=='object'||!backup.db||Array.isArray(backup.db)) return null;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(backup.db));
+    if(backup.session&&backup.session!=='null'&&!localStorage.getItem(SESSION_KEY)){
+      localStorage.setItem(SESSION_KEY, backup.session);
+    }
+    console.warn('[UNO] Profile DB recovered from auto-backup after parse failure.', parseError);
+    if(typeof notify==='function') setTimeout(()=>notify('♻️ Archivio locale recuperato da backup automatico.'), 0);
+    return backup.db;
+  }catch(recoveryError){
+    console.warn('[UNO] Auto-backup recovery failed.', recoveryError);
+    return null;
+  }
+}
+
 function _loadDB(){
-  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'); }catch(e){ return {}; }
+  const rawDb=localStorage.getItem(STORAGE_KEY);
+  if(!rawDb) return {};
+  try{
+    const parsed=JSON.parse(rawDb);
+    return parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?parsed:{};
+  }catch(e){
+    return _recoverDBFromAutoBackup(e)||{};
+  }
 }
 function _saveDB(db){
   try{
@@ -8548,6 +8621,8 @@ function ensureFields(p){
   if(!p.unlockedTitles) p.unlockedTitles=['t1'];
   if(!p.unlockedTitles.includes('t1')) p.unlockedTitles.unshift('t1');
   if(!p.selectedTitle) p.selectedTitle='t1';
+  if(!p.ownedCardBacks) p.ownedCardBacks=[];
+  if(!p.seasonRewards) p.seasonRewards=[];
   // ── v52+: Bond/Affinity System ──
   if(!p.botBond) p.botBond={};
   // ── v52+: AI Habit Learning ──
@@ -8625,6 +8700,23 @@ async function cloudLogin(username, pin){
 
 // ── saveP (debounced, fire-and-forget) ───────────────
 let P;
+
+// Bridge global profile access for shell iframe integration.
+// The launcher writes `fw.P`; map that to this lexical runtime profile state.
+if (!Object.getOwnPropertyDescriptor(window, 'P')) {
+  Object.defineProperty(window, 'P', {
+    configurable: true,
+    enumerable: false,
+    get() { return P; },
+    set(v) {
+      if (v && typeof v === 'object') {
+        P = ensureFields(v);
+      } else {
+        P = v;
+      }
+    }
+  });
+}
 
 // ── localStorage size guard ───────────────────────────
 // Browsers cap localStorage at ~5MB. Monitor usage and prune old match history
@@ -10797,7 +10889,7 @@ function renderTitles(){
   }
 }
 function selectTitle(id){
-  sfx.click();P.selectedTitle=id;saveP();requestAnimationFrame(()=>{try{renderTitles();renderLockerTitles();}catch(e){}requestAnimationFrame(()=>{try{updateProfile();}catch(e){}});});
+  sfx.click();P.selectedTitle=id;saveP();requestAnimationFrame(()=>{try{renderTitles();renderLockerTitles();renderLockerIdentityShowcase();}catch(e){}requestAnimationFrame(()=>{try{updateProfile();}catch(e){}});});
 }
 
 // ══════════════════════════════════════════════════════
@@ -11248,10 +11340,277 @@ function syncColorblindUI(){
 }
 // Called in openLocker to sync UI
 let _lockerBackScr='splash';
+function getBotAffinityArchetype(botName){
+  const normalized=(botName||'').toLowerCase();
+  try{
+    if(typeof AI_PROFILES!=='undefined'){
+      const match=Object.values(AI_PROFILES).find(function(profile){
+        const candidate=((profile&&profile.name)||'').toLowerCase();
+        return candidate && (candidate===normalized || normalized.includes(candidate) || candidate.includes(normalized));
+      });
+      if(match&&match.name) return match.name;
+    }
+  }catch(e){}
+  return 'Strategico';
+}
+function isSeasonTestModeActive(){
+  try{return !!JSON.parse(localStorage.getItem(SEASON_KEY)||'{}')._testMode;}catch(e){return false;}
+}
+function getProfileIdentitySnapshot(){
+  const empty={
+    totalGames:0,totalWins:0,totalLosses:0,winRate:0,preferredMode:{id:'ranked',label:'Ranked'},
+    signature:{key:'strategico',label:'Stratega Stagionale',icon:'♟️',accent:'#22D3EE',desc:'Controlli il ritmo e trasformi ogni reset in vantaggio.'},
+    topBond:null,selectedTitle:null,rewardTracks:[],spotlightTrack:null
+  };
+  if(!window.P) return empty;
+  const hist=P.mmrHistoryFull||P.mmrHistory||[];
+  const histWins=hist.filter(function(h){return !!h.won;}).length;
+  const totalWins=Math.max(P.wins||0,histWins);
+  const totalGames=Math.max(P.games||0,totalWins+(P.losses||0),hist.length);
+  const totalLosses=Math.max(P.losses||0,totalGames-totalWins,0);
+  const winRate=totalGames?Math.round((totalWins/totalGames)*100):0;
+  const modeCounts=[
+    {id:'ranked',label:'Ranked',value:P.winsRanked||0},
+    {id:'casual',label:'Casual',value:P.winsCasual||0},
+    {id:'blitz',label:'Blitz',value:P.winsBlitz||0},
+    {id:'chaos',label:'Chaos',value:P.winsChaos||0}
+  ];
+  if(modeCounts.every(function(mode){return !mode.value;})&&hist.length){
+    hist.forEach(function(entry){
+      const mode=(entry&&entry.mode)||'ranked';
+      const row=modeCounts.find(function(candidate){return candidate.id===mode;});
+      if(row) row.value++;
+    });
+  }
+  const preferredMode=modeCounts.slice().sort(function(a,b){return b.value-a.value;})[0]||modeCounts[0];
+  const sortedBonds=Object.entries(P.botBond||{}).sort(function(a,b){return (b[1]?.xp||0)-(a[1]?.xp||0);});
+  const topBond=sortedBonds[0]?{
+    key:sortedBonds[0][0],
+    name:sortedBonds[0][1].name||sortedBonds[0][0],
+    xp:sortedBonds[0][1].xp||0,
+    lv:getBondLevel(sortedBonds[0][1].xp||0),
+    style:getBotAffinityArchetype(sortedBonds[0][1].name||sortedBonds[0][0])
+  }:null;
+  let signature={key:'strategico',label:'Stratega Stagionale',icon:'♟️',accent:'#22D3EE',desc:'Controlli il ritmo e trasformi ogni reset in vantaggio.'};
+  if((((P.winsChaos||0)+(P.winsBlitz||0))>=Math.max(P.winsRanked||0,P.winsCasual||0)&&((P.winsChaos||0)+(P.winsBlitz||0))>0) || (P.maxWinStreak||0)>=6){
+    signature={key:'aggressivo',label:'Finalizzatore Aggressivo',icon:'🔥',accent:'#F43F5E',desc:'Chiudi forte, spingi il countdown e alzi la pressione nel finale di stagione.'};
+  } else if((P.maxLoginStreak||0)>=7 || preferredMode.id==='casual'){
+    signature={key:'costante',label:'Grinder Costante',icon:'🛠️',accent:'#34D399',desc:'Accumuli progressione ogni giorno e fai crescere il profilo nel lungo periodo.'};
+  } else if(preferredMode.id==='blitz' || preferredMode.id==='chaos'){
+    signature={key:'reattivo',label:'Playmaker Reattivo',icon:'⚡',accent:'#F59E0B',desc:'Rendi il match volatile e trasformi il momentum in reward veloci.'};
+  }
+  const selectedTitle=typeof ALL_TITLES!=='undefined'
+    ? ALL_TITLES.find(function(title){return title.id===P.selectedTitle;})
+    : null;
+  const rewardTracks=[
+    {
+      label:'Cosmetica',
+      pct:Math.min(100,Math.round(((P.unlockedTitles||[]).length*8)+(topBond?topBond.lv*4:0))),
+      accent:'#67E8F9',
+      detail:topBond?('Focus '+topBond.style+' · '+topBond.name):'Personalizzazione profilo e locker'
+    },
+    {
+      label:'Progressione',
+      pct:Math.min(100,Math.round((winRate*0.45)+Math.min(totalGames,40))),
+      accent:'#34D399',
+      detail:totalWins+' vittorie · '+winRate+'% WR'
+    },
+    {
+      label:'Status',
+      pct:Math.min(100,Math.round(Math.min(P.mmr||200,1800)/18)),
+      accent:'#F5C842',
+      detail:(typeof getRank==='function'?getRank(P.mmr||200).n:'Rank')+' · streak '+(P.maxWinStreak||0)
+    }
+  ];
+  const spotlightTrack=rewardTracks.slice().sort(function(a,b){return b.pct-a.pct;})[0]||rewardTracks[0]||null;
+  return {
+    totalGames,totalWins,totalLosses,winRate,preferredMode,signature,topBond,selectedTitle,rewardTracks,spotlightTrack
+  };
+}
+function renderSeasonEventCard(si, identity, resetRank, resetMMR){
+  if(!isSeasonTestModeActive()) return '';
+  const spotlight=identity.spotlightTrack||identity.rewardTracks[0]||{label:'Progressione',accent:'#34D399',detail:'Progressione attiva',pct:0};
+  const topBond=identity.topBond
+    ? identity.topBond.name+' · LV.'+identity.topBond.lv+' · '+identity.topBond.style
+    : 'Nessuna affinità dominante ancora';
+  return `
+  <div class="season-card" style="background:linear-gradient(135deg,rgba(244,63,94,.12),rgba(245,158,11,.08));border:1px solid rgba(244,63,94,.28)">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px">
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4)">Fase finale live</div>
+        <div style="font-family:Syne,sans-serif;font-size:18px;font-weight:900;color:#fff;margin-top:4px">TEST MODE: evento di chiusura stagione</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.58);margin-top:5px;max-width:440px">Il countdown ora racconta cosa si congela a fine stagione: reset competitivo, snapshot del tuo stile e focus reward per cosmetica, progressione e status.</div>
+      </div>
+      <div style="text-align:right;min-width:150px">
+        <div style="font-size:10px;color:rgba(255,255,255,.42)">Reset tra</div>
+        <div id="season-panel-countdown2" style="font-family:Syne,sans-serif;font-size:22px;font-weight:900;color:#FBBF24">${_formatSeasonLeft(si.leftMs)}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:10px">
+      ${identity.rewardTracks.map(function(track){return `<div style="padding:10px;border-radius:12px;background:rgba(15,23,42,.35);border:1px solid rgba(255,255,255,.08)"><div style="font-size:10px;color:${track.accent};font-weight:800;letter-spacing:1px;text-transform:uppercase">${track.label}</div><div style="width:100%;height:6px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:8px 0 6px"><div style="width:${track.pct}%;height:100%;background:${track.accent};border-radius:999px"></div></div><div style="font-size:10px;color:rgba(255,255,255,.55);line-height:1.45">${track.detail}</div></div>`;}).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;align-items:stretch">
+      <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1px">Snapshot identità</div>
+        <div style="font-size:13px;font-weight:800;color:${identity.signature.accent};margin-top:6px">${identity.signature.icon} ${identity.signature.label}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.56);margin-top:4px">${identity.signature.desc}</div>
+      </div>
+      <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1px">Affinità trainante</div>
+        <div style="font-size:12px;font-weight:800;color:#F9A8D4;margin-top:6px">${topBond}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.56);margin-top:4px">Spinge soprattutto la corsia ${spotlight.label.toLowerCase()} nel reward track finale.</div>
+      </div>
+      <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;justify-content:space-between">
+        <div>
+          <div style="font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1px">Esito immediato</div>
+          <div style="font-size:12px;font-weight:800;color:${resetRank.col};margin-top:6px">${P.mmr} → ${resetMMR} MMR</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.56);margin-top:4px">Soft reset previsto su ${resetRank.n} con snapshot dei progressi stagionali.</div>
+        </div>
+        <button onclick="applySoftReset()" style="margin-top:10px;background:#FF5A7A;border:none;border-radius:10px;color:#fff;font-weight:800;font-size:11px;padding:8px 12px;cursor:pointer">⚡ Forza evento ora</button>
+      </div>
+    </div>
+  </div>`;
+}
+function getLeaderboardSeasonEventBanner(accent){
+  if(!isSeasonTestModeActive()) return '';
+  const identity=getProfileIdentitySnapshot();
+  const topBond=identity.topBond?identity.topBond.name+' · LV.'+identity.topBond.lv:'nessuna affinità dominante';
+  return `<div style="background:linear-gradient(135deg,rgba(255,64,129,.12),rgba(245,200,66,.08));border:1px solid rgba(255,64,129,.35);border-radius:12px;padding:10px 12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap"><div><div style="font-size:11px;color:#FF7AA2;font-weight:900">⚠️ TEST MODE: finale stagione live</div><div style="font-size:10px;color:rgba(255,255,255,.56);margin-top:4px">Countdown, reward track e snapshot identità sono già in chiusura. Focus attuale: <span style="color:${accent};font-weight:700">${identity.spotlightTrack?identity.spotlightTrack.label:'Progressione'}</span>.</div></div><div style="text-align:right"><div id="lb-test-countdown" style="font-size:15px;font-weight:900;color:#FBBF24">${getSeasonTimeLeft()}</div><div style="font-size:10px;color:rgba(255,255,255,.42)">${topBond}</div></div></div></div>`;
+}
+function renderLockerIdentityShowcase(){
+  const body=document.querySelector('#locker .locker-body');
+  if(!body||!window.P) return;
+  let root=document.getElementById('locker-live-service-root');
+  if(!root){
+    root=document.createElement('div');
+    root.id='locker-live-service-root';
+    root.className='locker-section';
+    body.insertBefore(root, body.firstElementChild||null);
+  }
+  const identity=getProfileIdentitySnapshot();
+  const border=(LOCKER_BORDERS||[]).find(function(item){return item.id===(P.locker?.border||'default');});
+  const back=(LOCKER_CARDBACKS||[]).find(function(item){return item.id===(P.locker?.cardback||'default');});
+  const effect=(LOCKER_EFFECTS||[]).find(function(item){return item.id===(P.locker?.effect||'default');});
+  const title=(typeof ALL_TITLES!=='undefined'?ALL_TITLES.find(function(item){return item.id===P.selectedTitle;}):null) || identity.selectedTitle;
+  root.innerHTML=`
+    <div class="locker-section-title">🌟 Vetrina Identità</div>
+    <div class="locker-section-sub">Statistiche, affinità e stagione convergono qui: il locker mostra la build con cui chiudi la stagione e come si riflette sul reward track.</div>
+    <div style="padding:14px;border-radius:16px;background:linear-gradient(145deg,rgba(103,232,249,.08),rgba(14,165,233,.04));border:1px solid rgba(103,232,249,.16)">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px">
+        <div>
+          <div style="font-family:Syne,sans-serif;font-size:18px;font-weight:900;color:${identity.signature.accent}">${identity.signature.icon} ${identity.signature.label}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.56);margin-top:4px;max-width:520px">${identity.signature.desc}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;color:rgba(255,255,255,.4)">Focus stagione</div>
+          <div style="font-size:13px;font-weight:800;color:#FBBF24">${identity.spotlightTrack?identity.spotlightTrack.label:'Progressione'}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <span style="padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.68)">🏷️ ${title?title.txt:'Titolo base'}</span>
+        <span style="padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.68)">✨ ${border?border.label:'Standard'}</span>
+        <span style="padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.68)">🃏 ${back?back.label:'UNO Classic'}</span>
+        <span style="padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.68)">⚡ ${effect?effect.label:'Nessuno'}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:12px">
+        <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)">
+          <div style="font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1px">Record attuale</div>
+          <div style="font-size:15px;font-weight:900;color:#34D399;margin-top:6px">${identity.totalWins}W · ${identity.winRate}%</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.52);margin-top:4px">${identity.totalGames} partite · ${identity.preferredMode.label}</div>
+        </div>
+        <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)">
+          <div style="font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1px">Affinità in primo piano</div>
+          <div style="font-size:13px;font-weight:800;color:#F9A8D4;margin-top:6px">${identity.topBond?identity.topBond.name:'Nessun bond dominante'}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.52);margin-top:4px">${identity.topBond?('LV.'+identity.topBond.lv+' · '+identity.topBond.style):'Gioca coi bot per personalizzare il profilo.'}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+        ${identity.rewardTracks.map(function(track){return `<div style="padding:10px;border-radius:12px;background:rgba(15,23,42,.28);border:1px solid rgba(255,255,255,.08)"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><span style="font-size:10px;color:${track.accent};font-weight:800;text-transform:uppercase;letter-spacing:1px">${track.label}</span><span style="font-size:10px;color:rgba(255,255,255,.4)">${track.pct}%</span></div><div style="width:100%;height:6px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:8px 0 6px"><div style="width:${track.pct}%;height:100%;background:${track.accent};border-radius:999px"></div></div><div style="font-size:10px;color:rgba(255,255,255,.56);line-height:1.45">${track.detail}</div></div>`;}).join('')}
+      </div>
+    </div>`;
+}
+
+const SEASON_REWARD_CARDBACKS={
+  aggressivo:'crimson',
+  costante:'emerald',
+  reattivo:'neon',
+  strategico:'midnight'
+};
+const SEASON_STATUS_TITLES={
+  aggressivo:{txt:'Finale Incendiario', icon:'🔥'},
+  costante:{txt:'Costanza Orbitale', icon:'🛠️'},
+  reattivo:{txt:'Momentum Istantaneo', icon:'⚡'},
+  strategico:{txt:'Mente di Stagione', icon:'♟️'}
+};
+function ensureSeasonStatusTitle(seasonNum, identity, peakMMR){
+  const meta=SEASON_STATUS_TITLES[identity.signature.key]||SEASON_STATUS_TITLES.strategico;
+  const id=`season_status_s${seasonNum}_${identity.signature.key}`;
+  const feat=`season_status_s${seasonNum}_${identity.signature.key}`;
+  let title=ALL_TITLES.find(function(item){return item.id===id;});
+  if(title) return title;
+  title={
+    id,
+    txt:`S${seasonNum} – ${meta.txt}`,
+    col:identity.signature.accent,
+    req:-1,
+    mmrReq:-1,
+    feat,
+    season:seasonNum,
+    legacy:true,
+    glow:peakMMR>=1600,
+    desc:`Reward status stagione ${seasonNum}: ${identity.signature.label} · focus ${identity.spotlightTrack?identity.spotlightTrack.label:'Progressione'}`
+  };
+  ALL_TITLES.push(title);
+  return title;
+}
+function grantSeasonTrackRewards(peakMMR, seasonNum){
+  if(!P) return null;
+  if(!P.seasonRewards) P.seasonRewards=[];
+  const rewardKey=`season_reward_s${seasonNum}`;
+  const existing=P.seasonRewards.find(function(entry){return entry&&entry.key===rewardKey;});
+  if(existing) return existing;
+  const identity=getProfileIdentitySnapshot();
+  const spotlight=identity.spotlightTrack||identity.rewardTracks[0]||{label:'Progressione',pct:0};
+  const credits=150 + Math.round((identity.winRate||0)*2) + Math.max(0,Math.min(220,Math.round(((peakMMR||200)-200)/8)));
+  const xp=90 + Math.min(180,Math.round((identity.totalWins||0)*2.5)) + Math.round((spotlight.pct||0)*1.2);
+  const cosmeticId=SEASON_REWARD_CARDBACKS[identity.signature.key]||SEASON_REWARD_CARDBACKS.strategico;
+  const cosmetic=LOCKER_CARDBACKS.find(function(item){return item.id===cosmeticId;});
+  if(!P.ownedCardBacks) P.ownedCardBacks=[];
+  if(cosmetic && !P.ownedCardBacks.includes(cosmeticId)) P.ownedCardBacks.push(cosmeticId);
+  const statusTitle=ensureSeasonStatusTitle(seasonNum, identity, peakMMR);
+  if(statusTitle && !P.unlockedTitles.includes(statusTitle.id)) P.unlockedTitles.push(statusTitle.id);
+  if((!P.selectedTitle || P.selectedTitle==='t1') && statusTitle) P.selectedTitle=statusTitle.id;
+  if((!P.locker || !P.locker.cardback || P.locker.cardback==='default') && cosmetic){
+    if(!P.locker) P.locker={};
+    P.locker.cardback=cosmetic.id;
+  }
+  P.credits=(P.credits||0)+credits;
+  const xpResult=(typeof addXP==='function') ? addXP(xp) : {leveled:false,nl:P.level||1};
+  const reward={
+    key:rewardKey,
+    season:seasonNum,
+    signatureKey:identity.signature.key,
+    signatureLabel:identity.signature.label,
+    spotlightLabel:spotlight.label,
+    credits,
+    xp,
+    leveled:!!xpResult.leveled,
+    newLevel:xpResult.nl||P.level||1,
+    cosmeticId:cosmetic?cosmetic.id:null,
+    cosmeticLabel:cosmetic?cosmetic.label:null,
+    statusTitleId:statusTitle?statusTitle.id:null,
+    statusTitleTxt:statusTitle?statusTitle.txt:null,
+    grantedAt:new Date().toISOString()
+  };
+  P.seasonRewards.push(reward);
+  if(P.seasonRewards.length>12) P.seasonRewards=P.seasonRewards.slice(-12);
+  return reward;
+}
 function openLocker(){
   sfx.click();
   _lockerBackScr='splash';
   syncColorblindUI();
+  renderLockerIdentityShowcase();
   renderLockerTitles();renderLockerProgress();renderLockerBorders();renderLockerCardbacks();renderLockerEffects();
   try{renderAvatarEditor();}catch(e){}
   showScr('locker');
@@ -11262,6 +11621,7 @@ function openLockerFromGame(){
   paused=true;
   _lockerBackScr='game';
   syncColorblindUI();
+  renderLockerIdentityShowcase();
   renderLockerTitles();renderLockerProgress();renderLockerBorders();renderLockerCardbacks();renderLockerEffects();
   try{renderAvatarEditor();}catch(e){}
   showScr('locker');
@@ -11324,6 +11684,7 @@ function openLockerFromGame(){
         if(!P.locker)P.locker={};
         P.locker.cardback=c.id;
         saveP();renderLockerCardbacks();
+        renderLockerIdentityShowcase();
         // Apply to game immediately if active
         applyCardBackToGame();
         notify2('✅ "'+c.label+'" attivato!','#34D399',1200);
@@ -11399,7 +11760,7 @@ function renderLockerBorders(){
     div.innerHTML=`
       <div class="border-preview" style="${b.style}">${b.icon}</div>
       <div class="border-label">${b.label}</div>`;
-    div.onclick=()=>{sfx.click();if(!P.locker)P.locker={};P.locker.border=b.id;saveP();renderLockerBorders();};
+    div.onclick=()=>{sfx.click();if(!P.locker)P.locker={};P.locker.border=b.id;saveP();renderLockerBorders();renderLockerIdentityShowcase();};
     wrap.appendChild(div);
   });
 }
@@ -11413,7 +11774,7 @@ function renderLockerCardbacks(){
     div.innerHTML=`
       <div class="cardback-preview" style="background:${c.bg};color:#fff;font-family:Syne,sans-serif;font-size:14px">${c.text}</div>
       <div class="cardback-label">${c.label}</div>`;
-    div.onclick=()=>{sfx.click();if(!P.locker)P.locker={};P.locker.cardback=c.id;saveP();renderLockerCardbacks();};
+    div.onclick=()=>{sfx.click();if(!P.locker)P.locker={};P.locker.cardback=c.id;saveP();renderLockerCardbacks();renderLockerIdentityShowcase();};
     wrap.appendChild(div);
   });
 }
@@ -11425,7 +11786,7 @@ function renderLockerEffects(){
     const div=document.createElement('div');
     div.className='effect-item'+(cur===e.id?' selected':'');
     div.innerHTML=`<div style="font-size:24px">${e.icon}</div><div class="effect-label">${e.label}</div>`;
-    div.onclick=()=>{sfx.click();if(!P.locker)P.locker={};P.locker.effect=e.id;saveP();renderLockerEffects();};
+    div.onclick=()=>{sfx.click();if(!P.locker)P.locker={};P.locker.effect=e.id;saveP();renderLockerEffects();renderLockerIdentityShowcase();};
     wrap.appendChild(div);
   });
 }
@@ -12685,6 +13046,28 @@ function aiTurn(){
 }
 
 // S = argmax_{c ∈ M}(V(c) + P(c))
+function getAiDecisionProfile(idx,diff,UCS){
+  const bot=G?.players?.[idx]||{};
+  const name=String(bot.name||`BOT-${idx}`);
+  const mmr=bot.mmr||200;
+  const rankName=typeof getRank==='function' ? (getRank(mmr)?.n||'') : '';
+  let seed=0;
+  for(let i=0;i<name.length;i++) seed=((seed<<5)-seed)+name.charCodeAt(i);
+  seed=Math.abs(seed);
+  const archetypes=[
+    {key:'rookie',label:'Rookie',blunderChance:0.2,noiseBase:22,stackBias:24,blockBias:10,preserveWild4:8,wildCommit:6,lowCardBias:0},
+    {key:'tactician',label:'Tattico',blunderChance:0.1,noiseBase:14,stackBias:48,blockBias:18,preserveWild4:16,wildCommit:12,lowCardBias:3},
+    {key:'shark',label:'Pressure',blunderChance:0.05,noiseBase:8,stackBias:72,blockBias:26,preserveWild4:24,wildCommit:16,lowCardBias:5},
+    {key:'legend',label:'Legend',blunderChance:0.02,noiseBase:5,stackBias:90,blockBias:32,preserveWild4:32,wildCommit:20,lowCardBias:7}
+  ];
+  let profile=archetypes[seed%archetypes.length];
+  if(UCS) return archetypes[3];
+  if(diff==='easy') return archetypes[0];
+  if(diff==='normal') return rankName.includes('Bronze') ? archetypes[0] : archetypes[1];
+  if(diff==='hard') return rankName.includes('Silver') ? archetypes[1] : archetypes[2];
+  return archetypes[3];
+}
+
 function aiChoose(plays,idx){
 
   // UCS MODE: potenziamento bot
@@ -12704,14 +13087,14 @@ function aiChoose(plays,idx){
   }
   // UCS: ignora profilo easy, sempre avanzato
   if(UCS) diff = 'ultra';
-  // 2. Pure random solo per easy (ma non in UCS)
-  if(diff==='easy' && !UCS) return plays[Math.floor(Math.random()*plays.length)];
+  const aiProfile=getAiDecisionProfile(idx,diff,UCS);
 
   // 3. Analisi stato avversari per counter-play
   const n=G.players.length;
   const ni=((idx+G.direction)%n+n)%n; // next player
   const nc=G.players[ni].hand.length<=2; // next player is close to winning
   const myHand=G.players[idx].hand.length;
+  const hasNonWildAlternative=plays.some(p=>p.c.col!=='w');
   const gamePhase=myHand<=3?'late':myHand<=6?'mid':'early'; // late/mid/early
 
   // 1.1 Memoria di gioco: inizializza se non esiste
@@ -12729,6 +13112,7 @@ function aiChoose(plays,idx){
     const isSpecial=p.c.val==='skip'||p.c.val==='rev';
     const isDraw=p.c.val==='d2'||p.c.val==='w4';
     const isWild=p.c.col==='w';
+    const isWild4=p.c.val==='w4';
     const numVal=isNaN(+p.c.val)?0:+p.c.val;
 
     // Gestione del colore dominante in mano
@@ -12768,11 +13152,39 @@ function aiChoose(plays,idx){
       if(p.c.col===curCol()&&myHand<4) pc+=5;
     }
 
+    // Layer esplicito per difficolta: easy = casuale, medium = anti-rush,
+    // hard/ultra = uso piu disciplinato delle carte jolly e della draw stack.
+    if(diff==='easy' && !UCS){
+      pc += (Math.random()-.5)*40;
+      if(isWild4&&hasNonWildAlternative) pc-=18;
+      if(nc&&(isDraw||isSpecial)) pc+=8;
+    } else if(diff==='normal'){
+      if(nc&&isSpecial) pc+=18;
+      if(nc&&isDraw) pc+=22;
+      if(isWild4&&hasNonWildAlternative) pc-=14;
+      if(G.pendingDraw>0&&isDraw) pc+=55;
+    } else if(diff==='hard' || diff==='ultra'){
+      if(nc&&isSpecial) pc+=28;
+      if(nc&&isDraw) pc+=34;
+      if(G.pendingDraw>0&&isDraw) pc+=85;
+      if(isWild4&&hasNonWildAlternative) pc-=32;
+      if(isWild&&!isWild4&&hasNonWildAlternative&&myHand>3) pc-=10;
+      if(!hasNonWildAlternative&&isWild) pc+=24;
+      if(isSpecial&&myHand>G.players[ni].hand.length) pc+=10;
+    }
+
+    if(isWild4&&hasNonWildAlternative) pc-=aiProfile.preserveWild4;
+    if(!hasNonWildAlternative&&isWild) pc+=aiProfile.wildCommit;
+    if(nc&&(isDraw||isSpecial)) pc+=aiProfile.blockBias;
+    if(G.pendingDraw>0&&isDraw) pc+=aiProfile.stackBias;
+    if(numVal>0&&numVal<5&&myHand>4) pc-=aiProfile.lowCardBias;
+
     // UCS: minimizza punteggio in mano in caso di sconfitta
+    let thisScore = 0;
     if(UCS) {
       let handScore = G.players[idx].hand.reduce((a,c)=>a+(c.val==='w4'?50:c.val==='d2'?20:c.val==='skip'||c.val==='rev'?20:!isNaN(+c.val)?+c.val:0),0);
       // Se questa carta è la più "pesante", priorità a giocarla
-      let thisScore = (p.c.val==='w4'?50:p.c.val==='d2'?20:p.c.val==='skip'||p.c.val==='rev'?20:!isNaN(+p.c.val)?+p.c.val:0);
+      thisScore = (p.c.val==='w4'?50:p.c.val==='d2'?20:p.c.val==='skip'||p.c.val==='rev'?20:!isNaN(+p.c.val)?+p.c.val:0);
       if(thisScore>0 && thisScore>=handScore/Math.max(1,G.players[idx].hand.length)) {vc+=18;}
       // Tracciamento carte speciali giocate
       if(specialsPlayed && (isDraw||isWild)) {
@@ -12805,14 +13217,15 @@ function aiChoose(plays,idx){
 
     // 6. Bonus strategici generali
     if(isWild&&plays.length>1&&(diff==='hard'||diff==='ultra')) pc-=14;
+    if(isWild4&&hasNonWildAlternative&&(diff==='normal'||diff==='hard'||diff==='ultra')) pc-=10;
     if(diff==='ultra'&&numVal>0&&numVal<5&&myHand>5) pc-=6;
 
     // 7. Randomness controllata
-    let blunderChance=diff==='easy'?0.25:diff==='normal'?0.12:diff==='hard'?0.06:0.03;
+    let blunderChance=aiProfile.blunderChance;
     if(UCS) blunderChance=0; // UCS: zero errori
     const blunder=Math.random()<blunderChance;
     const phaseNoise=gamePhase==='late'?0.6:1.0;
-    const noiseRange=blunder?45:(diff==='hard'?10:diff==='ultra'?6:16)*phaseNoise;
+    const noiseRange=blunder?45:aiProfile.noiseBase*phaseNoise;
     const noise=noiseRange*(Math.random()-.5);
     const total=vc+pc+noise;
     if(total>bestScore){bestScore=total;bestPlay=p;}
@@ -18079,6 +18492,7 @@ function applySoftReset(){
     P.seasonData.peakMMR = {};
     // ── TITOLI STAGIONALI v48: assegna il trofeo della stagione appena conclusa ──
     grantSeasonTitles(_peakBeforeReset, _oldSeasonNum);
+    const _seasonReward = grantSeasonTrackRewards(_peakBeforeReset, _oldSeasonNum);
     // Aggiorna il seed stagionale — cap a 2 in test mode per non gonfiare i bot
     _duSeasonSeed = _newSeasonNum;
     // Invalida la domMap: il nuovo seed cambia Legacy/Breakthrough
@@ -18091,7 +18505,14 @@ function applySoftReset(){
       season: _oldSeasonNum,
       peakMMR: _peakBeforeReset,
       peakRank: (typeof getRank==='function' ? getRank(_peakBeforeReset).n : 'N/A'),
-      date: new Date().toLocaleDateString('it-IT')
+      date: new Date().toLocaleDateString('it-IT'),
+      rewards: _seasonReward ? {
+        credits:_seasonReward.credits,
+        xp:_seasonReward.xp,
+        cosmetic:_seasonReward.cosmeticLabel,
+        status:_seasonReward.statusTitleTxt,
+        spotlight:_seasonReward.spotlightLabel
+      } : null
     });
     // Mantieni al massimo 10 stagioni nello storico
     if(P.seasonHistory.length > 10) P.seasonHistory = P.seasonHistory.slice(-10);
@@ -18102,7 +18523,7 @@ function applySoftReset(){
     try{ _applyBotSeasonReset(_newSeasonNum); }catch(e){}
     if(typeof renderSeasonPanel==='function') try{ renderSeasonPanel(); }catch(e){}
     if(typeof updateProfile==='function') try{ updateProfile(); }catch(e){}
-    notify('🔄 Soft Reset Stagionale · −2 div · La tua forza resta intatta. Stagione ' + _newSeasonNum + ' iniziata!');
+    notify('🔄 Soft Reset Stagionale · −2 div · Stagione ' + _newSeasonNum + ' iniziata!' + (_seasonReward ? ' Reward: +' + _seasonReward.credits + '🏅 +' + _seasonReward.xp + 'XP' : ''));
     console.log('[applySoftReset] DONE — Peak S'+_oldSeasonNum+':'+_peakBeforeReset+' → MMR ora:'+P.mmr+' (S'+_newSeasonNum+')');
   }
 }
@@ -20710,21 +21131,59 @@ function buildLeaderboard(){
   // FIX: applica fluttuazione giornaliera ai bot (±20 MMR) — classifica viva
   const fluctuatedBots=bots.map(b=>({
     ...b,
-    mmr:getLBFluctuation(b.name, b.mmr)
+    mmr:getLBFluctuation(b.name, b.mmr),
+    lbSource:'simulated'
   }));
   // I top 3 hanno leggera fluttuazione ma rimangono in cima
   const fluctuatedTop=SIMULATED_TOP.map(b=>({
     ...b,
-    mmr:getLBFluctuation(b.name, b.mmr) // FIX v43.10: stesso seed
+    mmr:getLBFluctuation(b.name, b.mmr), // FIX v43.10: stesso seed
+    lbSource:'simulated'
   }));
   const list=[...fluctuatedTop, ...fluctuatedBots];
   // Inserisci il giocatore reale
   if(P){
     const _pAv=(P.avatarConfig&&P.avatarConfig.emoji)?P.avatarConfig.emoji:(P.av||'🎮');
-    list.push({name:(P.name||'Tu'),mmr:P.mmr,av:_pAv,isMe:true});
-    list.sort((a,b)=>b.mmr-a.mmr);
+    list.push({name:(P.name||'Tu'),mmr:P.mmr,av:_pAv,isMe:true,lbSource:'me'});
   }
+  getLocalLeaderboardProfiles('p1').forEach(profile=>list.push(profile));
+  list.sort((a,b)=>b.mmr-a.mmr);
   return list;
+}
+
+function getLocalLeaderboardProfiles(modeKey){
+  try{
+    const db=typeof _loadDB==='function' ? _loadDB() : {};
+    const me=(P?.name||'').toLowerCase();
+    const seen=new Set();
+    return Object.values(db).flatMap(entry=>{
+      const profile=entry?.profile;
+      if(!profile?.name) return [];
+      const key=String(profile.name).toLowerCase();
+      if(key===me||seen.has(key)) return [];
+      seen.add(key);
+      const avatar=(profile.avatarConfig&&profile.avatarConfig.emoji)?profile.avatarConfig.emoji:(profile.av||'🎮');
+      const mmr=(profile.mmrP&&typeof profile.mmrP[modeKey]==='number')?profile.mmrP[modeKey]:(profile.mmr||200);
+      return [{
+        name:profile.name,
+        mmr,
+        av:avatar,
+        wins:profile.wins||0,
+        losses:profile.losses||0,
+        winStreak:profile.winStreak||0,
+        lastSeen:profile.mmrHistory?.length?profile.mmrHistory.at(-1)?.d:null,
+        lbSource:'local',
+      }];
+    });
+  }catch(e){
+    return [];
+  }
+}
+
+function getLeaderboardSourceBadge(entry, accent){
+  if(entry.isMe) return `<span style="display:inline-flex;align-items:center;padding:1px 6px;border-radius:999px;background:${accent}22;border:1px solid ${accent}55;color:${accent};font-size:9px;font-weight:800;letter-spacing:.04em">TU</span>`;
+  if(entry.lbSource==='local') return '<span style="display:inline-flex;align-items:center;padding:1px 6px;border-radius:999px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35);color:#67e8f9;font-size:9px;font-weight:800;letter-spacing:.04em">PROFILO</span>';
+  return '<span style="display:inline-flex;align-items:center;padding:1px 6px;border-radius:999px;background:rgba(245,200,66,.12);border:1px solid rgba(245,200,66,.35);color:#f5c842;font-size:9px;font-weight:800;letter-spacing:.04em">BOT</span>';
 }
 // ══ MULTI-MODE LEADERBOARD STATE ══
 let _lbMode='uno', _lbSize='1v1';
@@ -21266,8 +21725,9 @@ function buildLeaderboardForMode(mode, size){
   if(P){
     const playerMMR = (P.mmrP||{})[key]||200;
     const _pAv = (P.avatarConfig&&P.avatarConfig.emoji)?P.avatarConfig.emoji:(P.av||'🎮');
-    list.push({name:(P.name||'Tu'), mmr:playerMMR, av:_pAv, isMe:true});
+    list.push({name:(P.name||'Tu'), mmr:playerMMR, av:_pAv, isMe:true, lbSource:'me'});
   }
+  getLocalLeaderboardProfiles(key).forEach(profile=>list.push(profile));
   list.sort((a,b)=>b.mmr-a.mmr);
   return list;
 }
@@ -21305,10 +21765,10 @@ function renderLeaderboardTab(){
         <div style="font-size:9px;color:rgba(255,255,255,.3);font-weight:400;margin-top:1px">Stagione ${s.season} · Reset tra <span id="lb-season-timer">${getSeasonTimeLeft()}</span> · ${total} giocatori</div>
       </div>
     </div>
-    ${(()=>{ try{ const sd=JSON.parse(localStorage.getItem('uno-ultra-season-v1')||'{}'); return sd._testMode?`<div style="background:rgba(255,64,129,.12);border:1px solid rgba(255,64,129,.4);border-radius:8px;padding:6px 10px;font-size:10px;color:#FF4081;font-weight:700;margin-bottom:8px">⚠️ TEST MODE — Stagione scade tra <span id="lb-test-countdown">${getSeasonTimeLeft()}</span></div>`:'';}catch(e){return '';} })()}
+    ${getLeaderboardSeasonEventBanner(accent)}
       </div>
     </div>
-    <div style="font-size:10px;color:rgba(255,165,0,.35);margin-bottom:10px;font-style:italic">⚡ Avversari simulati — competizione locale basata sul tuo MMR${myPos>=0?' · Tu sei <span style="color:'+accent+'">&#35;'+(myPos+1)+'</span>':''}</div>
+    <div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:10px;font-style:italic">⚡ Classifica ibrida: <span style="color:#f5c842">BOT</span> simulati, <span style="color:#67e8f9">PROFILI</span> locali salvati${myPos>=0?' · Tu sei <span style="color:'+accent+'">&#35;'+(myPos+1)+'</span>':''}</div>
     <div id="lb-rows"></div>
     <div id="lb-load-more" style="text-align:center;margin-top:10px"></div>`;
 
@@ -21340,7 +21800,7 @@ function renderLeaderboardTab(){
           const bLoss = p.losses !== undefined ? p.losses : Math.max(0, Math.round(_baseG*(1-_wr)*(0.7+((h>>4)%30)/100)));
           const bStreak = p.winStreak !== undefined ? p.winStreak : Math.floor((h>>6)%8);
           const bBP = p.bpLevel !== undefined ? p.bpLevel : Math.min(25, Math.max(1, Math.round(1+(_mmr/1800)*20)+((h>>9)%4)-1));
-          window._ppOpen&&window._ppOpen({name:p.name,mmr:p.mmr,wins:bWins,losses:bLoss,winStreak:bStreak,bpLevel:bBP,avatarConfig:{emoji:p.av||'🎮'},selectedTitle:p.selectedTitle,unlockedTitles:p.unlockedTitles||[],isAI:true,loginStreak:p.loginStreak||0});
+          window._ppOpen&&window._ppOpen({name:p.name,mmr:p.mmr,wins:bWins,losses:bLoss,winStreak:bStreak,bpLevel:bBP,avatarConfig:{emoji:p.av||'🎮'},selectedTitle:p.selectedTitle,unlockedTitles:p.unlockedTitles||[],isAI:p.lbSource!=='local',loginStreak:p.loginStreak||0});
         });
       }
       const posLabel=i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
@@ -21348,7 +21808,7 @@ function renderLeaderboardTab(){
         <div class="lb-pos" style="min-width:34px;font-size:${i<3?'16px':'11px'}">${posLabel}</div>
         <div class="lb-av">${p.av||'🎮'}</div>
         <div class="lb-info">
-          <div class="lb-name" style="font-size:12px">${p.name}${p.isMe?` <span style="color:${accent};font-size:9px">(Tu)</span>`:''}</div>
+          <div class="lb-name" style="font-size:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">${p.name}${p.isMe?` <span style="color:${accent};font-size:9px">(Tu)</span>`:''}${getLeaderboardSourceBadge(p, accent)}</div>
           <div class="lb-rank" style="color:${r.col};font-size:10px;display:flex;align-items:center;gap:3px"><span style="display:inline-flex;width:14px;height:14px">${getRankSVG(r.n,14)}</span>${r.n}</div>
           ${isGod?`<div style="font-size:9px;color:${accent}">👑 ${mCfg.titleGod}</div>`:''}
         </div>
@@ -21387,7 +21847,7 @@ function renderLeaderboardTab(){
     const div=document.createElement('div');
     div.className='lb-entry me';
     div.style.borderColor=accent+'66';
-    div.innerHTML=`<div class="lb-pos" style="min-width:34px;font-size:11px">#${myPos+1}</div><div class="lb-av">🎮</div><div class="lb-info"><div class="lb-name" style="font-size:12px">${p.name} <span style="color:${accent};font-size:9px">(Tu)</span></div><div class="lb-rank" style="color:${r.col};font-size:10px;display:flex;align-items:center;gap:3px"><span style="display:inline-flex;width:14px;height:14px">${getRankSVG(r.n,14)}</span>${r.n}</div></div><div class="lb-mmr-val" style="color:${r.col};font-size:13px;font-weight:800">${p.mmr}</div>`;
+    div.innerHTML=`<div class="lb-pos" style="min-width:34px;font-size:11px">#${myPos+1}</div><div class="lb-av">🎮</div><div class="lb-info"><div class="lb-name" style="font-size:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">${p.name} <span style="color:${accent};font-size:9px">(Tu)</span>${getLeaderboardSourceBadge(p, accent)}</div><div class="lb-rank" style="color:${r.col};font-size:10px;display:flex;align-items:center;gap:3px"><span style="display:inline-flex;width:14px;height:14px">${getRankSVG(r.n,14)}</span>${r.n}</div></div><div class="lb-mmr-val" style="color:${r.col};font-size:13px;font-weight:800">${p.mmr}</div>`;
     document.getElementById('lb-rows').appendChild(div);
   }
   updateLoadMore();
@@ -22731,8 +23191,23 @@ function aiPickColorSSL(p,idx){const h=G.players[0].hand;const cnt={r:0,b:0,g:0,
 // ══════════════════════════════════════════════════════
 const REPLAY_KEY='uno-ultra-replay-v1';
 let _currentReplayLog=[];
-function logReplayMove(playerName,card){if(!G||G.roundOver)return;const label=card?`${card.col||''} ${card.val}`:'pesca';_currentReplayLog.push({n:playerName,c:label});}
-function saveReplayLog(won){try{const logs=JSON.parse(localStorage.getItem(REPLAY_KEY)||'[]');logs.unshift({date:new Date().toLocaleString('it'),won,moves:_currentReplayLog.slice(0,60),opponent:G.players.find(p=>p.isAI)?.name||'AI',diff:G.diff});if(logs.length>10)logs.pop();localStorage.setItem(REPLAY_KEY,JSON.stringify(logs));_currentReplayLog=[];}catch(e){}}
+function renderLiveMatchLog(){
+  const wrap=el('uno-live-log');
+  if(!wrap) return;
+  const recent=_currentReplayLog.slice(-6).reverse();
+  if(!recent.length){
+    wrap.innerHTML='<div class="uno-live-log-empty">Nessuna mossa registrata</div>';
+    return;
+  }
+  wrap.innerHTML=recent.map(move=>`<div class="uno-live-log-entry">${move.n}: ${move.c}</div>`).join('');
+}
+function logReplayMove(playerName,card){
+  if(!G||G.roundOver)return;
+  const label=card?nvdaCardLabel(card):'Pesca una carta';
+  _currentReplayLog.push({n:playerName,c:label});
+  renderLiveMatchLog();
+}
+function saveReplayLog(won){try{const logs=JSON.parse(localStorage.getItem(REPLAY_KEY)||'[]');logs.unshift({date:new Date().toLocaleString('it'),won,moves:_currentReplayLog.slice(0,60),opponent:G.players.find(p=>p.isAI)?.name||'AI',diff:G.diff});if(logs.length>10)logs.pop();localStorage.setItem(REPLAY_KEY,JSON.stringify(logs));_currentReplayLog=[];renderLiveMatchLog();}catch(e){}}
 {const _o=doPlay;window.doPlay=function(pidx,ci,cc){const p=G.players[pidx];const card=p&&p.hand[ci];logReplayMove(p?.name||'?',card);return _o(pidx,ci,cc);};}
 
 function renderReplayHistory(){
@@ -22745,7 +23220,7 @@ function renderReplayHistory(){
     const rh=document.createElement('div');rh.style.cssText='font-size:10px;font-weight:800;letter-spacing:2px;color:rgba(0,229,255,.5);text-transform:uppercase;margin:14px 0 8px';rh.textContent='🎬 REPLAY PARTITE';wrap.appendChild(rh);
     logs.forEach(log=>{
       const ri=document.createElement('div');ri.className='replay-item';
-      const movesHtml=log.moves.slice(0,20).map(m=>`<span class="rm-card ${m.me?'rm-you':'rm-ai'}">${m.c}</span>`).join('');
+      const movesHtml=log.moves.slice(0,20).map(m=>`<span class="rm-card ${m.me?'rm-you':'rm-ai'}" role="listitem" aria-label="Mossa: ${String(m.c).replace(/"/g,'&quot;')}">${m.c}</span>`).join('');
       ri.innerHTML=`<div class="replay-header"><span class="replay-result ${log.won?'win':'loss'}">${log.won?'🏆 Vittoria':'💔 Sconfitta'}</span><span style="font-size:10px;color:rgba(255,255,255,.3)">${log.date}</span><span style="font-size:9px;color:rgba(255,255,255,.25)">vs ${log.opponent}</span></div><div class="replay-moves">${movesHtml}${log.moves.length>20?`<span style="font-size:9px;color:rgba(255,255,255,.25)">+${log.moves.length-20}</span>`:''}</div> <button onclick="openReplayPlayer(${logs.indexOf(log)})" style="font-size:10px;padding:2px 8px;border-radius:6px;border:1px solid rgba(34,211,238,.3);background:rgba(34,211,238,.08);color:var(--teal);cursor:pointer;margin-left:auto">▶ Rivedi</button>`;
       wrap.appendChild(ri);
     });
@@ -23261,7 +23736,7 @@ function startUCS(){
   G.players.push({hand:[],isAI:false,name:P.name||'Tu',score:0});
   G.players.push({hand:[],isAI:true,name:botName,score:0,botMMR:botMMR});
   G.unoSaid.push(false,false);G.totalScores.push(0,0);
-  window._gameActive=true;_currentReplayLog=[];
+  window._gameActive=true;_currentReplayLog=[];renderLiveMatchLog();
   // UCS: reduce turn timer to 5s for extra challenge
   G._ucsTurnSecs=5;
   showScr('game');updateHUD();updateAIDiffHUD();dealRound();
@@ -23304,7 +23779,7 @@ function renderUCSAccessCheck(){
 {const _o=window.endRound;window.endRound=function(wi){if(G?.isUCS)try{resolveUCSResult(wi===0);}catch(e){}try{rewardTrust();}catch(e){}try{saveReplayLog(wi===0);}catch(e){}window._gameActive=false;_o(wi);};}
 
 // startGame: flag + log reset
-{const _o=window.startGame||startGame;window.startGame=function(){window._gameActive=true;_currentReplayLog=[];_o();setTimeout(()=>updateAIDiffHUD(),300);};}
+{const _o=window.startGame||startGame;window.startGame=function(){window._gameActive=true;_currentReplayLog=[];renderLiveMatchLog();_o();setTimeout(()=>updateAIDiffHUD(),300);};}
 
 // doPlay: W4 count for UCS chaos title
 {const _o=window.doPlay;window.doPlay=function(pidx,ci,cc){if(G?.isUCS&&pidx===0){const c=G.players[pidx]?.hand[ci];if(c?.val==='w4')G.ucsW4Count=(G.ucsW4Count||0)+1;}return _o(pidx,ci,cc);};}
@@ -23795,7 +24270,7 @@ function renderMiniDiffSelector(containerId, color) {
   // Calcola difficoltà in base all'MMR del giocatore
   const _mmr = (typeof P!=='undefined'&&P&&P.mmr)?P.mmr:200;
   const _autoDiff = typeof getDiffFromMMR==='function' ? getDiffFromMMR(_mmr) : 'normal';
-  setMiniDiff(_autoDiff);
+  _miniDiff = _autoDiff;
   // Mostra solo un badge informativo (non modificabile)
   const wrap = document.getElementById(containerId);
   if(!wrap) return;
@@ -23812,12 +24287,13 @@ function renderMiniDiffSelector(containerId, color) {
 }
 
 function setMiniDiff(diff) {
-  _miniDiff = diff;
+  const normalized = MINI_DIFF_LABELS[diff] ? diff : 'normal';
+  _miniDiff = normalized;
   // Aggiorna tutti i selettori aperti
   ['scopa','poker','burraco','millemiglia'].forEach(m => {
     renderMiniDiffSelector('mini-diff-sel-'+m, null);
   });
-  notify2(`${MINI_DIFF_ICONS[diff]} Difficoltà: ${MINI_DIFF_LABELS[diff]}`, MINI_DIFF_COLORS[diff], 1200);
+  notify2(`${MINI_DIFF_ICONS[normalized]} Difficoltà: ${MINI_DIFF_LABELS[normalized]}`, MINI_DIFF_COLORS[normalized], 1200);
 }
 
 function hexToRgb(hex) {
@@ -28473,12 +28949,14 @@ function renderSeasonPanel(){
   const root = document.getElementById('season-panel-root');
   if(!root) return;
   const si = getSeasonInfo();
+  const identity = getProfileIdentitySnapshot();
   const peakMMR = P.mmr || 200;
   const peakRank = getRank(peakMMR);
   const resetMMR = softResetMMR(peakMMR);
   const resetRank = getRank(resetMMR);
   const lastSeason = P.seasonData?.lastSeasonRank;
   const lastMMR    = P.seasonData?.lastSeasonMMR;
+  const lastReward = (P.seasonRewards||[]).filter(function(entry){return entry&&entry.season===si.season-1;}).slice(-1)[0] || null;
 
   const pct = Math.round(si.progress * 100);
   const barCol = pct > 75 ? '#F43F5E' : pct > 40 ? '#F5C842' : '#22D3EE';
@@ -28514,7 +28992,6 @@ function renderSeasonPanel(){
 
   <div class="season-card">
     <div style="font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:1px">RANK ATTUALE</div>
-    ${(()=>{ try{ const sd=JSON.parse(localStorage.getItem('uno-ultra-season-v1')||'{}'); return sd._testMode?`<div style="background:rgba(255,64,129,.1);border:1px solid #FF4081;border-radius:10px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;color:#FF4081;font-weight:700">⚠️ TEST MODE — Fine stagione tra <span id="season-panel-countdown2">${_formatSeasonLeft(si.leftMs)}</span></span><button onclick="applySoftReset()" style="background:#FF4081;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;padding:5px 12px;cursor:pointer">⚡ FORZA RESET</button></div>`:'';}catch(e){return '';} })()}
     <div class="season-stat-row">
       <span style="color:rgba(255,255,255,.5);font-size:12px">Rank di picco questa stagione</span>
       <span style="font-weight:700;color:${peakRank.col}">${peakRank.n}</span>
@@ -28534,6 +29011,32 @@ function renderSeasonPanel(){
     </div>
   </div>
 
+  ${renderSeasonEventCard(si, identity, resetRank, resetMMR)}
+
+  <div class="season-card">
+    <div style="font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:1px">DNA STAGIONALE</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:10px">
+      <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1px">Profilo di gioco</div>
+        <div style="font-size:14px;font-weight:900;color:${identity.signature.accent};margin-top:6px">${identity.signature.icon} ${identity.signature.label}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:4px">${identity.signature.desc}</div>
+      </div>
+      <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1px">Statistiche chiave</div>
+        <div style="font-size:14px;font-weight:900;color:#34D399;margin-top:6px">${identity.totalWins}W · ${identity.winRate}%</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:4px">${identity.totalGames} partite · modalità ${identity.preferredMode.label.toLowerCase()}</div>
+      </div>
+      <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1px">Affinità dominante</div>
+        <div style="font-size:14px;font-weight:900;color:#F9A8D4;margin-top:6px">${identity.topBond?identity.topBond.name:'In costruzione'}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:4px">${identity.topBond?('LV.'+identity.topBond.lv+' · '+identity.topBond.style):'Gioca coi bot per sbloccare reward più mirati.'}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+      ${identity.rewardTracks.map(function(track){return `<div style="padding:10px;border-radius:12px;background:rgba(15,23,42,.24);border:1px solid rgba(255,255,255,.08)"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span style="font-size:10px;color:${track.accent};font-weight:800;letter-spacing:1px;text-transform:uppercase">${track.label}</span><span style="font-size:10px;color:rgba(255,255,255,.42)">${track.pct}%</span></div><div style="width:100%;height:6px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:8px 0 6px"><div style="width:${track.pct}%;height:100%;background:${track.accent};border-radius:999px"></div></div><div style="font-size:10px;color:rgba(255,255,255,.55);line-height:1.45">${track.detail}</div></div>`;}).join('')}
+    </div>
+  </div>
+
   ${lastSeason ? `
   <div class="season-card">
     <div style="font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:1px">🏆 STAGIONE PRECEDENTE</div>
@@ -28544,6 +29047,27 @@ function renderSeasonPanel(){
     <div class="season-stat-row">
       <span style="color:rgba(255,255,255,.5);font-size:12px">MMR di picco</span>
       <span style="font-weight:700">${lastMMR} MMR</span>
+    </div>
+  </div>` : ''}
+  ${lastReward ? `
+  <div class="season-card">
+    <div style="font-family:Syne,sans-serif;font-size:12px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:1px">🎁 REWARD STAGIONE S${lastReward.season}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+      <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1px">Progressione</div>
+        <div style="font-size:14px;font-weight:900;color:#34D399;margin-top:6px">+${lastReward.credits}🏅 · +${lastReward.xp}XP</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:4px">Focus ${lastReward.spotlightLabel||'Progressione'}${lastReward.leveled?' · livello '+lastReward.newLevel:''}</div>
+      </div>
+      <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1px">Cosmetica</div>
+        <div style="font-size:14px;font-weight:900;color:#67E8F9;margin-top:6px">${lastReward.cosmeticLabel||'Nessuna'}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:4px">Sbloccata nel locker come reward stagionale.</div>
+      </div>
+      <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1px">Status</div>
+        <div style="font-size:14px;font-weight:900;color:${identity.signature.accent};margin-top:6px">${lastReward.statusTitleTxt||'Titolo stagionale'}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:4px">Premia il tuo stile: ${lastReward.signatureLabel||identity.signature.label}.</div>
+      </div>
     </div>
   </div>` : ''}
   ${(P.seasonHistory && P.seasonHistory.length > 1) ? `
@@ -33855,11 +34379,13 @@ function showBondPopup(msg, sub) {
 function renderBondsPanel() {
   const root = document.getElementById('bonds-panel-root');
   if (!root || !window.P) return;
+  const identity = getProfileIdentitySnapshot();
   const bonds = P.botBond || {};
   const keys = Object.keys(bonds);
+  const summaryCard = `<div style="padding:14px;background:linear-gradient(135deg,rgba(255,107,157,.12),rgba(192,132,252,.08));border:1px solid rgba(255,107,157,.2);border-radius:16px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap"><div><div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.34);text-transform:uppercase">Affinità dinamiche</div><div style="font-size:15px;font-weight:900;color:#fff;margin-top:6px">${identity.signature.icon} ${identity.signature.label}</div><div style="font-size:11px;color:rgba(255,255,255,.56);margin-top:4px;max-width:460px">Le statistiche raccontano il tuo stile. Le affinità rifiniscono cosmetica, progressione e status spingendo il reward track della stagione.</div></div><div style="text-align:right"><div style="font-size:10px;color:rgba(255,255,255,.4)">Bond trainante</div><div style="font-size:12px;font-weight:800;color:#F9A8D4;margin-top:6px">${identity.topBond?identity.topBond.name:'In crescita'}</div><div style="font-size:10px;color:rgba(255,255,255,.42);margin-top:3px">${identity.topBond?('LV.'+identity.topBond.lv+' · '+identity.topBond.style):'Gioca più match coi bot'}</div></div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px"><span style="padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.66)">🏆 ${identity.totalWins} vittorie</span><span style="padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.66)">📈 ${identity.winRate}% WR</span><span style="padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.66)">🎮 ${identity.preferredMode.label}</span></div></div>`;
 
   if (keys.length === 0) {
-    root.innerHTML = `<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.3)">
+    root.innerHTML = summaryCard + `<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.3)">
       <div style="font-size:40px;margin-bottom:10px">💖</div>
       <div style="font-size:14px;font-weight:700">Nessuna affinità ancora</div>
       <div style="font-size:12px;margin-top:6px">Gioca partite contro i bot per costruire legami!</div>
@@ -33867,7 +34393,7 @@ function renderBondsPanel() {
     return;
   }
 
-  root.innerHTML = `<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.3);text-transform:uppercase;margin-bottom:12px;padding:0 4px">Legami con i bot</div>` +
+  root.innerHTML = summaryCard + `<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.3);text-transform:uppercase;margin-bottom:12px;padding:0 4px">Legami con i bot</div>` +
   keys.sort((a,b) => (bonds[b].xp||0) - (bonds[a].xp||0)).map(key => {
     const bond = bonds[key];
     const lv = getBondLevel(bond.xp || 0);
@@ -33886,8 +34412,8 @@ function renderBondsPanel() {
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
         <div style="font-size:28px">🤖</div>
         <div style="flex:1">
-          <div style="font-weight:800;font-size:14px">${bond.name || key}</div>
-          <div style="font-size:10px;color:rgba(255,200,150,.7);margin-top:1px">${stars} Livello ${lv}</div>
+          <div style="font-weight:800;font-size:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">${bond.name || key}${identity.topBond&&identity.topBond.key===key?'<span style="padding:2px 6px;border-radius:999px;background:rgba(255,107,157,.14);border:1px solid rgba(255,107,157,.28);font-size:9px;color:#ff6b9d">FOCUS</span>':''}</div>
+          <div style="font-size:10px;color:rgba(255,200,150,.7);margin-top:1px">${stars} Livello ${lv} · ${getBotAffinityArchetype(bond.name || key)}</div>
         </div>
         <div style="text-align:right">
           <div style="font-size:18px;font-weight:900;color:#ff6b9d">${xpCur.toLocaleString()}</div>
@@ -34915,14 +35441,15 @@ window.togglePushNotif = togglePushNotif;
 (function initV52Features() {
   function _init() {
     // Wait for P to be defined
-    if (!window.P) { setTimeout(_init, 500); return; }
+    const profile = window.P;
+    if (!profile) { setTimeout(_init, 500); return; }
     // Sync push notif toggle
     const toggle = document.getElementById('push-notif-toggle');
-    if (toggle) toggle.checked = !!P.notifEnabled;
+    if (toggle) toggle.checked = !!profile.notifEnabled;
     // Apply animated cardback CSS class
     try {
-      if (P.locker && P.locker.cardback) {
-        const cb = P.locker.cardback;
+      if (profile.locker && profile.locker.cardback) {
+        const cb = profile.locker.cardback;
         document.querySelectorAll('.card-back, .ai-card-back').forEach(el => {
           el.classList.forEach(c => { if (c.startsWith('cb-')) el.classList.remove(c); });
           el.classList.add('cb-' + cb);

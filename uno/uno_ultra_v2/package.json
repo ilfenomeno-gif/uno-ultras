@@ -8,10 +8,12 @@
     "port:original": "node scripts/port-original.js",
     "audit:original": "node scripts/audit-original.js",
     "dev": "node scripts/dev.js",
+    "dev:online": "node scripts/dev.js",
     "build": "node scripts/build.js",
     "check": "node scripts/build.js --check"
   },
   "dependencies": {
-    "peerjs": "^1.5.5"
+    "peerjs": "^1.5.5",
+    "ws": "^8.18.0"
   }
 }

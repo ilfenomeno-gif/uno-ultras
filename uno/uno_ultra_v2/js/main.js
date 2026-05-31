@@ -1,5 +1,5 @@
 const pageName = window.location.pathname.split("/").pop()?.toLowerCase() || "index.html";
-const runtimeFile = pageName === "original.html" ? "../legacy/original-runtime.html" : "../legacy/index-runtime.html";
+const runtimeFile = "../legacy/index-runtime.html";
 const runtimeUrl = new URL(runtimeFile, import.meta.url);
 
 window.__UNO_ULTRA_PORT = {

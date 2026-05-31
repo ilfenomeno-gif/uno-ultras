@@ -1,0 +1,31 @@
+CHANGELOG
+UNO ULTRAS — ilfenomeno-gif/uno-ultras
+[v-current]  Stato attuale del repo
+Bug corretti
+Avvio partita reindirizzato verso runtime legacy invece del flusso aggiornato — risolto con unificazione bootstrap
+Avvio multiplayer incoerente tra popup inviti e start lobby — pipeline unificata
+Caricamento infinito in start match per modalità non valorizzata — aggiunta assegnazione esplicita e normalizzazione
+Numero giocatori sovrascritto dagli inviti — la selezione manuale ora viene preservata
+Validazioni corrette (non bug)
+Blocco avvio quando inviti insufficienti per 3P/4P — comportamento atteso, validazione corretta
+Warning ambientali (non codice di gioco)
+ENOENT su npm run dev — causato da avvio nella cartella errata
+EADDRINUSE sulla porta dev — porta occupata da processo precedente
+[BACKLOG]  Funzionalità pianificate
+Priorità 1 — Critico
+Implementare modal selezione colore per wild e wild4 lato giocatore umano
+Aggiungere aria-live al log di gioco e label accessibili alle carte
+Priorità 2 — Alto
+Refactoring AI con livelli easy / medium / hard
+Leaderboard persistente da localStorage con storico partite reale
+Separare il motore UNO in moduli indipendenti per gioco
+Priorità 3 — Medio
+Implementare Blackjack completo come secondo gioco
+Aggiungere test automatici per engine UNO
+Rafforzare persistenza con versioning dati e fallback
+Priorità 4 — Futuro
+Sistema di progressione e shop con oggetti cosmetici reali
+Replay delle partite
+Statistiche dettagliate per sessione
+Supporto multiplayer locale o remoto
+Versione mobile-friendly

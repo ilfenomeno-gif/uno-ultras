@@ -1,0 +1,193 @@
+UNO ULTRAS
+Analisi UI — Stato attuale delle schermate
+Versione 1.0  •  SPA TypeScript + Vite
+1. Panoramica generale
+L'interfaccia di UNO ULTRAS e una Single Page Application con navigazione multi-schermata. Il routing e gestito lato client e le transizioni tra schermate avvengono senza ricaricamento della pagina. La struttura visiva e basata su un layout a colonna centrale con navigazione laterale o inferiore a seconda del contesto.
+Le schermate principali sono sei: Home, Gioca, Shop, Impostazioni, Profilo e Classifica. Esistono anche schermate secondarie per i giochi aggiuntivi (Scopa, Poker, Burraco, Blackjack) che sono placeholder UI senza logica implementata.
+2. Riepilogo schermate
+Schermata
+Stato
+Elementi principali
+Note
+Home
+COMPLETA
+Logo, accesso rapido, news/eventi
+Punto d'ingresso principale
+Gioca
+COMPLETA
+Selezione modalita, avvio partita UNO
+Motore funzionante
+Shop
+PARZIALE
+Lista oggetti, crediti, acquisto
+UI presente, logica transazioni assente
+Impostazioni
+PARZIALE
+Toggle accessibilita, audio, grafica
+Salvataggio ok, integrazione gameplay mancante
+Profilo
+COMPLETA
+MMR, crediti, vittorie, titoli
+Persistente su localStorage
+Classifica
+PLACEHOLDER
+Tabella top 10
+Dati hardcoded, non reali
+Scopa
+PLACEHOLDER
+Shell UI vuota
+Nessuna logica
+Poker
+PLACEHOLDER
+Shell UI vuota
+Nessuna logica
+Burraco
+PLACEHOLDER
+Shell UI vuota
+Nessuna logica
+3. Dettaglio schermate
+3.1  Home
+Stato: Completa
+La schermata iniziale funziona come punto di ingresso principale. Mostra il branding del gioco, fornisce accesso rapido alle aree principali e puo contenere notifiche o eventi in corso. La navigazione verso le altre sezioni e chiara e funzionante.
+Elementi presenti
+Logo e branding UNO ULTRAS
+Pulsanti di navigazione verso Gioca, Shop, Profilo
+Area news o eventi (se presente)
+Indicatore stato account o crediti
+Problemi rilevati
+Nessun problema critico rilevato nella schermata Home
+La struttura visiva potrebbe beneficiare di maggiore gerarchia informativa
+Accessibilita
+I pulsanti di navigazione principali devono avere label ARIA descrittive
+Il focus iniziale deve essere posizionato correttamente al caricamento
+La schermata deve essere navigabile completamente da tastiera
+3.2  Gioca
+Stato: Completa — con bug critico
+La schermata di gioco e quella piu importante del progetto. Il motore UNO e funzionante e gestisce mazzo, turni, carte speciali, pesca, penalita e vittoria. Tuttavia esiste un bug critico: quando il giocatore umano usa una carta wild o wild4, il colore viene scelto automaticamente invece di essere selezionato dall'utente.
+Elementi presenti
+Tavolo di gioco con mazzo e scarto visibili
+Mano del giocatore con carte interattive
+Log di partita con ultime mosse
+Indicatore turno corrente e direzione
+Pulsante pesca quando non si puo giocare
+Visualizzazione mani avversari (numero carte)
+Feedback vittoria/sconfitta
+Problemi rilevati
+Scelta colore wild mancante: il colore viene assegnato da nextColor() senza chiedere al giocatore
+Log di partita mostra solo le ultime 6 righe senza scroll accessibile
+Le carte giocabili non hanno evidenziazione visiva chiara rispetto a quelle non giocabili
+Nessun feedback visivo sul drawStack cumulativo in corso
+AI avversaria gioca in modo casuale senza strategia visibile
+Accessibilita
+Il log di partita non ha aria-live: le mosse non vengono annunciate a screen reader
+Le carte non hanno aria-label descrittive (colore + valore + se giocabile)
+La scelta colore wild, quando implementata, deve funzionare senza mouse
+Il feedback di turno, pesca e vittoria deve essere testuale, non solo visivo
+I colori delle carte non devono essere l'unico indicatore informativo
+3.3  Shop
+Stato: Parziale
+La schermata Shop mostra una lista di oggetti acquistabili con i crediti accumulati in partita. L'interfaccia e visivamente presente ma la logica di transazione non e implementata: i pulsanti di acquisto non producono effetti reali sul profilo.
+Elementi presenti
+Lista oggetti con nome, descrizione e costo in crediti
+Indicatore crediti disponibili del giocatore
+Pulsanti di acquisto per ogni oggetto
+Categorie o filtri (se presenti)
+Problemi rilevati
+I pulsanti di acquisto non eseguono transazioni reali
+Non c'e feedback dopo un tentativo di acquisto
+Il saldo crediti non si aggiorna dopo un acquisto
+Nessuna distinzione visiva tra oggetti acquistati e non acquistati
+Nessuna conferma prima dell'acquisto
+Accessibilita
+I pulsanti di acquisto devono avere label che includono nome oggetto e costo
+Il saldo crediti deve essere annunciato quando cambia
+La lista oggetti deve essere navigabile da tastiera in ordine logico
+3.4  Impostazioni
+Stato: Parziale
+La schermata Impostazioni contiene toggle per accessibilita, audio e grafica. Il salvataggio delle preferenze funziona tramite localStorage, ma le impostazioni di accessibilita non sono integrate nel flusso di gioco reale. Esistono come scelta utente ma non modificano il comportamento dell'interfaccia durante la partita.
+Elementi presenti
+Toggle accessibilita (NVDA/screen reader)
+Impostazioni audio (volume, effetti, musica)
+Impostazioni grafiche (tema, animazioni)
+Salvataggio automatico su localStorage
+Problemi rilevati
+Le impostazioni accessibilita non hanno effetto sul gameplay reale
+Nessun feedback visivo o sonoro al cambio di impostazione
+Non e chiaro quale sia lo stato attuale di ogni toggle prima di interagire
+Manca una sezione per le scorciatoie da tastiera
+Accessibilita
+Ogni toggle deve avere aria-checked correttamente impostato
+I cambi di stato devono essere annunciati da screen reader
+Le impostazioni accessibilita devono propagarsi al gameplay in modo reale
+La schermata deve essere completamente navigabile da tastiera
+3.5  Profilo
+Stato: Completa
+La schermata Profilo e quella piu solida del progetto. Mostra i dati del giocatore persistiti su localStorage: MMR, crediti, vittorie, sconfitte e titoli sbloccati. La struttura e chiara e i dati si aggiornano correttamente dopo ogni partita.
+Elementi presenti
+Nome giocatore e avatar (se presente)
+MMR corrente e storico approssimativo
+Crediti disponibili
+Contatori vittorie e sconfitte
+Lista titoli sbloccati con condizioni
+Statistiche aggiuntive (streak, partite totali)
+Problemi rilevati
+I titoli sbloccabili non mostrano le condizioni per sbloccare quelli ancora bloccati
+Non c'e distinzione visiva chiara tra titoli ottenuti e titoli obiettivo
+Manca uno storico partite dettagliato per sessione
+Accessibilita
+I dati statistici devono avere label descrittive, non solo numeri isolati
+La lista titoli deve essere navigabile da tastiera
+Le condizioni di sblocco devono essere leggibili da screen reader
+3.6  Classifica
+Stato: Placeholder
+La schermata Classifica e attualmente un placeholder con dati hardcoded. Mostra una tabella con i primi dieci giocatori generati da RANKS.slice(0,10) con nomi fittizi. Non riflette il profilo reale del giocatore ne dati persistenti.
+Elementi presenti
+Tabella top 10 con posizione, nome e punteggio
+Nessuna indicazione della posizione del giocatore corrente
+Dati statici non aggiornabili
+Problemi rilevati
+I dati sono completamente fittizi e non riflettono partite reali
+Il giocatore corrente non appare nella classifica
+Non c'e ordinamento ne filtro per periodo o modalita
+Nessuna persistenza: al reload i dati restano identici
+Accessibilita
+La tabella deve avere intestazioni con scope corretto per screen reader
+La posizione del giocatore corrente deve essere evidenziata e annunciata
+La navigazione nella tabella da tastiera deve seguire l'ordine logico delle celle
+4. Schermate giochi aggiuntivi
+Le schermate dei giochi aggiuntivi sono shell UI senza logica implementata. Rappresentano la struttura visiva prevista ma non hanno motori di gioco, stato o interazioni funzionanti.
+Gioco
+Cosa c'e
+Cosa manca
+Blackjack
+Layout tavolo, area carte, pulsanti Pesca e Stai
+Motore completo, dealer AI, calcolo punteggio, fine partita
+Scopa
+Schermata vuota con titolo
+Tutto: mazzo, tavolo, prese, punteggio, AI
+Poker
+Schermata vuota con titolo
+Tutto: mano, puntate, combinazioni, AI, pot
+Burraco
+Schermata vuota con titolo
+Tutto: mazzo doppio, combinazioni, punteggio, AI
+5. Priorita interventi UI
+Priorita 1 — Critico
+Implementare modal scelta colore wild nel gameplay
+Aggiungere aria-live al log di partita
+Aggiungere aria-label descrittive a ogni carta giocabile
+Priorita 2 — Alto
+Evidenziare visivamente le carte giocabili rispetto a quelle non giocabili
+Sostituire la leaderboard hardcoded con dati reali da localStorage
+Propagare le impostazioni accessibilita al gameplay
+Aggiungere feedback testuale su turno, pesca, penalita e vittoria
+Priorita 3 — Medio
+Aggiungere indicatore visivo del drawStack cumulativo
+Mostrare condizioni di sblocco per i titoli ancora bloccati nel Profilo
+Aggiungere conferma prima dell'acquisto nello Shop
+Rendere la tabella Classifica navigabile da tastiera con scope corretti
+Priorita 4 — Futuro
+Implementare almeno un gioco aggiuntivo completo (Blackjack consigliato)
+Aggiungere storico partite dettagliato nel Profilo
+Rendere lo Shop funzionante con transazioni reali
+Aggiungere sezione scorciatoie da tastiera nelle Impostazioni
