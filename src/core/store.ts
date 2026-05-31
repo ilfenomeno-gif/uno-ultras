@@ -11,7 +11,9 @@ export const GAME_LABELS: Record<GameId, string> = {
   burraco: 'Burraco',
   blackjack: 'Blackjack',
   millemiglia: 'Millemiglia',
-  scala40: 'Scala 40'
+  scala40: 'Scala 40',
+  briscola: 'Briscola',
+  tressette: 'Tressette'
 };
 
 export const RANKS = [

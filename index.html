@@ -6,13 +6,47 @@
     <meta name="theme-color" content="#0b1020" />
     <title>UNO ULTRAS DEFINITIVO - Beta Demo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Exo+2:wght@600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Exo+2:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
-    <div id="app"></div>
+    <a href="#fn-main" class="skip-link">Vai al contenuto</a>
+
+    <div class="fn-bg" aria-hidden="true">
+      <div class="fn-bg-overlay"></div>
+    </div>
+
+    <header class="fn-navbar" role="banner">
+      <div class="fn-navbar-inner">
+        <span class="fn-logo">UNO<span class="fn-logo-accent">ULTRAS</span></span>
+
+        <nav class="fn-nav" role="navigation" aria-label="Hub principale" id="fn-nav"></nav>
+
+        <div class="fn-navbar-right">
+          <button class="fn-profile-btn" data-action="goto" data-screen="profile" aria-label="Profilo giocatore">
+            <div class="fn-avatar" id="fn-avatar">U</div>
+            <span class="fn-username" id="fn-username">Giocatore</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="fn-main" id="fn-main" tabindex="-1"></main>
+
+    <div class="fn-level-badge" id="fn-level-badge" aria-label="Livello account">
+      <span class="fn-level-label">LVL</span>
+      <span class="fn-level-num" id="fn-level-num">1</span>
+    </div>
+
+    <div id="notify" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <div class="fn-modal-overlay" id="fn-modal-overlay" aria-hidden="true">
+      <div class="fn-modal" role="dialog" aria-modal="true" aria-label="Seleziona modalita di gioco" id="fn-modal"></div>
+    </div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

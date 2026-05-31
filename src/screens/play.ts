@@ -269,9 +269,17 @@ export function stopGame(): void {
 }
 
 export function startMode(): void {
-  selectedGame = 'uno';
   showHandoffScreen = false;
   handoffPlayerName = '';
+
+  if (selectedGame !== 'uno') {
+    engine = null;
+    gameLog = [`Modalita ${GAME_LABELS[selectedGame]} pronta.`];
+    clearPendingWild();
+    clearAiTimer();
+    renderCallback?.();
+    return;
+  }
 
   if (selectedMode === 'single') {
     selectedPlayers = 2;
@@ -437,4 +445,37 @@ export function handlePlayAction(action: string, actor: HTMLElement): boolean {
   }
 
   return false;
+}
+
+export function getUnoRuntimeState(): {
+  playerHand: Card[];
+  discardTop: Card | null;
+  deckCount: number;
+  opponents: { name: string; cardCount: number; isActive: boolean; position: 'top' | 'left' | 'right'; title?: string }[];
+  currentPlayer: number;
+  isPlayerTurn: boolean;
+  playableIndices: number[];
+} | null {
+  if (!engine) return null;
+
+  const state = engine.state;
+  const positions: Array<'top' | 'left' | 'right'> = ['top', 'left', 'right'];
+  const opponents = state.players
+    .slice(1)
+    .map((player, index) => ({
+      name: player.name,
+      cardCount: player.hand.length,
+      isActive: state.currentPlayerIndex === index + 1,
+      position: positions[index] ?? 'top'
+    }));
+
+  return {
+    playerHand: [...state.players[0].hand],
+    discardTop: state.discard[state.discard.length - 1] ?? null,
+    deckCount: state.deck.length,
+    opponents,
+    currentPlayer: state.currentPlayerIndex,
+    isPlayerTurn: isHumanTurn(state),
+    playableIndices: engine.getPlayableIndicesForCurrent()
+  };
 }
