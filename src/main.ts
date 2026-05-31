@@ -52,6 +52,12 @@ document.addEventListener('input', (event) => {
   if (profileField === 'name') {
     profile.name = ((target as HTMLInputElement).value || '').trim() || 'Giocatore';
     saveProfile();
+
+    const fnUsername = document.getElementById('fn-username');
+    const fnAvatar = document.querySelector('.fn-avatar');
+    if (fnUsername) fnUsername.textContent = profile.name;
+    if (fnAvatar) fnAvatar.textContent = profile.name.charAt(0).toUpperCase() || 'U';
+
     return;
   }
   if (handleSettingsInput(target)) render();

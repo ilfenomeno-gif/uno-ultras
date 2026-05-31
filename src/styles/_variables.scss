@@ -1,16 +1,29 @@
 :root {
-  --bg: #0a0e1a;
-  --bg2: #1a1a35;
-  --teal: #45e8cf;
-  --amber: #ffba52;
-  --rose: #ff7ca5;
-  --violet: #7c5fff;
-  --neon: #00ffe7;
-  --text: #f2f6ff;
-  --muted: rgba(242, 246, 255, 0.72);
-  --glass: rgba(20, 24, 40, 0.82);
-  --glass-strong: rgba(30, 26, 49, 0.92);
-  --glow: 0 0 16px 2px var(--neon);
+  --fn-bg-dark: #0a0f1e;
+  --fn-bg-mid: #0f1a35;
+  --fn-navy: #0d1b2a;
+  --fn-panel: rgba(10, 14, 28, 0.82);
+  --fn-panel-dark: rgba(6, 10, 20, 0.9);
+  --fn-yellow: #f5c518;
+  --fn-yellow-h: #ffe040;
+  --fn-yellow-glow: rgba(245, 197, 24, 0.55);
+  --fn-blue-el: #00d4ff;
+  --fn-blue-glow: rgba(0, 212, 255, 0.4);
+  --fn-purple: #7c3aed;
+  --fn-tab-bg: rgba(255, 255, 255, 0.08);
+  --fn-tab-active: #ffffff;
+  --fn-text: #ffffff;
+  --fn-text-muted: rgba(255, 255, 255, 0.65);
+  --fn-border: rgba(255, 255, 255, 0.12);
+  --fn-red: #e63535;
+  --fn-green: #2ecc71;
+  --fn-orange: #ff6b00;
+
+  --fn-r-sm: 6px;
+  --fn-r-md: 10px;
+  --fn-r-lg: 16px;
+  --fn-r-xl: 22px;
+  --fn-r-pill: 999px;
 }
 
 * {
@@ -24,9 +37,9 @@ body {
 }
 
 body {
-  font-family: 'Manrope', 'Sora', sans-serif;
-  color: var(--text);
-  background: var(--bg);
+  font-family: 'Burbank Big Rg', 'Barlow Condensed', 'Exo 2', 'Impact', sans-serif;
+  color: var(--fn-text);
+  background: var(--fn-bg-dark);
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -37,33 +50,9 @@ body.reduce-motion * {
 }
 
 body.colorblind .card.red {
-  background: #0077bb;
+  background: linear-gradient(135deg, #0055aa, #0077cc);
 }
 
 body.colorblind .card.green {
-  background: #ee7733;
-}
-
-.bg-animated {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.bg-svg {
-  position: absolute;
-  width: 100vw;
-  height: 100vh;
-  left: 0;
-  top: 0;
-  z-index: 1;
-}
-
-.bg-overlay {
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(120deg, rgba(255, 255, 255, 0.02) 0 2px, transparent 2px 32px);
-  z-index: 2;
-  pointer-events: none;
+  background: linear-gradient(135deg, #cc5500, #ee7733);
 }
