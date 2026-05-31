@@ -1,13 +1,31 @@
+import { profile } from '../core/store';
+
 export function renderShop(): string {
+  const items = [
+    { id: 'bundle-weekly', name: 'Bundle Settimanale', desc: 'Skin tavolo + emote + titolo.', cost: 450 },
+    { id: 'legendary-box', name: 'Cassa Leggendaria', desc: 'Drop titoli premium e FX.', cost: 800 },
+    { id: 'xp-token', name: 'Token XP', desc: 'Boost progressione per 3 match.', cost: 120 }
+  ];
+
+  const cards = items
+    .map(
+      (item) => `
+      <article class="panel compact">
+        <h4>${item.name}</h4>
+        <p>${item.desc}</p>
+        <button class="btn-primary" type="button" data-action="buy-item" data-cost="${item.cost}" data-item-id="${item.id}" aria-label="Acquista ${item.name} per ${item.cost} crediti">
+          Acquista ${item.cost}
+        </button>
+      </article>
+    `
+    )
+    .join('');
+
   return `
     <section class="panel">
       <h2>Shop</h2>
-      <p>Demo shop interna pronta per beta.</p>
-      <div class="grid three">
-        <article class="panel compact"><h4>Bundle Settimanale</h4><p>Skin tavolo + emote + titolo.</p><button class="btn-primary">Acquista 450</button></article>
-        <article class="panel compact"><h4>Cassa Leggendaria</h4><p>Drop titoli premium e FX.</p><button class="btn-primary">Apri 800</button></article>
-        <article class="panel compact"><h4>Token XP</h4><p>Boost progressione per 3 match.</p><button class="btn-primary">Attiva 120</button></article>
-      </div>
+      <p>I tuoi crediti: <strong id="shop-credits">${profile.credits}</strong></p>
+      <div class="grid three">${cards}</div>
     </section>
   `;
 }
