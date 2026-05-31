@@ -28,6 +28,26 @@ function cardLabel(card: Card): string {
   return card.value;
 }
 
+function colorLabel(color: CardColor): string {
+  if (color === 'red') return 'rosso';
+  if (color === 'blue') return 'blu';
+  if (color === 'green') return 'verde';
+  if (color === 'yellow') return 'giallo';
+  return 'jolly';
+}
+
+function cardAriaLabel(card: Card, playable: boolean): string {
+  return `Carta ${cardLabel(card)} ${colorLabel(card.color)}, ${playable ? 'giocabile' : 'non giocabile'}`;
+}
+
+function focusAfterAction(): void {
+  window.requestAnimationFrame(() => {
+    const logEntry = document.querySelector('.log .log-entry') as HTMLElement | null;
+    const playableCard = document.querySelector('.hand .card.playable:not([disabled])') as HTMLElement | null;
+    (logEntry ?? playableCard)?.focus();
+  });
+}
+
 export function setSelectedGame(game: GameId): void {
   selectedGame = game;
 }
@@ -39,13 +59,13 @@ export function setSelectedPlayers(players: PlayersMode): void {
 export function renderGameMatrix(): string {
   const games = Object.entries(GAME_LABELS).map(([id, name]) => {
     const active = selectedGame === id;
-    return `<button class="chip ${active ? 'active' : ''}" data-action="pick-game" data-game="${id}">${name}</button>`;
+    return `<button class="chip ${active ? 'active' : ''}" data-action="pick-game" data-game="${id}" aria-pressed="${active ? 'true' : 'false'}">${name}</button>`;
   });
 
   const modes = [2, 3, 4].map((value) => {
     const active = selectedPlayers === value;
     const label = value === 2 ? '1v1' : `${value} giocatori`;
-    return `<button class="chip ${active ? 'active' : ''}" data-action="pick-players" data-players="${value}">${label}</button>`;
+    return `<button class="chip ${active ? 'active' : ''}" data-action="pick-players" data-players="${value}" aria-pressed="${active ? 'true' : 'false'}">${label}</button>`;
   });
 
   return `
@@ -79,7 +99,7 @@ export function renderUnoBoard(): string {
     .map((card, idx) => {
       const playable = state.currentPlayerIndex === 0 && playableIndices.includes(idx);
       return `
-        <button class="card ${colorClass(card.color)} ${playable ? 'playable' : ''}" data-action="play-card" data-index="${idx}" ${playable ? '' : 'disabled'}>
+        <button class="card ${colorClass(card.color)} ${playable ? 'playable' : ''}" data-action="play-card" data-index="${idx}" aria-label="${cardAriaLabel(card, playable)}" ${playable ? '' : 'disabled'}>
           <span>${cardLabel(card)}</span>
         </button>
       `;
@@ -97,8 +117,8 @@ export function renderUnoBoard(): string {
       </div>
       <div class="opponents">${opponents}</div>
       <div class="table-area">
-        <div class="deck" data-action="draw">PESCA</div>
-        <div class="discard ${colorClass(topCard.color)}">${cardLabel(topCard)}</div>
+        <div class="deck" data-action="draw" aria-label="Pesca carta dal mazzo">PESCA</div>
+        <div class="discard ${colorClass(topCard.color)}" aria-label="Carta scartata: ${cardLabel(topCard)} ${colorLabel(topCard.color)}">${cardLabel(topCard)}</div>
       </div>
       <div class="hand">${hand}</div>
       <div class="game-actions">
@@ -106,7 +126,7 @@ export function renderUnoBoard(): string {
         <button class="btn-ghost" data-action="draw">Pesca Carta</button>
         <button class="btn-ghost" data-action="stop-game">Abbandona Match</button>
       </div>
-      <div class="log">${gameLog.slice(0, 6).map((x) => `<div>${x}</div>`).join('')}</div>
+      <div class="log" aria-live="polite" aria-atomic="false">${gameLog.slice(0, 6).map((x) => `<button type="button" class="log-entry">${x}</button>`).join('')}</div>
     </section>
   `;
 }
@@ -176,6 +196,7 @@ export function handlePlayAction(action: string, actor: HTMLElement): boolean {
     const message = engine.drawForCurrent();
     gameLog.unshift(message);
     renderCallback?.();
+    focusAfterAction();
     triggerAi();
     return true;
   }
@@ -184,6 +205,7 @@ export function handlePlayAction(action: string, actor: HTMLElement): boolean {
     engine.sayUno();
     gameLog.unshift('UNO dichiarato.');
     renderCallback?.();
+    focusAfterAction();
     return true;
   }
 
@@ -201,6 +223,7 @@ export function handlePlayAction(action: string, actor: HTMLElement): boolean {
     }
 
     renderCallback?.();
+    focusAfterAction();
     triggerAi();
     return true;
   }

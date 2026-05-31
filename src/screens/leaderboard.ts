@@ -8,7 +8,7 @@ export function renderLeaderboard(): string {
   return `
     <section class="panel">
       <h2>Classifica Demo</h2>
-      <table class="board">
+      <table class="board" aria-label="Classifica demo locale">
         <thead><tr><th>Pos</th><th>Nome</th><th>Rank</th><th>MMR</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
