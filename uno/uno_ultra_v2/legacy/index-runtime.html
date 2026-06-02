@@ -887,6 +887,12 @@ function nvdaAnnounce(msg, priority){
 ═══════════════════════════════════════════════════ -->
 <div class="scr" id="splash" role="region" aria-label="Menu principale">
   <div class="splash-ambient"></div>
+  <div class="splash-card-layer" aria-hidden="true">
+    <div class="splash-card-dec c1">7</div>
+    <div class="splash-card-dec c2">+2</div>
+    <div class="splash-card-dec c3">↺</div>
+    <div class="splash-card-dec wild">W</div>
+  </div>
 
   <!-- ══ ROCKET-LEAGUE STYLE LAYOUT ══ -->
   <div class="rl-layout">
@@ -1840,6 +1846,94 @@ function nvdaAnnounce(msg, priority){
   <!-- Animated background -->
   <div class="ol-bg"></div>
 
+  <div class="ol-shell">
+    <div class="ol-shell-left">
+      <div class="ol-rail-head">
+        <div class="ol-rail-kicker">Sfide disponibili</div>
+        <div class="ol-rail-title">Online / Multiplayer</div>
+      </div>
+      <div class="ol-challenge-list">
+        <button class="ol-challenge-item active" type="button" data-mode="ranked" onclick="olSelectPlaylist('ranked',this)">
+          <span class="ol-challenge-tag">RANKED</span>
+          <strong>Competitiva</strong>
+          <span>Partite classificate e progressione MMR.</span>
+        </button>
+        <button class="ol-challenge-item" type="button" data-mode="casual" onclick="olSelectPlaylist('casual',this)">
+          <span class="ol-challenge-tag alt">FUN</span>
+          <strong>Casual</strong>
+          <span>Lobby leggere, ingresso rapido, zero pressione.</span>
+        </button>
+        <button class="ol-challenge-item" type="button" data-mode="blitz" onclick="olSelectPlaylist('blitz',this)">
+          <span class="ol-challenge-tag warm">FAST</span>
+          <strong>Speed Blitz</strong>
+          <span>Turni veloci e timer aggressivo.</span>
+        </button>
+        <button class="ol-challenge-item" type="button" data-mode="chaos" onclick="olSelectPlaylist('chaos',this)">
+          <span class="ol-challenge-tag chaos">WILD</span>
+          <strong>Chaos</strong>
+          <span>Regole rotanti e ritmo imprevedibile.</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="ol-shell-center">
+      <div class="ol-hero-row">
+        <div class="ol-hero-copy">
+          <div class="ol-hero-kicker">UNO Ultra</div>
+          <h1 class="ol-hero-title">Modalità online</h1>
+          <p class="ol-hero-sub">Entra in lobby, invita gli amici e riempi gli slot della scena 3D.</p>
+        </div>
+        <button class="ol-social-chip" id="ol-social-chip" type="button" onclick="olOpenSocialPanel()" aria-label="Apri pannello social">
+          <span class="ol-social-chip-icon">👥</span>
+          <span class="ol-social-chip-label">Lobby</span>
+          <span class="ol-social-chip-count" id="ol-lobby-count">0</span>
+        </button>
+      </div>
+
+      <div class="ol-stage" id="ol-stage">
+        <div class="ol-stage-backdrop"></div>
+        <div class="ol-stage-grid" id="ol-stage-grid">
+          <button class="ol-player-card slot-left-2" type="button" data-slot="g3" onclick="olOpenSocialPanel()">
+            <span class="ol-player-card-slot">+</span>
+            <strong>Slot libero</strong>
+            <span>Invita un amico</span>
+          </button>
+          <button class="ol-player-card slot-left-1" type="button" data-slot="g2" onclick="olOpenSocialPanel()">
+            <span class="ol-player-card-slot">+</span>
+            <strong>Slot libero</strong>
+            <span>Invita un amico</span>
+          </button>
+          <button class="ol-player-card slot-center filled" type="button" data-slot="host" onclick="olOpenSocialPanel()">
+            <span class="ol-player-card-emoji" id="ol-player-host-emoji">🎮</span>
+            <strong id="ol-player-host-name">Giocatore</strong>
+            <span id="ol-player-host-meta">Tu</span>
+          </button>
+          <button class="ol-player-card slot-right-1" type="button" data-slot="g1" onclick="olOpenSocialPanel()">
+            <span class="ol-player-card-slot">+</span>
+            <strong>Slot libero</strong>
+            <span>Invita un amico</span>
+          </button>
+          <button class="ol-player-card slot-right-2" type="button" data-slot="g4" onclick="olOpenSocialPanel()">
+            <span class="ol-player-card-slot">+</span>
+            <strong>Slot libero</strong>
+            <span>Invita un amico</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ol-bottom-row">
+        <div class="ol-mode-tabs" role="tablist" aria-label="Modalità multiplayer">
+          <button class="ol-mode-tab" id="ol-mode-1v1" type="button" onclick="olSelectCount('1v1',this)">1v1</button>
+          <button class="ol-mode-tab" id="ol-mode-3p" type="button" onclick="olSelectCount('3p',this)">3P</button>
+          <button class="ol-mode-tab" id="ol-mode-4p" type="button" onclick="olSelectCount('4p',this)">4P</button>
+          <button class="ol-mode-tab active" id="ol-mode-2v2" type="button" onclick="olSelectCount('2v2',this)">2v2</button>
+          <button class="ol-mode-tab" id="ol-mode-3v3" type="button" onclick="olSelectCount('3v3',this)">3v3</button>
+        </div>
+        <button class="ol-cta-play" type="button" onclick="olStartGame()">GIOCA</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ CLUB LEFT DRAWER ═══ -->
   <div class="ol-club-drawer" id="ol-club-drawer">
     <div class="ol-club-drawer-inner" id="ol-club-drawer-inner">
@@ -2093,6 +2187,41 @@ function nvdaAnnounce(msg, priority){
   </div><!-- /.ol-drawer -->
 
 </div><!-- /.ol-screen -->
+
+<div class="ol-social-overlay" id="ol-social-overlay" aria-hidden="true">
+  <div class="ol-social-panel" role="dialog" aria-modal="true" aria-labelledby="ol-social-title">
+    <button class="ol-social-close" type="button" onclick="olCloseSocialPanel()" aria-label="Chiudi pannello social">✕</button>
+    <div class="ol-social-top">
+      <div>
+        <div class="ol-social-kicker">Pannello social</div>
+        <div class="ol-social-title" id="ol-social-title">Lobby e amici online</div>
+      </div>
+      <div class="ol-social-badge"><span id="ol-social-count">0</span> membri</div>
+    </div>
+    <div class="ol-social-grid">
+      <section class="ol-social-block">
+        <div class="ol-social-block-title">Invita amici online</div>
+        <div class="ol-social-list" id="ol-social-friends"></div>
+      </section>
+      <section class="ol-social-block">
+        <div class="ol-social-block-title">Unisciti</div>
+        <div class="ol-social-join-row">
+          <input class="ol-social-input" id="ol-social-code" type="text" maxlength="8" placeholder="Codice lobby" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" onkeydown="if(event.key==='Enter')olSocialJoinCode()">
+          <button class="ol-social-action" type="button" onclick="olSocialJoinCode()">Unisciti</button>
+        </div>
+        <div class="ol-social-hint">Inserisci il codice della lobby privata oppure usa uno degli amici online.</div>
+      </section>
+      <section class="ol-social-block">
+        <div class="ol-social-block-title">Gestione amici</div>
+        <div class="ol-social-join-row">
+          <input class="ol-social-input" id="ol-social-friend-code" type="text" maxlength="8" placeholder="ID / username" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" onkeydown="if(event.key==='Enter')frSendRequest()">
+          <button class="ol-social-action secondary" type="button" onclick="frSendRequest()">Aggiungi</button>
+        </div>
+        <div class="ol-social-hint">Aggiungi amici con ID o username, poi invitali al volo.</div>
+      </section>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ GAME MODE MODAL (host/join panels) ═══ -->
 <div class="ol-modal-overlay" id="ol-modal-overlay">
@@ -3812,14 +3941,13 @@ function _backupDownload(json){
   a.href=url;
   a.download=`uno-ultra-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
-  URL.revokeObjectURL(url);
+  const _playerName = (typeof P !== 'undefined' && P && P.name) ? P.name : 'Tu';
   _backupSaveMeta();
   notify('📦 Backup scaricato!');
 }
-
+  setText('mp-slot-host-name',_playerName);
 function _backupSaveMeta(){
-  try{
-    localStorage.setItem(BACKUP_META_KEY,JSON.stringify({
+  if(typeof mpOlSyncProfile === 'function') mpOlSyncProfile();
       lastAt:new Date().toISOString(),
       games:P?.games||0
     }));
@@ -10134,6 +10262,8 @@ function lobbyRenderSlots(){
     if(canStart && MP.conn && MP.conn.open) startBtn.removeAttribute('disabled');
     else if(!canStart) startBtn.setAttribute('disabled', '');
   }
+  if(typeof olRenderStage === 'function') olRenderStage();
+  if(typeof olUpdateLobbyMeta === 'function') olUpdateLobbyMeta();
 }
 
 // ╔═══════════════════════════════════════════════════════════╗
@@ -10680,6 +10810,7 @@ function genRoomCode(){
 // ── Open multiplayer screen ───────────────────────────
 function openMultiplayer(){
   sfx.click();
+  const _playerName = (typeof P !== 'undefined' && P && P.name) ? P.name : 'Tu';
   // FIX: if an active MP connection already exists (e.g. rematch flow), just show the screen
   if(MP.conn&&MP.conn.open){
     showMpLobbyAfterGame();
@@ -10710,7 +10841,7 @@ function openMultiplayer(){
   setText('mp-host-status-txt','Generazione codice…');
   el('mp-host-dot')?.classList.remove('connected','error');
   el('mp-host-dot')?.classList.add('waiting');
-  setText('mp-slot-host-name',P.name||'Tu');
+  setText('mp-slot-host-name',_playerName);
   // Reset guest slot
   const gs=el('mp-slot-guest');
   if(gs){gs.style.opacity='.4';gs.querySelector('.mp-slot-avatar').textContent='⏳';gs.querySelector('.mp-slot-name').textContent='In attesa…';}
@@ -20631,13 +20762,101 @@ function olToggleDrawer(){
   if(isOpen) olRenderFriends();
 }
 
+function olOpenSocialPanel(){
+  const ov = document.getElementById('ol-social-overlay');
+  if(!ov) return;
+  ov.classList.add('open');
+  ov.setAttribute('aria-hidden','false');
+  olRenderFriends();
+  olRenderStage();
+  olUpdateLobbyMeta();
+}
+
+function olCloseSocialPanel(){
+  const ov = document.getElementById('ol-social-overlay');
+  if(!ov) return;
+  ov.classList.remove('open');
+  ov.setAttribute('aria-hidden','true');
+}
+
+function olSocialJoinCode(){
+  const input = document.getElementById('ol-social-code');
+  const code = input && input.value ? input.value.trim().toUpperCase() : '';
+  if(!code){ notify('Inserisci un codice lobby valido'); return; }
+  if(_olCount === '3p' && typeof el === 'function'){
+    const i = el('mp-3p-join-input'); if(i) i.value = code;
+    if(typeof mp3pJoin === 'function') mp3pJoin();
+  } else if(_olCount === '3v3'){
+    const i = el('mp-3v3-join-input'); if(i) i.value = code;
+    if(typeof mp3v3JoinByCode === 'function') mp3v3JoinByCode();
+  } else if(_olCount === '2v2'){
+    const i = el('mp-2v2-join-input'); if(i) i.value = code;
+    if(typeof mp2v2JoinByCode === 'function') mp2v2JoinByCode();
+  } else {
+    const i = el('mp-join-input'); if(i) i.value = code;
+    if(typeof mpJoin === 'function') mpJoin();
+  }
+}
+
+function olUpdateLobbyMeta(){
+  const members = 1 + ((LOBBY.players || []).filter(p => p && p.slot !== 'host').length);
+  const countEl = document.getElementById('ol-lobby-count');
+  if(countEl) countEl.textContent = String(members);
+  const socialCount = document.getElementById('ol-social-count');
+  if(socialCount) socialCount.textContent = String(members);
+}
+
+function _olStagePlayerMeta(p){
+  if(!p) return { name: 'Slot libero', meta: 'Invita un amico', emoji: '+' , filled: false };
+  const isHost = p.role === 'host' || p.slot === 'host';
+  return {
+    name: p.name || (isHost ? 'Tu' : 'Giocatore'),
+    meta: isHost ? 'Host' : ((p.ready ? 'Pronto' : 'In attesa') + (p.ping != null ? ' · ' + p.ping + 'ms' : '')),
+    emoji: p.avatar || (isHost ? '🎮' : '👤'),
+    filled: true
+  };
+}
+
+function olRenderStage(){
+  const slots = [
+    { el: 'ol-player-host-name', meta: 'ol-player-host-meta', emoji: 'ol-player-host-emoji', slot: 'host' },
+    { slot: 'g2' },
+    { slot: 'g1' },
+    { slot: 'g3' },
+    { slot: 'g4' }
+  ];
+  const players = [];
+  const hostName = (typeof P !== 'undefined' && P && P.name) ? P.name : 'Giocatore';
+  players.push({ slot: 'host', name: hostName, role: 'host', ready: true, avatar: (typeof P !== 'undefined' && P && P.avatar) ? P.avatar : '🎮' });
+  (LOBBY.players || []).forEach(p => {
+    if(p && p.slot !== 'host') players.push(p);
+  });
+  const lookup = new Map(players.map(p => [p.slot, p]));
+  slots.forEach((s, idx) => {
+    const card = document.querySelector('.ol-player-card[data-slot="' + s.slot + '"]');
+    if(!card) return;
+    const player = lookup.get(s.slot);
+    const meta = _olStagePlayerMeta(player);
+    card.classList.toggle('filled', !!meta.filled);
+    card.classList.toggle('empty', !meta.filled);
+    const nameEl = card.querySelector('strong');
+    const subEl = card.querySelector('span:last-of-type');
+    const slotEl = card.querySelector('.ol-player-card-slot, .ol-player-card-emoji');
+    if(nameEl) nameEl.textContent = meta.name;
+    if(subEl) subEl.textContent = meta.meta;
+    if(slotEl) slotEl.textContent = meta.emoji;
+  });
+  olUpdateLobbyMeta();
+}
+
 /* ── Player count selector ── */
 function olSelectCount(mode, btn){
   _olCount = mode;
-  ['ol-pc-1v1','ol-pc-3p','ol-pc-4p','ol-pc-2v2','ol-pc-3v3'].forEach(id => {
+  ['ol-pc-1v1','ol-pc-3p','ol-pc-4p','ol-pc-2v2','ol-pc-3v3','ol-mode-1v1','ol-mode-3p','ol-mode-4p','ol-mode-2v2','ol-mode-3v3'].forEach(id => {
     const e = document.getElementById(id); if(e) e.classList.remove('active');
   });
   if(btn) btn.classList.add('active');
+  olUpdateLobbyMeta();
 }
 
 /* ── Playlist selector ── */
@@ -20645,6 +20864,8 @@ function olSelectPlaylist(mode, btn){
   _olPlaylist = mode;
   document.querySelectorAll('.ol-pl-item').forEach(i => i.classList.remove('active'));
   if(btn) btn.classList.add('active');
+  document.querySelectorAll('.ol-challenge-item').forEach(i => i.classList.remove('active'));
+  if(btn && btn.classList.contains('ol-challenge-item')) btn.classList.add('active');
   // Aggiorna badge modalità nelle lobby team
   _refreshTeamPlaylistBadges();
 }
@@ -20825,21 +21046,44 @@ function mpOlSyncProfile(){
   // Compat IDs
   st('mp-dr-uname', p.name||'Giocatore');
   st('mp-dr-rank', (p.rank||'Bronze I')+' · '+(p.mmr||200)+' MMR');
+  st('ol-player-host-name', p.name||'Giocatore');
+  st('ol-player-host-meta', 'Tu');
+  const hostEmoji = document.getElementById('ol-player-host-emoji'); if(hostEmoji) hostEmoji.textContent = p.avatar||'🎮';
+  olUpdateLobbyMeta();
+  olRenderStage();
 }
 
 /* ── Render friends in drawer ── */
 function olRenderFriends(){
   const list = document.getElementById('mp-dr-fr-list'); if(!list) return;
   const friends = (typeof P!=='undefined'&&P&&P.friends)?P.friends:[];
+  const socialList = document.getElementById('ol-social-friends');
   list.innerHTML='';
-  if(!friends.length){ list.innerHTML='<div class="ol-dr-fr-empty">Nessun amico ancora 👀</div>'; return; }
+  if(socialList) socialList.innerHTML='';
+  if(!friends.length){
+    list.innerHTML='<div class="ol-dr-fr-empty">Nessun amico ancora 👀</div>';
+    if(socialList) socialList.innerHTML='<div class="ol-social-empty">Nessun amico online ora.</div>';
+    return;
+  }
+  let onlineCount = 0;
   friends.forEach(fr=>{
+    if(fr.online) onlineCount++;
     const d=document.createElement('div');
     d.className='ol-dr-fr-item'+(fr.online?' online':'');
     d.innerHTML='<div class="ol-dr-fr-dot'+(fr.online?' online':'')+'"></div>'+
       '<div class="ol-dr-fr-name">'+(fr.name||fr.code)+'</div>'+
       (fr.online?'<button class="ol-dr-fr-inv" onclick="frInviteFriend(\''+fr.code+'\')">▶ Invita</button>':'');
     list.appendChild(d);
+    if(socialList){
+      const row=document.createElement('button');
+      row.type='button';
+      row.className='ol-social-friend'+(fr.online?' online':'');
+      row.onclick = fr.online ? function(){ frInviteFriend(fr.code); } : null;
+      row.innerHTML='<span class="ol-social-dot'+(fr.online?' online':'')+'"></span>'+
+        '<span class="ol-social-friend-name">'+(fr.name||fr.code)+'</span>'+
+        '<span class="ol-social-friend-meta">'+(fr.online?'Invita':'Offline')+'</span>';
+      socialList.appendChild(row);
+    }
   });
 }
 // Also alias for legacy calls
@@ -20857,6 +21101,8 @@ function olUpdateSlots(){
     if(dot) { dot.classList.toggle('on',!!guest); dot.classList.toggle('off',!guest); }
     if(slot){ slot.classList.toggle('filled',!!guest); slot.classList.toggle('empty',!guest); }
   });
+  olUpdateLobbyMeta();
+  olRenderStage();
 }
 window.olAddGuest=function(name,conn){
   const i=OL.guests.findIndex(g=>!g); if(i<0) return -1;
@@ -24450,9 +24696,15 @@ const BP_TITLES = [
 
 // Register BP titles in ALL_TITLES
 (function(){
+  const titleRegistry = (
+    (typeof ALL_TITLES !== 'undefined' && Array.isArray(ALL_TITLES))
+      ? ALL_TITLES
+      : (Array.isArray(globalThis.ALL_TITLES) ? globalThis.ALL_TITLES : (globalThis.ALL_TITLES = []))
+  );
+
   BP_TITLES.forEach(t=>{
-    if(!ALL_TITLES.find(x=>x.id===t.id)){
-      ALL_TITLES.push({id:t.id, txt:t.txt, req:-1, col:t.col, mmrReq:-1, feat:t.feat, desc:`Raggiungi Livello ${t.lv} del Battle Pass`});
+    if(!titleRegistry.find(x=>x.id===t.id)){
+      titleRegistry.push({id:t.id, txt:t.txt, req:-1, col:t.col, mmrReq:-1, feat:t.feat, desc:`Raggiungi Livello ${t.lv} del Battle Pass`});
     }
   });
 })();

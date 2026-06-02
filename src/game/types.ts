@@ -15,7 +15,7 @@ export type GameId =
   | 'scala40'
   | 'briscola'
   | 'tressette';
-export type GameMode = 'single' | 'local';
+export type GameMode = 'single' | 'local' | 'online';
 
 export type HubScreen = 'gioca' | 'negozio' | 'armadietto' | 'battle-card' | 'sfide' | 'carriera' | 'v-card';
 

@@ -1,4 +1,6 @@
 import { renderPlayerBadge } from './player-badge';
+import { renderGameShell } from './game-shell';
+import { formatMilleMigliaFace } from './card-face';
 
 export type MMCard =
   | { type: 'km'; value: 25 | 50 | 75 | 100 | 200; index: number }
@@ -34,60 +36,64 @@ export function renderMMBoard(state: MMViewState): string {
     return `<div class="fn-mm-kmbar"><div class="fn-mm-kmfill" style="width:${pct}%"></div><span>${km}/${target} km</span></div>`;
   };
 
-  return `
-    <div class="fn-board fn-board-mm">
-      ${opponentLeft ? `<div class="fn-side left">${renderPlayerBadge(opponentLeft)}${kmBar(opponentLeft.km, state.target)}</div>` : ''}
-      ${opponentRight ? `<div class="fn-side right">${renderPlayerBadge(opponentRight)}${kmBar(opponentRight.km, state.target)}</div>` : ''}
-
-      <div class="fn-board-center">
-        ${
-          opponentTop
-            ? `<div class="fn-opponents-row">${renderPlayerBadge(opponentTop)}${kmBar(opponentTop.km, state.target)}${
-                opponentTop.hazard ? `<div class="fn-mm-hazard active">${opponentTop.hazard}</div>` : ''
-              }</div>`
-            : ''
-        }
-
-        <div class="fn-table-area">
-          <button class="fn-deck-btn ${!state.isPlayerTurn ? 'disabled' : ''}" data-action="draw-card">
-            <span class="fn-deck-count">${state.deckCount}</span>
-            <span class="fn-deck-label">PESCA</span>
-          </button>
-          <div class="fn-discard empty">
-            <span class="fn-deck-count">${state.discardCount}</span>
-            <span class="fn-deck-label">SCARTO</span>
-          </div>
-        </div>
-
-        <div class="fn-player-area">
-          <div class="fn-mm-player-status">
-            ${kmBar(state.player.km, state.target)}
-            ${
-              state.player.hazard
-                ? `<div class="fn-mm-hazard active">⚠️ ${state.player.hazard}</div>`
-                : '<div class="fn-mm-hazard ok">✅ In marcia</div>'
-            }
-            ${
-              state.player.safeties.length > 0
-                ? `<div class="fn-mm-safeties">${state.player.safeties.map((s) => `<span class="fn-mm-safety-chip">🛡️ ${s}</span>`).join('')}</div>`
-                : ''
-            }
-          </div>
-          <div class="fn-hand" role="list">
-            ${state.player.hand
-              .map((card, i) => `
-              <button class="fn-card fn-mm-card type-${card.type}" data-action="${state.isPlayerTurn ? 'play-mm-card' : ''}" data-index="${i}" ${
-    !state.isPlayerTurn ? 'disabled' : ''
-  } role="listitem" aria-label="${card.type === 'km' ? `${card.value} km` : card.name}">
-                <span class="fn-mm-card-label">${
-                  card.type === 'km' ? `🚗 ${card.value}` : `${'emoji' in card ? card.emoji : ''} ${'name' in card ? card.name : card.type}`
-                }</span>
-              </button>
-            `)
-              .join('')}
-          </div>
-        </div>
+  const centerContent = `
+    <div class="fn-table-area">
+      <button class="fn-deck-btn ${!state.isPlayerTurn ? 'disabled' : ''}" data-action="draw-card">
+        <span class="fn-deck-count">${state.deckCount}</span>
+        <span class="fn-deck-label">PESCA</span>
+      </button>
+      <div class="fn-discard empty">
+        <span class="fn-deck-count">${state.discardCount}</span>
+        <span class="fn-deck-label">SCARTO</span>
       </div>
     </div>
   `;
+
+  const bottomContent = `
+    <div class="fn-player-area">
+      <div class="fn-mm-player-status">
+        ${kmBar(state.player.km, state.target)}
+        ${
+          state.player.hazard
+            ? `<div class="fn-mm-hazard active">⚠️ ${state.player.hazard}</div>`
+            : '<div class="fn-mm-hazard ok">✅ In marcia</div>'
+        }
+        ${
+          state.player.safeties.length > 0
+            ? `<div class="fn-mm-safeties">${state.player.safeties.map((s) => `<span class="fn-mm-safety-chip">🛡️ ${s}</span>`).join('')}</div>`
+            : ''
+        }
+      </div>
+      <div class="fn-hand" role="list">
+        ${state.player.hand
+          .map((card, i) => {
+            const face = formatMilleMigliaFace(card);
+            return `
+          <button class="fn-card fn-mm-card type-${card.type}" data-action="${state.isPlayerTurn ? 'play-mm-card' : ''}" data-index="${i}" ${
+    !state.isPlayerTurn ? 'disabled' : ''
+  } role="listitem" aria-label="${card.type === 'km' ? `${card.value} km` : card.name}">
+            <span class="fn-mm-card-label">${face.main}</span>
+            ${face.sub ? `<small class="fn-mm-card-sub">${face.sub}</small>` : ''}
+          </button>
+        `;
+          })
+          .join('')}
+      </div>
+    </div>
+  `;
+
+  return renderGameShell({
+    boardClass: 'fn-board-mm',
+    title: 'MILLE MIGLIA',
+    subtitle: state.isPlayerTurn ? 'Il tuo turno' : 'Turno avversario',
+    topSlot: opponentTop
+      ? `<div class="fn-opponents-row">${renderPlayerBadge(opponentTop)}${kmBar(opponentTop.km, state.target)}${
+          opponentTop.hazard ? `<div class="fn-mm-hazard active">${opponentTop.hazard}</div>` : ''
+        }</div>`
+      : '',
+    leftSlot: opponentLeft ? `${renderPlayerBadge(opponentLeft)}${kmBar(opponentLeft.km, state.target)}` : '',
+    rightSlot: opponentRight ? `${renderPlayerBadge(opponentRight)}${kmBar(opponentRight.km, state.target)}` : '',
+    centerContent,
+    bottomContent
+  });
 }

@@ -57,6 +57,13 @@
 - avviata migrazione multiplayer online (fase 1): `scripts/dev.js` include ora gateway WebSocket realtime (`/ws`) con servizi in-memory per presenza, inviti, lobby e lifecycle match
 - `createTransport` ora prova modalità online via WebSocket e mantiene fallback automatico BroadcastChannel locale, senza rompere i flussi shell esistenti
 - aggiunto canale presenza client (`createPresenceChannel`) e hook shell di transizione stato (`online`/`in_lobby`/`in_match`) su entry multiplayer, start match e cleanup
+- irrobustita la persistenza profilo shell con migrazione schema/versioning (`profileSchemaVersion`) e normalizzazione dati in load/save
+- aggiunto tracciamento rank persistente con notifica automatica `rank up`/`rank aggiornato` al cambio fascia MMR
+- iniziato lo split del monolite shell: estratta logica classifica nel modulo `js/shell/leaderboard-data.js`
+- rimossa Top100 finta basata su bot statici (`LB_BASE`): la classifica shell usa ora profili locali reali (`_loadDB` runtime + profilo shell)
+- migliorata accessibilità shell con focus management automatico su titolo pannello durante cambi screen/tab
+- secondo split del monolite shell: estratti helper rank in `js/shell/rank-utils.js` e rimossa duplicazione inline in `index.html`
+- contenimento feature-creep: card `Torneo` multiplayer rese esplicitamente preview-only (niente falsa navigazione/azione)
 
 ## Snapshot v-current
 

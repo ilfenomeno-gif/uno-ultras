@@ -83,6 +83,41 @@ describe('uno engine', () => {
     expect(lengths).toEqual([7, 7, 7, 7]);
   });
 
+  it('deals unique card ids across all players at game start', () => {
+    const game = new UnoEngine(4);
+    const allIds = game.state.players.flatMap((p) => p.hand.map((card) => card.id));
+    expect(new Set(allIds).size).toBe(allIds.length);
+  });
+
+  it('rarely produces identical full starting hands between players', () => {
+    const simulations = 1500;
+    let sameHandPairs = 0;
+    let comparedPairs = 0;
+
+    for (let sim = 0; sim < simulations; sim += 1) {
+      const game = new UnoEngine(4);
+      const signatures = game.state.players.map((player) =>
+        player.hand
+          .map((card) => `${card.color}:${card.value}`)
+          .sort()
+          .join('|')
+      );
+
+      for (let i = 0; i < signatures.length; i += 1) {
+        for (let j = i + 1; j < signatures.length; j += 1) {
+          comparedPairs += 1;
+          if (signatures[i] === signatures[j]) {
+            sameHandPairs += 1;
+          }
+        }
+      }
+    }
+
+    const ratio = sameHandPairs / comparedPairs;
+    // Statistical guardrail: full identical 7-card hands must stay extremely rare.
+    expect(ratio).toBeLessThan(0.0005);
+  });
+
   it('advances turn when drawing', () => {
     const game = new UnoEngine(2);
     const start = game.state.currentPlayerIndex;
@@ -93,7 +128,8 @@ describe('uno engine', () => {
   it('sets pendingWildIndex when player selects a wild card', async () => {
     const play = await import('../src/screens/play');
     play.setPlayRenderCallback(() => undefined);
-    play.setSelectedMode('single');
+    play.setSelectedMode('local');
+    play.setSelectedPlayers(2);
     play.startMode();
 
     const state = play.getEngineStateForTest();
@@ -114,7 +150,8 @@ describe('uno engine', () => {
   it('applies chosen color after wild selection', async () => {
     const play = await import('../src/screens/play');
     play.setPlayRenderCallback(() => undefined);
-    play.setSelectedMode('single');
+    play.setSelectedMode('local');
+    play.setSelectedPlayers(2);
     play.startMode();
 
     const state = play.getEngineStateForTest();

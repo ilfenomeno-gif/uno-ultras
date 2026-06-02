@@ -2,7 +2,7 @@ import { profile } from '../core/store';
 
 export function renderShop(): string {
   const items = [
-    { id: 'bundle-weekly', name: 'Bundle Settimanale', desc: 'Skin tavolo + emote + titolo.', cost: 450 },
+    { id: 'title-pass', name: 'Pass Targhette', desc: 'Sblocco progressivo targhette dedicate.', cost: 450 },
     { id: 'legendary-box', name: 'Cassa Leggendaria', desc: 'Drop titoli premium e FX.', cost: 800 },
     { id: 'xp-token', name: 'Token XP', desc: 'Boost progressione per 3 match.', cost: 120 }
   ];

@@ -88,3 +88,23 @@ File: `index.html`
 2. Introdurre persistenza server (Redis/DB) per sessioni, invites e lobby.
 3. Aggiungere auth session token e validazione identità.
 4. E2E multi-client automatici (2 browser context) su invite/lobby/start/end/cleanup.
+
+## Aggiornamento strutturale e UX (post-fase1)
+
+Interventi aggiuntivi applicati dopo la fase 1 per coprire criticità di code quality e credibilità prodotto:
+
+1. **Top100 non più placeholder statico**
+- Rimossa la base hardcoded (`LB_BASE`) dal rendering shell.
+- Nuova pipeline classifica: profili locali reali da runtime DB (`_loadDB`) + profilo shell.
+
+2. **Primo split del monolite shell**
+- Estratto modulo dedicato: `js/shell/leaderboard-data.js`.
+- `index.html` ora delega la costruzione dati classifica a una funzione pura (`buildTop100FromLocal`).
+
+3. **Accessibilità operativa su navigazione shell**
+- Aggiunto focus management automatico su cambi screen/tab (`showScreen`, `activateTab`, `activateMPTab`) con focus su titolo pannello.
+- Obiettivo: migliore usabilità tastiera/screen reader e contesto immediato dopo navigazione.
+
+4. **Ulteriore modularizzazione shell**
+- Estratto modulo `js/shell/rank-utils.js` per ranking labels/color.
+- Ridotta logica inline in `index.html` e migliorata separazione responsabilità.

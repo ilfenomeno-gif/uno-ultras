@@ -1,0 +1,204 @@
+// src/styles/_friends.scss
+
+// ── FRIEND TOAST ──────────────────────────────────────────
+.fn-friend-toast {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  z-index: 9999;
+  background: rgba(10, 15, 30, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 4px solid var(--fn-blue);
+  border-radius: var(--fn-r-lg);
+  padding: 16px 18px;
+  min-width: 300px;
+  max-width: 380px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  animation: slideInRight 0.25s ease both;
+
+  .fn-friend-toast-body {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    margin-bottom: 12px;
+    color: var(--fn-text);
+
+    strong {
+      color: var(--fn-yellow);
+    }
+  }
+
+  .fn-friend-toast-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .fn-lobby-code-pill {
+    display: inline-block;
+    background: rgba(245, 197, 24, 0.15);
+    border: 1px solid var(--fn-yellow);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-weight: 900;
+    color: var(--fn-yellow);
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+    font-size: 13px;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// ── PANNELLO AMICI ─────────────────────────────────────────
+.fn-friends-panel {
+  background: rgba(10, 15, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--fn-r-xl);
+  padding: 16px;
+  min-width: 240px;
+  margin-top: 24px;
+
+  .fn-friends-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+
+    h3 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-style: italic;
+      font-weight: 900;
+      font-size: 15px;
+      text-transform: uppercase;
+      color: var(--fn-yellow);
+      margin: 0;
+    }
+
+    .fn-friends-count {
+      background: var(--fn-yellow);
+      color: #000;
+      border-radius: 999px;
+      padding: 1px 7px;
+      font-size: 11px;
+      margin-left: 6px;
+    }
+
+    .fn-friends-add-btn {
+      font-size: 12px;
+      padding: 5px 12px;
+    }
+  }
+
+  .fn-friends-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fn-friend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .fn-friend-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 14px;
+    flex-shrink: 0;
+
+    &.online {
+      background: rgba(0, 212, 255, 0.2);
+      border: 2px solid var(--fn-blue);
+    }
+
+    &.offline {
+      background: rgba(255, 255, 255, 0.06);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      opacity: 0.5;
+    }
+  }
+
+  .fn-friend-info {
+    flex: 1;
+    min-width: 0;
+
+    strong {
+      display: block;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    span {
+      font-size: 11px;
+      color: var(--fn-muted);
+    }
+  }
+
+  .fn-friend-invite-btn {
+    font-size: 11px;
+    padding: 5px 10px;
+    flex-shrink: 0;
+  }
+
+  .fn-friends-empty {
+    text-align: center;
+    color: var(--fn-muted);
+    font-size: 13px;
+    padding: 16px 0;
+    line-height: 1.5;
+  }
+
+  .fn-friends-search {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    #fn-friend-search-results {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+
+      .fn-search-result-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: var(--fn-r-md);
+        font-size: 13px;
+
+        .fn-search-result-name {
+          font-family: 'Barlow Condensed', sans-serif;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+}

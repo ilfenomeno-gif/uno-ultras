@@ -4,18 +4,30 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 127.0.0.1 --port 5174",
+    "server": "node server/index.js",
+    "dev:server": "tsx server/index.ts",
+    "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run --config vite.config.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "qa:mode-matrix": "tsx scripts/qa-mode-matrix.ts"
   },
   "devDependencies": {
     "@types/node": "^22.15.29",
+    "concurrently": "^9.2.1",
     "playwright": "^1.60.0",
     "sass": "^1.89.0",
+    "tsx": "^4.22.4",
     "typescript": "^5.8.3",
     "vite": "^7.0.6",
     "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
   }
 }

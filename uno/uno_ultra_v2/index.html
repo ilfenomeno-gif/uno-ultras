@@ -149,16 +149,19 @@
 
         <!-- News hub unico -->
         <div class="section-label" id="news-label">Notizie &amp; Aggiornamenti</div>
-        <button class="news-hub-trigger" id="news-hub-trigger"
-                aria-haspopup="dialog"
-                aria-label="Apri hub notizie e aggiornamenti">
-          <span class="news-hub-dot" aria-hidden="true">●</span>
-          <span>
-            <strong>News Hub</strong>
-            <small id="news-hub-summary">Apri per vedere tutte le novità</small>
-          </span>
-          <span class="news-hub-open" aria-hidden="true">Apri ↗</span>
-        </button>
+        <div class="mode-news-shell" aria-label="News modalità correnti">
+          <div class="mode-news-strip" id="mode-news-strip" role="list" aria-label="Card aggiornamenti per modalità"></div>
+          <button class="news-hub-trigger compact" id="news-hub-trigger"
+                  aria-haspopup="dialog"
+                  aria-label="Apri hub notizie e aggiornamenti">
+            <span class="news-hub-dot" aria-hidden="true">●</span>
+            <span>
+              <strong>News Hub</strong>
+              <small id="news-hub-summary">Aggiornamenti filtrati sulla modalità selezionata</small>
+            </span>
+            <span class="news-hub-open" aria-hidden="true">Apri ↗</span>
+          </button>
+        </div>
 
         <!-- Hero cards + play card -->
         <div class="home-center">
@@ -533,6 +536,14 @@
             <button id="mp-mode-picker" class="mp-mode-picker" aria-haspopup="listbox" aria-expanded="false">
               UNO
             </button>
+            <div class="mp-mode-quick" role="group" aria-label="Selezione rapida modalità online">
+              <button class="mp-mode-quick-btn active" data-mode="uno" aria-pressed="true">UNO</button>
+              <button class="mp-mode-quick-btn" data-mode="ruba" aria-pressed="false">Ruba</button>
+              <button class="mp-mode-quick-btn" data-mode="scala" aria-pressed="false">Scala</button>
+              <button class="mp-mode-quick-btn" data-mode="bj" aria-pressed="false">BJ</button>
+              <button class="mp-mode-quick-btn" data-mode="scopa" aria-pressed="false">Scopa</button>
+              <button class="mp-mode-quick-btn" data-mode="poker" aria-pressed="false">Poker</button>
+            </div>
             <div id="mp-mode-list" class="mp-mode-list" role="listbox" aria-label="Scegli modalità" hidden>
               <button class="mp-mode-option active" data-mode="uno" role="option" aria-selected="true">🎴 UNO</button>
               <button class="mp-mode-option" data-mode="ruba" role="option" aria-selected="false">🃏 Ruba Mazzetto</button>
@@ -643,6 +654,8 @@
             <div class="torneo-badge gold">Stagionale</div>
           </button>
         </div>
+        <div class="section-label" style="margin-top:18px">🏷️ Targhette Torneo</div>
+        <div class="sfide-list" id="torneo-targhette-list" role="list" aria-label="Titoli sbloccabili nei tornei"></div>
       </section>
 
       <!-- ─── AMICI ───────────────────────────────────── -->
@@ -1120,6 +1133,8 @@
 <script type="module" src="./js/main.js"></script>
 <script type="module">
 import { createPeerId, createRoomCode, createTransport, createPresenceChannel } from './js/multiplayer.js';
+import { buildTop100FromLocal } from './js/shell/leaderboard-data.js';
+import { getRankName, getRankColor } from './js/shell/rank-utils.js';
 
 // ═══════════════════════════════════════════════════════════════
 //  UNO ULTRA — Launcher Script  (runs only in index.html shell)
@@ -1164,6 +1179,7 @@ const bpTrack       = document.getElementById('bp-track');
 const sfideList     = document.getElementById('sfide-list');
 const targhetteList = document.getElementById('targhette-list');
 const shopList      = document.getElementById('shop-list');
+const modeNewsStrip = document.getElementById('mode-news-strip');
 const lbList        = document.getElementById('leaderboard-list');
 const lockerPopup   = document.getElementById('locker-popup');
 const lockerPopupList = document.getElementById('locker-popup-list');
@@ -1180,6 +1196,16 @@ const SCREENS = {
 function showScreen(name) {
   Object.values(SCREENS).forEach(s => s.classList.remove('active'));
   if (SCREENS[name]) SCREENS[name].classList.add('active');
+  requestAnimationFrame(() => focusActivePanelTitle(name));
+}
+
+function focusActivePanelTitle(screenName = '') {
+  const container = SCREENS[screenName] || document;
+  if (!container) return;
+  const title = container.querySelector('.panel-title, .screen-title, .section-label');
+  if (!title || typeof title.focus !== 'function') return;
+  title.setAttribute('tabindex', '-1');
+  title.focus({ preventScroll: true });
 }
 
 // ── Announce (screen reader) ───────────────────────────────────
@@ -1251,13 +1277,106 @@ function beginMatchLifecycle(kind, payload = {}) {
 }
 
 const SHELL_PROFILE_KEY = 'uno-ultra-shell-profile-v1';
+const SHELL_PROFILE_SCHEMA_VERSION = 2;
+const SHELL_RANK_TRACK_KEY = 'uno-ultra-shell-rank-track-v1';
+
+function normalizeShellLocker(locker) {
+  const base = {
+    cardback: 'default',
+    border: 'default',
+    effect: 'default',
+    avatar: 'classic',
+    frameFx: 'none',
+  };
+  if (!locker || typeof locker !== 'object') return base;
+  return {
+    cardback: locker.cardback || base.cardback,
+    border: locker.border || base.border,
+    effect: locker.effect || base.effect,
+    avatar: locker.avatar || base.avatar,
+    frameFx: locker.frameFx || base.frameFx,
+  };
+}
+
+function migrateShellProfile(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+
+  const next = {
+    ...raw,
+    name: String(raw.name || '').trim() || null,
+    credits: Number(raw.credits) || 0,
+    level: Math.max(1, Number(raw.level) || 1),
+    xp: Math.max(0, Number(raw.xp) || 0),
+    xpNext: Math.max(100, Number(raw.xpNext) || 200),
+    mmr: Math.max(200, Number(raw.mmr) || 200),
+    battlePassTier: Math.max(1, Number(raw.battlePassTier || raw.bpTier) || 1),
+    bpTier: Math.max(1, Number(raw.bpTier || raw.battlePassTier) || 1),
+    accountVersion: Math.max(2, Number(raw.accountVersion) || 2),
+    challengeCycleVersion: Math.max(2, Number(raw.challengeCycleVersion) || 2),
+    selectedTitle: raw.selectedTitle || 't1',
+    unlockedTitles: Array.isArray(raw.unlockedTitles) ? raw.unlockedTitles : ['t1'],
+    ownedShopItems: Array.isArray(raw.ownedShopItems) ? raw.ownedShopItems : [],
+    locker: normalizeShellLocker(raw.locker),
+    profileSchemaVersion: SHELL_PROFILE_SCHEMA_VERSION,
+    profileUpdatedAt: Date.now(),
+  };
+
+  return next;
+}
+
+function loadRankTrack() {
+  try {
+    const raw = localStorage.getItem(SHELL_RANK_TRACK_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return {
+      rank: String(parsed.rank || 'Bronze'),
+      mmr: Number(parsed.mmr) || 200,
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
+function saveRankTrack(rank, mmr) {
+  try {
+    localStorage.setItem(SHELL_RANK_TRACK_KEY, JSON.stringify({ rank, mmr: Number(mmr) || 200, at: Date.now() }));
+  } catch (_) {}
+}
+
+function maybeAnnounceRankTransition(mmr) {
+  const nextMMR = Math.max(200, Number(mmr) || 200);
+  const nextRank = getRankName(nextMMR);
+  const prev = loadRankTrack();
+
+  if (!prev) {
+    saveRankTrack(nextRank, nextMMR);
+    return;
+  }
+
+  if (prev.rank !== nextRank) {
+    const upgraded = nextMMR >= (Number(prev.mmr) || 200);
+    if (upgraded) {
+      announce('Rank up: ' + prev.rank + ' -> ' + nextRank + ' (' + nextMMR + ' MMR)');
+    } else {
+      announce('Rank aggiornato: ' + prev.rank + ' -> ' + nextRank + ' (' + nextMMR + ' MMR)');
+    }
+  }
+  saveRankTrack(nextRank, nextMMR);
+}
 
 function loadShellProfile() {
   try {
     const raw = localStorage.getItem(SHELL_PROFILE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === 'object' ? parsed : null;
+    const migrated = migrateShellProfile(parsed);
+    if (!migrated) return null;
+    if (parsed.profileSchemaVersion !== SHELL_PROFILE_SCHEMA_VERSION) {
+      saveShellProfile(migrated);
+    }
+    return migrated;
   } catch (_) {
     return null;
   }
@@ -1266,7 +1385,9 @@ function loadShellProfile() {
 function saveShellProfile(profile) {
   if (!profile || typeof profile !== 'object') return;
   try {
-    localStorage.setItem(SHELL_PROFILE_KEY, JSON.stringify(profile));
+    const migrated = migrateShellProfile(profile);
+    if (!migrated) return;
+    localStorage.setItem(SHELL_PROFILE_KEY, JSON.stringify(migrated));
   } catch (_) {}
 }
 
@@ -1288,6 +1409,7 @@ function ensureRuntimeProfile(fw) {
     accountVersion: Number(seed.accountVersion) || 2,
     challengeCycleVersion: Number(seed.challengeCycleVersion) || 2,
     selectedTitle: seed.selectedTitle || 't1',
+    unlockedTitles: Array.isArray(seed.unlockedTitles) ? seed.unlockedTitles : ['t1'],
     ownedShopItems: Array.isArray(seed.ownedShopItems) ? seed.ownedShopItems : [],
     locker: seed.locker || {
       cardback: 'default',
@@ -1393,6 +1515,7 @@ function activateTab(tabName) {
   if (tabName === 'top100'     && lbList.childElementCount === 0)     renderTop100('uno1v1');
   if (tabName === 'profilo')   syncProfile();
   if (tabName === 'stagione')  { syncProfile(); syncStagione(); }
+  requestAnimationFrame(() => focusActivePanelTitle('singleplayer'));
 }
 
 spTabs.forEach(t => t.addEventListener('click', () => activateTab(t.dataset.tab)));
@@ -1591,6 +1714,7 @@ function updatePlayDisplay() {
   if (mEl) mEl.textContent = MODE_LABELS[_selectedMode] || _selectedMode;
   if (pEl) pEl.textContent = PCOUNT_LABELS[_selectedCount] || '';
   updateCompetitiveToggleAvailability();
+  renderModeNewsStrip(_selectedMode);
 }
 
 const OFFLINE_DIRECT_MODES = new Set([
@@ -1778,6 +1902,7 @@ function activateMPTab(tabName) {
   });
   mpTabPanes.forEach(p => p.classList.toggle('active', p.id === 'mptab-' + tabName));
   if (tabName === 'profilo') syncProfile();
+  requestAnimationFrame(() => focusActivePanelTitle('multiplayer'));
 }
 mpTabs.forEach(t => t.addEventListener('click', () => activateMPTab(t.dataset.mptab)));
 
@@ -2208,21 +2333,36 @@ mpModePicker?.addEventListener('click', () => {
   }
 });
 
-document.querySelectorAll('.mp-mode-option[data-mode]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    _mpSelectedMode = btn.dataset.mode;
-    if (mpModePicker) mpModePicker.textContent = MODE_LABELS[_mpSelectedMode] || _mpSelectedMode;
-    document.querySelectorAll('.mp-mode-option').forEach(opt => {
-      const on = opt === btn;
-      opt.classList.toggle('active', on);
-      opt.setAttribute('aria-selected', on);
-    });
+function setMPMode(mode, closeList = false) {
+  _mpSelectedMode = mode;
+  if (mpModePicker) mpModePicker.textContent = MODE_LABELS[_mpSelectedMode] || _mpSelectedMode;
+  document.querySelectorAll('.mp-mode-option').forEach(opt => {
+    const on = opt.dataset.mode === mode;
+    opt.classList.toggle('active', on);
+    opt.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  document.querySelectorAll('.mp-mode-quick-btn[data-mode]').forEach(btn => {
+    const on = btn.dataset.mode === mode;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  if (closeList) {
     mpModeList?.setAttribute('hidden', '');
     mpModePicker?.setAttribute('aria-expanded', 'false');
-    ensureMPLobbyServer('lobby');
-    broadcastMPLobbyUpdate('mode-changed');
-    announce('Modalità selezionata: ' + (MODE_LABELS[_mpSelectedMode] || _mpSelectedMode));
+  }
+  ensureMPLobbyServer('lobby');
+  broadcastMPLobbyUpdate('mode-changed');
+  announce('Modalità selezionata: ' + (MODE_LABELS[_mpSelectedMode] || _mpSelectedMode));
+}
+
+document.querySelectorAll('.mp-mode-option[data-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    setMPMode(btn.dataset.mode, true);
   });
+});
+
+document.querySelectorAll('.mp-mode-quick-btn[data-mode]').forEach(btn => {
+  btn.addEventListener('click', () => setMPMode(btn.dataset.mode, false));
 });
 
 document.addEventListener('click', e => {
@@ -2344,11 +2484,38 @@ const TORNEO_LABELS = {
   t32:'Torneo 32', grandprix:'Grand Prix',
   classico:'Torneo Classico', ucs:'UCS Championship'
 };
+const TORNEO_TITLE_GROUPS = {
+  t32: ['🥉 Campione Bronzo I', '🥈 Campione Argento I', '🥇 Campione Oro I', '💠 Campione Platino I', '💎 Campione Diamante I', '🏅 Campione Champion I', '🔥 Grande Campione I', '⚡ Leggenda Supersonica', '🏆 Campione del Torneo'],
+  grandprix: ['🎴 Scalatore', '🎴 Re della Scala', '🃏 Ladro di Mazzi', '🃏 Re del Furto', '🂡 Mano Fortunata', '🏆 Campione Scala 32', '🏆 Campione Ruba 32', '🏆 Campione BJ 32'],
+  classico: ['⚡ Scarto Rapido', '➕ Maestro del +2', '💀 Incubo del +4', '🎨 Muro di Colore', '🎯 Tattico dell Ultima Carta', '👑 Sovrano del Tavolo'],
+  ucs: ['👑 ELITE UCS', '🌌 OLTRE L ULTRA', '💎 ETERNO', '💠 ARCHITETTO DEL CAOS', '🌍 World Championship Wildcard', '👑 WORLD CHAMPION SUPREME']
+};
+
+function renderTorneoTitles(torneoKey = 't32') {
+  const listEl = document.getElementById('torneo-targhette-list');
+  if (!listEl) return;
+  const items = TORNEO_TITLE_GROUPS[torneoKey] || [];
+  listEl.innerHTML = '';
+  items.forEach((title, idx) => {
+    const row = document.createElement('div');
+    row.className = 'sfida-row torneo-title-row';
+    row.setAttribute('role', 'listitem');
+    row.innerHTML =
+      '<div class="sfida-icon" aria-hidden="true">🏷️</div>' +
+      '<div class="sfida-info">' +
+        '<div class="sfida-name">' + title + '</div>' +
+        '<div class="sfida-desc">Sblocco torneo · Progressione competitiva ' + (idx + 1) + '/' + items.length + '</div>' +
+      '</div>' +
+      '<div class="sfida-xp">Torneo</div>';
+    listEl.appendChild(row);
+  });
+}
+
 document.querySelectorAll('.torneo-card[data-torneo]').forEach(card => {
   card.addEventListener('click', () => {
     const t = card.dataset.torneo;
-    announce('Apertura ' + (TORNEO_LABELS[t] || t));
-    openMultiplayerV2();
+    renderTorneoTitles(t);
+    announce((TORNEO_LABELS[t] || t) + ' selezionato: elenco targhette torneo aggiornato.');
   });
 });
 
@@ -2567,43 +2734,53 @@ function doFriendSearch() {
 friendSearchBtn?.addEventListener('click', doFriendSearch);
 friendSearchInput?.addEventListener('keydown', e => { if (e.key === 'Enter') doFriendSearch(); });
 
-// ── Club dialogs ───────────────────────────────────────────────
-const clubCreatePopup = document.getElementById('club-create-popup');
-const clubJoinPopup   = document.getElementById('club-join-popup');
-
-document.getElementById('btn-crea-club')?.addEventListener('click', () => clubCreatePopup?.showModal());
-document.getElementById('btn-join-club')?.addEventListener('click', () => clubJoinPopup?.showModal());
-document.getElementById('club-create-close')?.addEventListener('click', () => clubCreatePopup?.close());
-document.getElementById('club-join-close')?.addEventListener('click', () => clubJoinPopup?.close());
+// ── Top 100 ────────────────────────────────────────────────────
 clubCreatePopup?.addEventListener('click', e => { if (e.target === clubCreatePopup) clubCreatePopup.close(); });
 clubJoinPopup?.addEventListener('click',   e => { if (e.target === clubJoinPopup)   clubJoinPopup.close(); });
 
 document.getElementById('club-create-confirm')?.addEventListener('click', () => {
   const nameInput = document.getElementById('club-name-input');
   const tagInput  = document.getElementById('club-tag-input');
-  const cName = nameInput?.value.trim();
-  const cTag  = tagInput?.value.trim().toUpperCase();
-  if (!cName || cName.length < 2) { announce('Inserisci un nome club valido (minimo 2 caratteri)'); return; }
-  if (!cTag  || cTag.length  < 2) { announce('Inserisci un tag di almeno 2 caratteri'); return; }
-  // Simulate club creation
-  const heroEl = document.getElementById('club-hero');
-  if (heroEl) {
-    const code = cTag + '-' + Math.floor(1000+Math.random()*8999);
-    const socialCode = document.getElementById('social-club-code');
+  lbList.setAttribute('aria-live', 'polite');
+  lbList.setAttribute('aria-atomic', 'false');
+
+  const fw = getFrameWin();
+  const shellProfile = loadShellProfile();
+  const list = buildTop100FromLocal(fw, shellProfile, getRankName);
+  const myName = fw?.P?.name || shellProfile?.name || null;
+
+  if (!list.length) {
+    const empty = document.createElement('div');
+    empty.className = 'section-hint';
+    empty.textContent = 'Nessun profilo locale disponibile per la classifica. Gioca una partita per generare dati reali.';
+    lbList.appendChild(empty);
+    return;
+  }
+
+  const modePenaltyMap = {
+    uno:0, uno_blitz:45, uno_chaos:60,
+    ruba:80, scala:90, poker:110, scopa:95,
+    burraco:105, bj:70, millemiglia:85,
+  };
+  const modePenalty = modePenaltyMap[mode] || 0;
+  const countPenalty = topCount === 1 ? 0 : (topCount === 2 ? 25 : 50);
+
+  list.forEach((e,i) => {
     if (socialCode) socialCode.textContent = code;
     heroEl.innerHTML =
       `<div class="club-hero-icon">🏛️</div>` +
+    const rankName = getRankName(mmrV);
       `<div class="club-hero-title">${cName} [${cTag}]</div>` +
       `<div class="club-hero-sub">Il tuo club è stato creato! Codice: <strong style="color:#22D3EE">${code}</strong></div>` +
       `<div class="club-hero-actions">` +
         `<button class="club-btn-secondary" id="btn-leave-club">🚪 Lascia club</button>` +
-      `</div>`;
+    row.setAttribute('aria-label','Pos '+pos+': '+e.n+(isMe?' (tu)':'')+', '+mmrV+' MMR, '+rankName);
     document.getElementById('btn-leave-club')?.addEventListener('click', resetClubHero);
   }
   clubCreatePopup?.close();
   announce('Club ' + cName + ' creato con successo');
 });
-
+      `<div class="lb-rank">${rankName}</div>`;
 document.getElementById('club-join-confirm')?.addEventListener('click', () => {
   const codeInput = document.getElementById('club-join-code');
   const code = codeInput?.value.trim().toUpperCase();
@@ -2760,26 +2937,6 @@ function startMonitor() {
 updatePlayDisplay();
 
 // ── Profile sync ───────────────────────────────────────────────
-function getRankName(mmr) {
-  if (mmr>=2800) return 'SSL';
-  if (mmr>=2400) return 'Grand Champion';
-  if (mmr>=2000) return 'Champion';
-  if (mmr>=1600) return 'Diamond';
-  if (mmr>=1200) return 'Platinum';
-  if (mmr>=800)  return 'Gold';
-  if (mmr>=400)  return 'Silver';
-  return 'Bronze';
-}
-function getRankColor(mmr) {
-  if (mmr>=2800) return '#FFFFFF';
-  if (mmr>=2400) return '#FF4081';
-  if (mmr>=2000) return '#4A9CE1';
-  if (mmr>=1600) return '#7EE4F8';
-  if (mmr>=1200) return '#D2E4E3';
-  if (mmr>=800)  return '#D39940';
-  if (mmr>=400)  return '#C0C0C0';
-  return '#CD7F32';
-}
 
 // ── Unified profile view (single source projection) ───────────
 const CARD_BACK_PALETTE = {
@@ -2894,7 +3051,7 @@ function getChallengeValue(profile, type) {
 
 function getLockerCatalog(section) {
   if (section === 'targhette') {
-    return TARGHETTE.map(it => ({ id:it.id, icon:'🏷️', name:it.name, desc:it.desc, field:'selectedTitle' }));
+    return TARGHETTE.map(it => ({ id:it.id, icon:'🏷️', name:it.name, desc:it.desc, unlock:it.unlock, field:'selectedTitle' }));
   }
   if (section === 'cornici' || section === 'bordo') {
     return Object.keys(BORDER_PALETTE).map(id => ({ id, icon:'🖼️', name:'Bordo ' + id, desc:'Cornice profilo', field:'border' }));
@@ -2940,26 +3097,31 @@ function renderLockerSection(section) {
 
   items.forEach(item => {
     const current = getCurrentLockerValue(profile, item.field);
+    const unlockedTitles = new Set(Array.isArray(profile.unlockedTitles) ? profile.unlockedTitles : ['t1']);
+    const locked = item.field === 'selectedTitle' && !unlockedTitles.has(item.id);
     const selected = current === item.id;
-    const row = document.createElement('button');
-    row.className = 'locker-item-row' + (selected ? ' selected' : '');
-    row.type = 'button';
+    const row = document.createElement(locked ? 'div' : 'button');
+    row.className = 'locker-item-row' + (selected ? ' selected' : '') + (locked ? ' locked' : '');
+    if (!locked) row.type = 'button';
     row.setAttribute('role', 'listitem');
     row.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    if (locked) row.setAttribute('aria-disabled', 'true');
     row.innerHTML =
       '<div class="locker-item-icon" aria-hidden="true">' + (item.icon || '✨') + '</div>' +
       '<div class="locker-item-info">' +
         '<div class="locker-item-name">' + item.name + (selected ? ' · Equipaggiato' : '') + '</div>' +
-        '<div class="locker-item-desc">' + (item.desc || '') + '</div>' +
+        '<div class="locker-item-desc">' + (locked ? ('🔒 ' + (item.unlock || 'Da sbloccare')) : (item.desc || '')) + '</div>' +
       '</div>' +
-      '<div class="locker-item-cta">' + (selected ? 'Attivo' : 'Equipaggia') + '</div>';
+      '<div class="locker-item-cta">' + (locked ? 'Bloccata' : (selected ? 'Attivo' : 'Equipaggia')) + '</div>';
 
-    row.addEventListener('click', () => {
-      setCurrentLockerValue(profile, item.field, item.id);
-      syncProfile();
-      renderLockerSection(section);
-      announce(item.name + ' equipaggiato');
-    });
+    if (!locked) {
+      row.addEventListener('click', () => {
+        setCurrentLockerValue(profile, item.field, item.id);
+        syncProfile();
+        renderLockerSection(section);
+        announce(item.name + ' equipaggiato');
+      });
+    }
 
     lockerPopupList.appendChild(row);
   });
@@ -2982,11 +3144,52 @@ const newsHubDialog = document.getElementById('news-hub-dialog');
 const newsHubScroll = document.getElementById('news-hub-scroll');
 const newsHubDetail = document.getElementById('news-hub-detail');
 
+const MODE_NEWS_MAP = {
+  uno: ['season3', 'patch-v52', 'locker-v2'],
+  ruba: ['season3', 'mp-lobby', 'locker-v2'],
+  scala: ['season3', 'patch-v52', 'locker-v2'],
+  bj: ['patch-v52', 'mp-lobby', 'season3'],
+  scopa: ['season3', 'patch-v52', 'mp-lobby'],
+  poker: ['patch-v52', 'season3', 'mp-lobby'],
+  burraco: ['season3', 'patch-v52', 'mp-lobby'],
+  millemiglia: ['season3', 'patch-v52', 'mp-lobby'],
+  uno_blitz: ['patch-v52', 'season3', 'locker-v2'],
+  uno_chaos: ['patch-v52', 'season3', 'locker-v2'],
+};
+
+function getNewsByMode(mode) {
+  const ids = MODE_NEWS_MAP[mode] || MODE_NEWS_MAP.uno;
+  return ids.map(id => NEWS_ITEMS.find(item => item.id === id)).filter(Boolean);
+}
+
+function renderModeNewsStrip(mode = _selectedMode) {
+  if (!modeNewsStrip) return;
+  const items = getNewsByMode(mode);
+  modeNewsStrip.innerHTML = '';
+  items.forEach(item => {
+    const card = document.createElement('button');
+    card.className = 'mode-news-card';
+    card.type = 'button';
+    card.setAttribute('role', 'listitem');
+    card.innerHTML =
+      '<span class="news-badge">' + item.badge + '</span>' +
+      '<h3>' + item.title + '</h3>' +
+      '<p>' + item.summary + '</p>';
+    card.addEventListener('click', () => {
+      renderNewsHub(item.id);
+      newsHubDialog?.showModal();
+    });
+    modeNewsStrip.appendChild(card);
+  });
+}
+
 function renderNewsHub(activeId = null) {
   if (!newsHubScroll || !newsHubDetail) return;
-  const current = NEWS_ITEMS.find(n => n.id === (activeId || NEWS_ITEMS[0].id)) || NEWS_ITEMS[0];
+  const modeItems = getNewsByMode(_selectedMode);
+  const fallbackId = modeItems[0]?.id || NEWS_ITEMS[0].id;
+  const current = NEWS_ITEMS.find(n => n.id === (activeId || fallbackId)) || NEWS_ITEMS[0];
   newsHubScroll.innerHTML = '';
-  NEWS_ITEMS.forEach(item => {
+  modeItems.forEach(item => {
     const btn = document.createElement('button');
     btn.className = 'news-hub-card' + (item.id === current.id ? ' active' : '');
     btn.type = 'button';
@@ -3115,6 +3318,7 @@ function syncProfile() {
   const total  = Math.max(P.games||0, wins+losses);
   const wr     = total ? Math.round((wins/total)*100) : 0;
   const mmr    = P.mmr || 200;
+  maybeAnnounceRankTransition(mmr);
 
   const profAv = document.getElementById('prof-av');
   if (profAv) profAv.textContent = (P.name||'?')[0].toUpperCase();
@@ -3146,6 +3350,7 @@ function syncProfile() {
     accountVersion: P.accountVersion,
     challengeCycleVersion: P.challengeCycleVersion,
     selectedTitle: P.selectedTitle,
+    unlockedTitles: P.unlockedTitles,
     ownedShopItems: P.ownedShopItems,
     locker: P.locker,
   });
@@ -3253,54 +3458,326 @@ function renderSfide() {
 }
 
 // ── Targhette ────────────────────────────────────────────────
-const TARGHETTE = [
-  { id:'t1', name:'Recluta UNO', desc:'Titolo base', unlock:'Default' },
-  { id:'t2', name:'Stratega', desc:'Vinci 25 partite', unlock:'25 vittorie' },
-  { id:'t3', name:'MVP Stagionale', desc:'Top 10 settimanale', unlock:'Classifica' },
-  { id:'t4', name:'Signore del Caos', desc:'Vinci 20 UNO Chaos', unlock:'Evento Chaos' },
-  { id:'t5', name:'Maestro Blitz', desc:'Vinci 20 UNO Blitz', unlock:'Evento Blitz' },
+const TARGHETTE_GROUPS = [
+  {
+    key:'uno',
+    icon:'🎴',
+    name:'UNO',
+    titles:[
+      { id:'t1', name:'Principiante', unlock:'Default' },
+      { id:'uno-s1-bronzo', name:'S1 – Bronzo', unlock:'10 vittorie ranked Bronzo' },
+      { id:'uno-s1-argento', name:'S1 – Argento', unlock:'10 vittorie ranked Argento' },
+      { id:'uno-s1-oro', name:'S1 – Oro', unlock:'10 vittorie ranked Oro' },
+      { id:'uno-s1-platino', name:'S1 – Platino', unlock:'10 vittorie ranked Platino' },
+      { id:'uno-s1-diamante', name:'S1 – Diamante', unlock:'10 vittorie ranked Diamante' },
+      { id:'uno-s1-campione', name:'S1 – Campione', unlock:'10 vittorie ranked Champion' },
+      { id:'uno-s1-grande-campione', name:'S1 – Grande Campione', unlock:'10 vittorie ranked Grand Champion' },
+      { id:'uno-s1-leggenda', name:'S1 – Leggenda Supersonica', unlock:'10 vittorie ranked SSL' },
+      { id:'uno-scarto-rapido', name:'⚡ Scarto Rapido', unlock:'Vinci 50 partite UNO' },
+      { id:'uno-maestro-p2', name:'➕ Maestro del +2', unlock:'Gioca 100 carte +2' },
+      { id:'uno-incubo-p4', name:'💀 Incubo del +4', unlock:'Gioca 50 carte +4' },
+      { id:'uno-muro-colore', name:'🎨 Muro di Colore', unlock:'Vinci 100 partite UNO' },
+      { id:'uno-riflessi-luce', name:'💡 Riflessi di Luce', unlock:'Vinci 150 partite UNO' },
+      { id:'uno-tattico-ultima', name:'🎯 Tattico dell Ultima Carta', unlock:'Dì UNO e vinci 30 volte' },
+      { id:'uno-sentinella-mazzo', name:'🛡️ Sentinella del Mazzo', unlock:'Vinci 200 partite UNO' },
+      { id:'uno-predatore-turni', name:'🦅 Predatore di Turni', unlock:'Vinci 300 partite UNO' },
+      { id:'uno-ombra-salto', name:'👻 Ombra del Salto', unlock:'Usa 200 Skip' },
+      { id:'uno-tiranno-reverse', name:'🔄 Tiranno del Cambio Giro', unlock:'Usa 200 Reverse' },
+      { id:'uno-architetto-scarto', name:'🏗️ Architetto dello Scarto', unlock:'Vinci 500 partite UNO' },
+      { id:'uno-leggenda-uno', name:'🌟 Leggenda dell Uno', unlock:'Vinci 750 partite UNO' },
+      { id:'uno-dominatore-cromatico', name:'🎭 Dominatore Cromatico', unlock:'Vinci 1000 partite UNO' },
+      { id:'uno-eclissi-carte', name:'🌑 Eclissi di Carte', unlock:'Vinci 1500 partite UNO' },
+      { id:'uno-sovrano-tavolo', name:'👑 Sovrano del Tavolo', unlock:'Vinci 2000 partite UNO' },
+      { id:'uno-divinita', name:'🃏 DIVINITÀ DI UNO', unlock:'Raggiungi l apice assoluto di UNO' },
+    ]
+  },
+  {
+    key:'scala40',
+    icon:'♠️',
+    name:'Scala 40',
+    titles:[
+      { id:'scala-primo-trittico', name:'🃏 Primo Trittico', unlock:'Vinci 5 partite Scala 40' },
+      { id:'scala-esperto-sequenze', name:'🎯 Esperto di Sequenze', unlock:'Vinci 15 partite Scala 40' },
+      { id:'scala-collezionista-jolly', name:'🃏 Collezionista di Jolly', unlock:'Completa 20 sequenze con Jolly' },
+      { id:'scala-stratega-pozzo', name:'🧩 Stratega del Pozzo', unlock:'Vinci 30 partite Scala 40' },
+      { id:'scala-calcolatore-freddo', name:'🧊 Calcolatore Freddo', unlock:'Vinci 50 partite Scala 40' },
+      { id:'scala-maestro-chiusura', name:'🏁 Maestro della Chiusura', unlock:'Chiudi il mazzo senza pescare 20 volte' },
+      { id:'scala-re-giochi-aperti', name:'👑 Re dei Giochi Aperti', unlock:'Vinci 80 partite Scala 40' },
+      { id:'scala-alchimista-carte', name:'⚗️ Alchimista di Carte', unlock:'Vinci 120 partite Scala 40' },
+      { id:'scala-visionario-burraco', name:'🔮 Visionario del Burraco', unlock:'Vinci 180 partite Scala 40' },
+      { id:'scala-matematico-40', name:'📐 Matematico del 40', unlock:'Vinci 250 partite Scala 40' },
+      { id:'scala-architetto-scale', name:'🏗️ Architetto di Scale', unlock:'Vinci 350 partite Scala 40' },
+      { id:'scala-custode-jolly', name:'🃏 Custode del Jolly', unlock:'Usa 50 Jolly in Scala 40' },
+      { id:'scala-drago-sequenze', name:'🐉 Drago delle Sequenze', unlock:'Vinci 500 partite Scala 40' },
+      { id:'scala-mente-superiore', name:'🧠 Mente Superiore', unlock:'Vinci 700 partite Scala 40' },
+      { id:'scala-infallibile', name:'🎯 Infallibile', unlock:'Vinci 1000 partite Scala 40' },
+      { id:'scala-gran-maestro', name:'🎓 Gran Maestro di Scala', unlock:'Vinci 1500 partite Scala 40' },
+      { id:'scala-terrore-mazzo', name:'💀 Terrore del Mazzo', unlock:'Vinci 2000 partite Scala 40' },
+      { id:'scala-zenith-carte', name:'🌄 Zenith delle Carte', unlock:'Vinci 2500 partite Scala 40' },
+      { id:'scala-infinito-quadrato', name:'♾️ Infinito Quadrato', unlock:'Vinci 3000 partite Scala 40' },
+      { id:'scala-imperatore', name:'👑 IMPERATORE DI SCALA', unlock:'Raggiungi il massimo di Scala 40' },
+      { id:'scala-scalatore', name:'🎴 Scalatore', unlock:'Vinci 1 partita Scala 40' },
+      { id:'scala-re-scala', name:'🎴 Re della Scala', unlock:'Vinci 10 partite Scala 40' },
+      { id:'scala-maestro-40', name:'🎴 Maestro Scala 40', unlock:'Vinci 50 partite Scala 40' },
+      { id:'scala-campione-32', name:'🏆 Campione Scala 32', unlock:'Vinci Torneo 32 Scala 40' },
+      { id:'scala-gran-maestro-legacy', name:'👑 Gran Maestro Scala', unlock:'Vinci 3 tornei Scala 40' },
+    ]
+  },
+  {
+    key:'ruba',
+    icon:'🃏',
+    name:'Ruba Mazzetto',
+    titles:[
+      { id:'ruba-mano-lesta', name:'🖐️ Mano Lesta', unlock:'Vinci 5 partite Ruba' },
+      { id:'ruba-ladro-pro', name:'🃏 Ladro di Mazzi Pro', unlock:'Vinci 15 partite Ruba' },
+      { id:'ruba-rapina-perfetta', name:'💎 Rapina Perfetta', unlock:'Ruba 50 mazzetti' },
+      { id:'ruba-predatore-notturno', name:'🌙 Predatore Notturno', unlock:'Vinci 30 partite Ruba' },
+      { id:'ruba-accumulatore', name:'📦 Accumulatore Seriale', unlock:'Vinci 50 partite Ruba' },
+      { id:'ruba-terrore-punti', name:'💀 Terrore dei Punti', unlock:'Vinci 80 partite Ruba' },
+      { id:'ruba-re-furto', name:'👑 Re del Furto', unlock:'Ruba 200 mazzetti' },
+      { id:'ruba-ombra-invisibile', name:'👤 Ombra Invisibile', unlock:'Vinci 120 partite Ruba' },
+      { id:'ruba-colpo-grosso', name:'💰 Colpo Grosso', unlock:'Vinci 180 partite Ruba' },
+      { id:'ruba-sguardo-aquila', name:'🦅 Sguardo d Aquila', unlock:'Vinci 250 partite Ruba' },
+      { id:'ruba-rapace-tavolo', name:'🦅 Rapace del Tavolo', unlock:'Ruba 500 mazzetti' },
+      { id:'ruba-bandito-carte', name:'🏴‍☠️ Bandito delle Carte', unlock:'Vinci 350 partite Ruba' },
+      { id:'ruba-maestro-bottino', name:'💼 Maestro del Bottino', unlock:'Vinci 500 partite Ruba' },
+      { id:'ruba-inafferrabile', name:'🌬️ Inafferrabile', unlock:'Vinci 700 partite Ruba' },
+      { id:'ruba-tiranno-mazzo', name:'👹 Tiranno del Mazzo', unlock:'Ruba 1000 mazzetti' },
+      { id:'ruba-erede-lupin', name:'🎩 Erede di Lupin', unlock:'Vinci 1000 partite Ruba' },
+      { id:'ruba-dominatore-punti', name:'🌟 Dominatore dei Punti', unlock:'Vinci 1500 partite Ruba' },
+      { id:'ruba-leggenda-furto', name:'⚡ Leggenda del Furto', unlock:'Ruba 2000 mazzetti' },
+      { id:'ruba-fantasma-mazzo', name:'👻 Fantasma del Mazzo', unlock:'Vinci 2000 partite Ruba' },
+      { id:'ruba-re-dei-ladri', name:'👑 RE DEI LADRI', unlock:'Dominio assoluto del Ruba' },
+      { id:'ruba-ladro-legacy', name:'🃏 Ladro di Mazzi', unlock:'Vinci 1 partita Ruba' },
+      { id:'ruba-re-legacy', name:'🃏 Re del Furto', unlock:'Vinci 10 partite Ruba' },
+      { id:'ruba-maestro-legacy', name:'🃏 Maestro Ruba', unlock:'Vinci 50 partite Ruba' },
+      { id:'ruba-campione-32', name:'🏆 Campione Ruba 32', unlock:'Vinci Torneo 32 Ruba' },
+      { id:'ruba-dominatore-furto', name:'🥇 Dominatore Furto', unlock:'Vinci 3 tornei Ruba' },
+    ]
+  },
+  {
+    key:'bj',
+    icon:'🂡',
+    name:'Black Jack',
+    titles:[
+      { id:'bj-scommettitore', name:'💸 Scommettitore Audace', unlock:'Vinci 10 partite Blackjack' },
+      { id:'bj-occhio-21', name:'🎯 Occhio al 21', unlock:'Raggiungi 21 esatto 10 volte' },
+      { id:'bj-freddezza', name:'🧊 Freddezza del Dealer', unlock:'Vinci 30 partite Blackjack' },
+      { id:'bj-raddoppio', name:'🔱 Raddoppio d Oro', unlock:'20 raddoppi riusciti' },
+      { id:'bj-strategia-base', name:'📊 Strategia di Base', unlock:'Vinci 50 partite Blackjack' },
+      { id:'bj-assedio', name:'🏰 Assedio al Banco', unlock:'Batti il banco 30 volte di fila' },
+      { id:'bj-intuizione', name:'🔮 Intuizione Vincente', unlock:'Vinci 80 partite Blackjack' },
+      { id:'bj-mente-casino', name:'🎰 Mente da Casinò', unlock:'Vinci 120 partite Blackjack' },
+      { id:'bj-squalo', name:'🦈 Squalo del Blackjack', unlock:'Vinci 200 partite Blackjack' },
+      { id:'bj-high-roller', name:'💎 High Roller', unlock:'Vinci 300 partite Blackjack' },
+      { id:'bj-asso-manica', name:'🃏 Asso nella Manica', unlock:'20 Blackjack naturali' },
+      { id:'bj-colpo-maestro', name:'🎩 Colpo da Maestro', unlock:'Vinci 500 partite Blackjack' },
+      { id:'bj-architetto-21', name:'📐 Architetto del 21', unlock:'Vinci 700 partite Blackjack' },
+      { id:'bj-distruttore-banco', name:'💥 Distruttore del Banco', unlock:'Vinci 1000 partite Blackjack' },
+      { id:'bj-vegas', name:'🎰 Leggenda di Vegas', unlock:'Vinci 1500 partite Blackjack' },
+      { id:'bj-re-chip', name:'♠️ Re delle Chip', unlock:'Vinci 2000 partite Blackjack' },
+      { id:'bj-sfidante-supremo', name:'⚡ Sfidante Supremo', unlock:'50 Blackjack naturali' },
+      { id:'bj-anima-azzardo', name:'🃏 Anima d Azzardo', unlock:'Vinci 2500 partite Blackjack' },
+      { id:'bj-dio-21', name:'👑 DIO DEL 21', unlock:'Vertice assoluto Blackjack' },
+      { id:'bj-principiante', name:'🂡 Principiante BJ', unlock:'Vinci 1 partita BJ' },
+      { id:'bj-mano-fortunata', name:'🂡 Mano Fortunata', unlock:'Vinci 10 partite BJ' },
+      { id:'bj-contatore', name:'🂡 Contatore di Carte', unlock:'Vinci 50 partite BJ' },
+      { id:'bj-il-baro', name:'🂡 Il Baro', unlock:'Fai 5 Blackjack naturali' },
+      { id:'bj-sfida-banco', name:'🂡 Sfida al Banco', unlock:'Batti il banco con 21 esatti' },
+      { id:'bj-campione-32', name:'🏆 Campione BJ 32', unlock:'Vinci Torneo 32 Blackjack' },
+    ]
+  },
+  {
+    key:'ucs',
+    icon:'🌌',
+    name:'UCS — Ultra Champions Series',
+    titles:[
+      { id:'ucs-elite', name:'👑 ELITE UCS', unlock:'Primo trionfo UCS' },
+      { id:'ucs-oltre-ultra', name:'🌌 OLTRE L ULTRA', unlock:'5 vittorie UCS' },
+      { id:'ucs-eterno', name:'💎 ETERNO', unlock:'UCS senza perdere un round' },
+      { id:'ucs-architetto', name:'💠 ARCHITETTO DEL CAOS', unlock:'10+ carte +4 in un UCS' },
+      { id:'ucs-open', name:'🌱 Open Qualifier', unlock:'Completa il primo Open' },
+      { id:'ucs-top128', name:'🔢 Top 128 Seed', unlock:'Vinci 3 partite UCS' },
+      { id:'ucs-top64', name:'🎯 Top 64 Contender', unlock:'Vinci 7 partite UCS' },
+      { id:'ucs-closed', name:'⚡ Closed Qualifier Finalist', unlock:'Vinci 12 partite UCS' },
+      { id:'ucs-main-rookie', name:'🏟️ Main Event Rookie', unlock:'Vinci 20 partite UCS' },
+      { id:'ucs-world-champion', name:'👑 World Champion', unlock:'Vinci 1100 partite UCS + 50 flawless' },
+      { id:'ucs-mvp', name:'🌟 Season MVP', unlock:'1100 vittorie UCS e 50 +4' },
+      { id:'ucs-goat', name:'🐐 GOAT Contender', unlock:'Completa i titoli UCS precedenti' },
+      { id:'ucs-hall', name:'🏛️ Hall of Fame', unlock:'Completa i titoli UCS precedenti' },
+      { id:'ucs-supreme', name:'👑 WORLD CHAMPION SUPREME', unlock:'Tutti i titoli UCS sbloccati' },
+    ]
+  },
+  {
+    key:'scopa',
+    icon:'🧹',
+    name:'Scopa',
+    titles:[
+      { id:'scopa-prima-presa', name:'🪙 Prima Presa', unlock:'Vinci 1 partita Scopa' },
+      { id:'scopa-settebello', name:'🪙 Custode del Settebello', unlock:'Prendi il settebello 25 volte' },
+      { id:'scopa-scope-seriali', name:'🧹 Scope Seriali', unlock:'Fai 50 scope' },
+      { id:'scopa-calcolatore', name:'🧠 Calcolatore di Primiera', unlock:'Vinci 50 partite Scopa' },
+      { id:'scopa-signore-denari', name:'💰 Signore dei Denari', unlock:'Vinci 100 partite Scopa' },
+      { id:'scopa-dominatore', name:'👑 Dominatore della Scopa', unlock:'Vinci 250 partite Scopa' },
+      { id:'scopa-maestro-assoluto', name:'🏆 Maestro Assoluto Scopa', unlock:'Vinci 500 partite Scopa' },
+    ]
+  },
+  {
+    key:'poker',
+    icon:'♣️',
+    name:'Poker',
+    titles:[
+      { id:'poker-primo-piatto', name:'💵 Primo Piatto', unlock:'Vinci 1 mano Poker' },
+      { id:'poker-bluffer', name:'🎭 Bluffer Freddo', unlock:'Vinci 20 mani con bluff' },
+      { id:'poker-river-king', name:'🌊 Re del River', unlock:'Vinci 50 showdown' },
+      { id:'poker-texas-mind', name:'🧠 Texas Mind', unlock:'Vinci 100 mani Poker' },
+      { id:'poker-high-roller-plus', name:'💎 High Roller+', unlock:'Vinci 250 mani Poker' },
+      { id:'poker-final-table', name:'🏟️ Final Table Boss', unlock:'Vinci 3 tornei Poker' },
+      { id:'poker-world-class', name:'👑 World Class Holdem', unlock:'Vinci 500 mani Poker' },
+    ]
+  },
+  {
+    key:'burraco',
+    icon:'🃟',
+    name:'Burraco',
+    titles:[
+      { id:'burraco-apertura', name:'🃏 Apertura Perfetta', unlock:'Apri 20 volte a Burraco' },
+      { id:'burraco-pozzetto', name:'📦 Cacciatore di Pozzetto', unlock:'Prendi il pozzetto 50 volte' },
+      { id:'burraco-pulito', name:'✨ Burraco Pulito', unlock:'Chiudi 25 burraco puliti' },
+      { id:'burraco-sporco', name:'🌪️ Burraco Sporco', unlock:'Chiudi 25 burraco sporchi' },
+      { id:'burraco-geometra', name:'📐 Geometra di Sequenze', unlock:'Vinci 100 partite Burraco' },
+      { id:'burraco-stratega-team', name:'🤝 Stratega di Coppia', unlock:'Vinci 200 partite Burraco' },
+      { id:'burraco-imperatore', name:'👑 Imperatore del Burraco', unlock:'Vinci 500 partite Burraco' },
+    ]
+  },
+  {
+    key:'millemiglia',
+    icon:'🚗',
+    name:'Mille Miglia',
+    titles:[
+      { id:'mm-partenza', name:'🟢 Semaforo Verde', unlock:'Vinci 1 partita Mille Miglia' },
+      { id:'mm-sprint', name:'⚡ Sprint 200', unlock:'Gioca 50 carte da 200km' },
+      { id:'mm-meccanico', name:'🔧 Meccanico da Gara', unlock:'Risolvi 100 hazard' },
+      { id:'mm-sicurezza', name:'🛡️ Pilota Sicuro', unlock:'Gioca 50 safety' },
+      { id:'mm-maratoneta', name:'🏁 Maratoneta dei 1000', unlock:'Completa 100 gare' },
+      { id:'mm-campione', name:'🏆 Campione delle Miglia', unlock:'Vinci 250 partite Mille Miglia' },
+      { id:'mm-leggenda', name:'👑 Leggenda Stradale', unlock:'Vinci 500 partite Mille Miglia' },
+    ]
+  },
+  {
+    key:'briscola',
+    icon:'🇮🇹',
+    name:'Briscola',
+    titles:[
+      { id:'briscola-prima-mano', name:'🪙 Prima Mano Briscola', unlock:'Vinci 1 partita Briscola' },
+      { id:'briscola-asso', name:'🂡 Asso Dominante', unlock:'Prendi 100 assi' },
+      { id:'briscola-tre', name:'🃁 Dominio del Tre', unlock:'Prendi 100 tre' },
+      { id:'briscola-fine-gioco', name:'🎯 Chiusura Perfetta', unlock:'Vinci 50 finali tirati' },
+      { id:'briscola-capore', name:'👑 Capore di Briscola', unlock:'Vinci 200 partite Briscola' },
+      { id:'briscola-re-dei-semi', name:'🏆 Re dei Semi', unlock:'Vinci 500 partite Briscola' },
+    ]
+  },
+  {
+    key:'tressette',
+    icon:'🎼',
+    name:'Tressette',
+    titles:[
+      { id:'tressette-esordio', name:'🎵 Esordio Tressette', unlock:'Vinci 1 partita Tressette' },
+      { id:'tressette-accuso', name:'📣 Maestro dell Accuso', unlock:'Dichiara 30 accusi vincenti' },
+      { id:'tressette-3-2-asso', name:'3️⃣2️⃣🂡 Triade Perfetta', unlock:'Chiudi 50 mani con 3-2-Asso' },
+      { id:'tressette-mente', name:'🧠 Mente Tressette', unlock:'Vinci 100 partite Tressette' },
+      { id:'tressette-capitano', name:'⚓ Capitano di Tavolo', unlock:'Vinci 250 partite Tressette' },
+      { id:'tressette-supremo', name:'👑 Tressette Supremo', unlock:'Vinci 500 partite Tressette' },
+    ]
+  },
 ];
+
+const TARGHETTE = TARGHETTE_GROUPS.flatMap(group =>
+  group.titles.map((title, idx) => ({
+    id: title.id,
+    name: title.name,
+    desc: group.name,
+    unlock: title.unlock,
+    groupKey: group.key,
+    groupIcon: group.icon,
+    groupName: group.name,
+    groupIndex: idx,
+  }))
+);
 
 function renderTarghette() {
   if (!targhetteList) return;
   const fw = getFrameWin();
   const p = fw?.P || ensureRuntimeProfile(fw) || {};
-  const selectedTitle = p.selectedTitle || 't1';
+  p.unlockedTitles = Array.isArray(p.unlockedTitles) ? p.unlockedTitles : ['t1'];
+  if (!p.unlockedTitles.includes('t1')) p.unlockedTitles.unshift('t1');
+  const unlockedSet = new Set(p.unlockedTitles);
+  const selectedTitle = unlockedSet.has(p.selectedTitle) ? p.selectedTitle : 't1';
+  p.selectedTitle = selectedTitle;
   targhetteList.innerHTML = '';
 
-  TARGHETTE.forEach(item => {
-    const isSelected = item.id === selectedTitle;
-    const row = document.createElement('button');
-    row.className = 'sfida-row';
-    row.type = 'button';
-    row.setAttribute('role', 'listitem');
-    row.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-    row.setAttribute('aria-label', item.name + '. ' + item.desc + '. Sblocco: ' + item.unlock);
-    row.innerHTML =
-      '<div class="sfida-icon" aria-hidden="true">🏷️</div>' +
-      '<div class="sfida-info">' +
-        '<div class="sfida-name">' + item.name + (isSelected ? ' · Selezionata' : '') + '</div>' +
-        '<div class="sfida-desc">' + item.desc + ' · Sblocco: ' + item.unlock + '</div>' +
-      '</div>' +
-      '<div class="sfida-xp">' + (isSelected ? 'Attiva' : 'Seleziona') + '</div>';
+  TARGHETTE_GROUPS.forEach(group => {
+    const allInGroup = TARGHETTE.filter(item => item.groupKey === group.key);
+    const unlockedInGroup = allInGroup.filter(item => unlockedSet.has(item.id)).length;
+    const header = document.createElement('div');
+    header.className = 'title-group-header';
+    header.innerHTML =
+      '<div class="title-group-name">' + group.icon + ' ' + group.name + '</div>' +
+      '<div class="title-group-count">' + unlockedInGroup + '/' + allInGroup.length + '</div>';
+    targhetteList.appendChild(header);
 
-    row.addEventListener('click', () => {
-      if (!fw) return;
-      const target = fw.P || ensureRuntimeProfile(fw);
-      if (!target) return;
-      target.selectedTitle = item.id;
-      syncProfile();
-      renderTarghette();
-      announce('Targhetta selezionata: ' + item.name);
+    allInGroup.forEach(item => {
+      const locked = !unlockedSet.has(item.id);
+      const isSelected = item.id === selectedTitle;
+      const row = document.createElement('button');
+      row.className = 'sfida-row targhetta-row' + (locked ? ' locked' : '');
+      row.type = 'button';
+      row.setAttribute('role', 'listitem');
+      row.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      row.setAttribute('aria-label', item.name + '. ' + item.desc + '. Sblocco: ' + item.unlock);
+      if (locked) row.setAttribute('aria-disabled', 'true');
+      row.innerHTML =
+        '<div class="sfida-icon" aria-hidden="true">🏷️</div>' +
+        '<div class="sfida-info">' +
+          '<div class="sfida-name">' + item.name + (isSelected ? ' · Selezionata' : '') + '</div>' +
+          '<div class="sfida-desc">' + (locked ? ('🔒 ' + item.unlock) : (item.desc + ' · Sblocco: ' + item.unlock)) + '</div>' +
+        '</div>' +
+        '<div class="sfida-xp">' + (locked ? 'Bloccata' : (isSelected ? 'Attiva' : 'Seleziona')) + '</div>';
+
+      row.addEventListener('click', () => {
+        if (!fw) return;
+        const target = fw.P || ensureRuntimeProfile(fw);
+        if (!target) return;
+        target.unlockedTitles = Array.isArray(target.unlockedTitles) ? target.unlockedTitles : ['t1'];
+        if (!target.unlockedTitles.includes(item.id)) {
+          announce('Targhetta bloccata: ' + item.unlock);
+          return;
+        }
+        target.selectedTitle = item.id;
+        syncProfile();
+        renderTarghette();
+        announce('Targhetta selezionata: ' + item.name);
+      });
+
+      targhetteList.appendChild(row);
     });
-
-    targhetteList.appendChild(row);
   });
 }
 
 // ── Shop ─────────────────────────────────────────────────────
 const SHOP_ITEMS = [
-  { id:'shop-title-elite', icon:'🏷️', name:'Targhetta Elite', price:250, type:'title', value:'t5' },
+  { id:'shop-title-elite', icon:'🏷️', name:'Targhetta Elite', price:250, type:'title', value:'uno-divinita' },
+  { id:'shop-title-pack-uno', icon:'🎴', name:'Pack Targhette UNO', price:1250, type:'title-pack', value:'uno' },
+  { id:'shop-title-pack-scala', icon:'♠️', name:'Pack Targhette Scala 40', price:1200, type:'title-pack', value:'scala40' },
+  { id:'shop-title-pack-ruba', icon:'🃏', name:'Pack Targhette Ruba', price:1200, type:'title-pack', value:'ruba' },
+  { id:'shop-title-pack-bj', icon:'🂡', name:'Pack Targhette Blackjack', price:1200, type:'title-pack', value:'bj' },
+  { id:'shop-title-pack-scopa', icon:'🧹', name:'Pack Targhette Scopa', price:1100, type:'title-pack', value:'scopa' },
+  { id:'shop-title-pack-poker', icon:'♣️', name:'Pack Targhette Poker', price:1300, type:'title-pack', value:'poker' },
+  { id:'shop-title-pack-burraco', icon:'🃟', name:'Pack Targhette Burraco', price:1300, type:'title-pack', value:'burraco' },
+  { id:'shop-title-pack-mm', icon:'🚗', name:'Pack Targhette Mille Miglia', price:1200, type:'title-pack', value:'millemiglia' },
+  { id:'shop-title-pack-briscola', icon:'🇮🇹', name:'Pack Targhette Briscola', price:1100, type:'title-pack', value:'briscola' },
+  { id:'shop-title-pack-tressette', icon:'🎼', name:'Pack Targhette Tressette', price:1100, type:'title-pack', value:'tressette' },
+  { id:'shop-title-pack-ucs', icon:'🌌', name:'Pack Targhette UCS', price:1800, type:'title-pack', value:'ucs' },
   { id:'shop-cardback-gold', icon:'🃏', name:'Cardback Gold', price:500, type:'cardback', value:'gold' },
   { id:'shop-border-neon', icon:'✨', name:'Bordo Neon', price:450, type:'border', value:'neon' },
   { id:'shop-effect-electric', icon:'⚡', name:'Effetto Electric', price:600, type:'effect', value:'electric' },
@@ -3347,6 +3824,12 @@ function renderShop() {
       }
 
       if (item.type === 'title') target.selectedTitle = item.value;
+      if (item.type === 'title-pack') {
+        target.unlockedTitles = Array.isArray(target.unlockedTitles) ? target.unlockedTitles : ['t1'];
+        TARGHETTE.filter(t => t.groupKey === item.value).forEach(t => {
+          if (!target.unlockedTitles.includes(t.id)) target.unlockedTitles.push(t.id);
+        });
+      }
       if (item.type === 'cardback') {
         target.locker = target.locker || {};
         target.locker.cardback = item.value;
@@ -3366,6 +3849,7 @@ function renderShop() {
       target.ownedShopItems.push(item.id);
       syncProfile();
       renderShop();
+      renderTarghette();
       announce('Acquisto completato: ' + item.name);
     });
 
@@ -4016,6 +4500,8 @@ function openMultiplayerV2() {
 updatePlayDisplay();
 renderTop100('uno', 1);
 renderNewsHub();
+renderModeNewsStrip('uno');
+renderTorneoTitles('t32');
 // Keep the stable multiplayer screen enabled by default.
 // MP2 is experimental and currently not feature-complete.
 

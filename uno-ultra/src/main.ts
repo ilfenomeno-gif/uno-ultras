@@ -21,6 +21,15 @@ type MiniGameId =
   | 'scala40';
 
 type PlayersMode = '1v1' | '3p' | '4p';
+type OnlineView = 'menu' | 'join' | 'room';
+
+type FriendLobby = {
+  host: string;
+  code: string;
+  mode: string;
+  players: string;
+  open: boolean;
+};
 
 const HERO_CONTENT: Record<ScreenId, HeroContent> = {
   play: {
@@ -137,9 +146,153 @@ const TITLES = [
   'World Champion Supreme'
 ];
 
+const FRIEND_LOBBIES: FriendLobby[] = [
+  { host: 'Luca', code: 'UNO-42A9', mode: 'UNO · 1v1', players: '1/2', open: true },
+  { host: 'Nina', code: 'RUBA-91QX', mode: 'Ruba · 4P', players: '3/4', open: true },
+  { host: 'Marco', code: 'SCOPA-7PK2', mode: 'Scopa · 1v1', players: '2/2', open: false }
+];
+
 let currentScreen: ScreenId = resolveScreenFromPath(location.pathname);
 let selectedGame: MiniGameId = 'uno';
 let selectedPlayers: PlayersMode = '1v1';
+let onlineView: OnlineView = 'menu';
+let joinCode = '';
+let joinError = '';
+let activeLobbyCode = '';
+let lobbyPlayers = ['Giocatore (Host)'];
+
+function createLobbyCode(prefix: string): string {
+  const random = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${prefix}-${random}`;
+}
+
+function validateJoinCode(code: string): string {
+  if (!code) return 'Inserisci un codice lobby.';
+  if (!/^[A-Z0-9]{3,12}-[A-Z0-9]{3,12}$/.test(code)) {
+    return 'Formato codice non valido. Esempio: UNO-42A9';
+  }
+  return '';
+}
+
+function findLobbyByCode(code: string): FriendLobby | undefined {
+  const normalized = code.trim().toUpperCase();
+  return FRIEND_LOBBIES.find((lobby) => lobby.code === normalized);
+}
+
+function renderOnlineMenu(): string {
+  return `
+    <section class="online-tour" aria-label="Tour multiplayer online">
+      <header class="online-head">
+        <p class="online-kicker">Multiplayer Experience</p>
+        <h2>Menu Online</h2>
+        <p>Accesso immediato: crea una lobby o unisciti in pochi secondi.</p>
+      </header>
+      <div class="online-big-cta-row">
+        <button class="online-big-cta" data-action="online-menu-create">CREA LOBBY</button>
+        <button class="online-big-cta" data-action="online-menu-join">UNISCITI</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderOnlineJoin(): string {
+  const friendRows = FRIEND_LOBBIES.map((lobby) => {
+    const stateClass = lobby.open ? 'is-open' : 'is-closed';
+    const stateLabel = lobby.open ? 'Aperta' : 'Chiusa';
+    const action = lobby.open
+      ? `<button class="inline-btn" data-action="online-join" data-code="${lobby.code}">Entra</button>`
+      : '<span class="inline-link" aria-disabled="true">Non disponibile</span>';
+
+    return `
+      <li class="online-friend-row ${stateClass}">
+        <div>
+          <strong>${lobby.host}</strong>
+          <small>${lobby.mode} · ${lobby.players}</small>
+        </div>
+        <div class="online-friend-actions">
+          <span class="online-state">${stateLabel}</span>
+          ${action}
+        </div>
+      </li>
+    `;
+  }).join('');
+
+  return `
+    <section class="online-tour" aria-label="Join lobby online">
+      <header class="online-head">
+        <p class="online-kicker">Join</p>
+        <h2>Unisciti alla Lobby</h2>
+      </header>
+      <div class="online-join-tools">
+        <input
+          class="online-code-input"
+          type="text"
+          value="${joinCode}"
+          placeholder="Inserisci codice (es. UNO-42A9)"
+          autocomplete="off"
+          data-online-code="true"
+          aria-label="Codice lobby"
+        />
+        <button class="inline-btn" data-action="online-join">Entra con codice</button>
+        <button class="inline-btn" data-action="online-quick-join">Quick Join</button>
+        <button class="inline-link" data-action="online-back-menu">Indietro</button>
+      </div>
+      <p class="online-join-feedback ${joinError ? 'is-error' : 'is-ok'}">${joinError || 'Inserisci codice o usa Quick Join.'}</p>
+      <ul class="online-friend-list" aria-label="Lobby amici">${friendRows}</ul>
+    </section>
+  `;
+}
+
+function renderOnlineRoom(): string {
+  const players = lobbyPlayers
+    .map((player, index) => `<li class="online-player ${index === 0 ? 'is-host' : ''}">${player}</li>`)
+    .join('');
+
+  return `
+    <section class="online-tour" aria-label="Lobby room">
+      <div class="online-room-top">
+        <div class="online-room-code">Codice: <strong>${activeLobbyCode || '----'}</strong></div>
+        <div class="online-room-top-actions">
+          <button class="inline-btn" data-action="online-copy-code">Copia</button>
+          <button class="inline-link" data-action="online-leave">Esci</button>
+        </div>
+      </div>
+
+      <div class="online-room-split">
+        <div class="online-room-left">
+          <h3>Gestione Lobby</h3>
+          <div class="online-room-controls">
+            <label>
+              Modalita
+              <select data-action="online-select-game">
+                ${MINI_GAMES.map((game) => `<option value="${game.id}" ${game.id === selectedGame ? 'selected' : ''}>${game.label}</option>`).join('')}
+              </select>
+            </label>
+            <label>
+              Giocatori
+              <select data-action="online-select-players">
+                ${PLAYERS_MODES.map((mode) => `<option value="${mode.id}" ${mode.id === selectedPlayers ? 'selected' : ''}>${mode.label}</option>`).join('')}
+              </select>
+            </label>
+          </div>
+          <button class="online-big-cta" data-action="legacy">AVVIA PARTITA</button>
+        </div>
+
+        <div class="online-room-right">
+          <h3>Partecipanti</h3>
+          <ul class="online-players-list">${players}</ul>
+          <button class="inline-link" data-action="online-back-menu">Torna al menu online</button>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderOnlineTour(): string {
+  if (onlineView === 'join') return renderOnlineJoin();
+  if (onlineView === 'room') return renderOnlineRoom();
+  return renderOnlineMenu();
+}
 
 function resolveScreenFromPath(pathname: string): ScreenId {
   const path = pathname.toLowerCase();
@@ -209,6 +362,8 @@ function renderGameMatrix(): string {
 
 function renderPlaySection(): string {
   return `
+    ${renderOnlineTour()}
+
     <section class="content-block">
       <div class="section-head">
         <h2>Modalita complete</h2>
@@ -430,6 +585,93 @@ document.addEventListener('click', (event) => {
     return;
   }
 
+  if (action === 'online-menu-create' || action === 'online-create') {
+    activeLobbyCode = createLobbyCode(selectedGame.toUpperCase());
+    lobbyPlayers = ['Giocatore (Host)'];
+    joinError = '';
+    onlineView = 'room';
+    render(currentScreen);
+    return;
+  }
+
+  if (action === 'online-menu-join') {
+    joinError = '';
+    onlineView = 'join';
+    render(currentScreen);
+    return;
+  }
+
+  if (action === 'online-back-menu') {
+    joinError = '';
+    onlineView = 'menu';
+    render(currentScreen);
+    return;
+  }
+
+  if (action === 'online-quick-join') {
+    const openLobby = FRIEND_LOBBIES.find((lobby) => lobby.open);
+    if (!openLobby) {
+      joinError = 'Nessuna lobby aperta al momento.';
+      render(currentScreen);
+      return;
+    }
+    activeLobbyCode = openLobby.code;
+    lobbyPlayers = [`${openLobby.host} (Host)`, 'Giocatore'];
+    joinError = '';
+    onlineView = 'room';
+    render(currentScreen);
+    return;
+  }
+
+  if (action === 'online-join') {
+    const codeFromButton = actionElement.dataset.code || joinCode;
+    const normalizedCode = codeFromButton.trim().toUpperCase();
+    const validationError = validateJoinCode(normalizedCode);
+    if (validationError) {
+      joinError = validationError;
+      render(currentScreen);
+      return;
+    }
+
+    const lobby = findLobbyByCode(normalizedCode);
+    if (!lobby) {
+      joinError = 'Lobby non trovata.';
+      render(currentScreen);
+      return;
+    }
+
+    if (!lobby.open) {
+      joinError = 'Lobby chiusa.';
+      render(currentScreen);
+      return;
+    }
+
+    activeLobbyCode = lobby.code;
+    lobbyPlayers = [`${lobby.host} (Host)`, 'Giocatore'];
+    joinError = '';
+    onlineView = 'room';
+    render(currentScreen);
+    return;
+  }
+
+  if (action === 'online-copy-code') {
+    if (activeLobbyCode) {
+      navigator.clipboard?.writeText(activeLobbyCode).catch(() => {
+        // Fallback silenzioso: in ambienti non sicuri la clipboard puo fallire.
+      });
+    }
+    return;
+  }
+
+  if (action === 'online-leave' || action === 'online-leave-room') {
+    onlineView = 'menu';
+    activeLobbyCode = '';
+    joinError = '';
+    lobbyPlayers = ['Giocatore (Host)'];
+    render(currentScreen);
+    return;
+  }
+
   if (action === 'legacy') {
     window.open('/legacy/uno_ultra_v52.html', '_blank', 'noopener,noreferrer');
     return;
@@ -437,6 +679,39 @@ document.addEventListener('click', (event) => {
 
   if (action === 'open-screen' && actionElement.dataset.target) {
     navigateTo(actionElement.dataset.target as ScreenId);
+  }
+});
+
+document.addEventListener('input', (event) => {
+  const target = event.target as HTMLElement;
+  const codeInput = target.closest('[data-online-code]') as HTMLInputElement | null;
+  if (!codeInput) return;
+  joinCode = codeInput.value.toUpperCase();
+  joinError = validateJoinCode(joinCode);
+  const feedback = document.querySelector('.online-join-feedback') as HTMLElement | null;
+  if (!feedback) return;
+  if (joinError) {
+    feedback.textContent = joinError;
+    feedback.classList.add('is-error');
+    feedback.classList.remove('is-ok');
+  } else {
+    feedback.textContent = 'Codice valido, puoi entrare.';
+    feedback.classList.remove('is-error');
+    feedback.classList.add('is-ok');
+  }
+});
+
+document.addEventListener('change', (event) => {
+  const target = event.target as HTMLElement;
+  const gameSelect = target.closest('[data-action="online-select-game"]') as HTMLSelectElement | null;
+  if (gameSelect) {
+    selectedGame = gameSelect.value as MiniGameId;
+    return;
+  }
+
+  const playersSelect = target.closest('[data-action="online-select-players"]') as HTMLSelectElement | null;
+  if (playersSelect) {
+    selectedPlayers = playersSelect.value as PlayersMode;
   }
 });
 

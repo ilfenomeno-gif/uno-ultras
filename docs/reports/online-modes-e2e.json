@@ -1,0 +1,192 @@
+[
+  {
+    "mode": "uno",
+    "created": true,
+    "joined": true,
+    "started": true,
+    "host": {
+      "activeGame": "uno",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: UNO\nESCI E TORNA A GIOCA\nUNO ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\nR-7\nB-2\nY-REV\nWILD\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 14 carte\nAvversario 24 carte\nTORNA AL MENU"
+    },
+    "guest": {
+      "activeGame": "uno",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: UNO\nESCI E TORNA A GIOCA\nUNO ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\nR-7\nB-2\nY-REV\nWILD\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 14 carte\nAvversario 24 carte\nTORNA AL MENU"
+    },
+    "error": null
+  },
+  {
+    "mode": "ruba",
+    "created": true,
+    "joined": true,
+    "started": true,
+    "host": {
+      "activeGame": "ruba",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Ruba Mazzetto\nESCI E TORNA A GIOCA\nRUBA MAZZETTO ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\n3♥\n7♣\nK♦\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 13 carte\nAvversario 23 carte\nTORNA AL MENU"
+    },
+    "guest": {
+      "activeGame": "ruba",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Ruba Mazzetto\nESCI E TORNA A GIOCA\nRUBA MAZZETTO ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\n3♥\n7♣\nK♦\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 13 carte\nAvversario 23 carte\nTORNA AL MENU"
+    },
+    "error": null
+  },
+  {
+    "mode": "scopa",
+    "created": true,
+    "joined": true,
+    "started": true,
+    "host": {
+      "activeGame": "scopa",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Scopa\nESCI E TORNA A GIOCA\nSCOPA ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\n7♦\n1♥\n4♣\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 13 carte\nAvversario 23 carte\nTORNA AL MENU"
+    },
+    "guest": {
+      "activeGame": "scopa",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Scopa\nESCI E TORNA A GIOCA\nSCOPA ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\n7♦\n1♥\n4♣\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 13 carte\nAvversario 23 carte\nTORNA AL MENU"
+    },
+    "error": null
+  },
+  {
+    "mode": "briscola",
+    "created": true,
+    "joined": true,
+    "started": true,
+    "host": {
+      "activeGame": "briscola",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Briscola\nESCI E TORNA A GIOCA\nBRISCOLA ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\nA♠\n3♦\nR♣\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 13 carte\nAvversario 23 carte\nTORNA AL MENU"
+    },
+    "guest": {
+      "activeGame": "briscola",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Briscola\nESCI E TORNA A GIOCA\nBRISCOLA ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\nA♠\n3♦\nR♣\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 13 carte\nAvversario 23 carte\nTORNA AL MENU"
+    },
+    "error": null
+  },
+  {
+    "mode": "scala40",
+    "created": true,
+    "joined": true,
+    "started": true,
+    "host": {
+      "activeGame": "scala40",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Scala 40\nESCI E TORNA A GIOCA\nSCALA 40 ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\nA♥\n2♥\n3♥\nJ♣\nQ♣\nK♣\n5♠\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 17 carte\nAvversario 27 carte\nTORNA AL MENU"
+    },
+    "guest": {
+      "activeGame": "scala40",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Scala 40\nESCI E TORNA A GIOCA\nSCALA 40 ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\nA♥\n2♥\n3♥\nJ♣\nQ♣\nK♣\n5♠\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 17 carte\nAvversario 27 carte\nTORNA AL MENU"
+    },
+    "error": null
+  },
+  {
+    "mode": "burraco",
+    "created": true,
+    "joined": true,
+    "started": true,
+    "host": {
+      "activeGame": "burraco",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Burraco\nESCI E TORNA A GIOCA\nBURRACO ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\nA♠\n2♠\n7♦\nJ♥\nQ♣\n4♣\n6♦\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 17 carte\nAvversario 27 carte\nTORNA AL MENU"
+    },
+    "guest": {
+      "activeGame": "burraco",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Burraco\nESCI E TORNA A GIOCA\nBURRACO ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\nA♠\n2♠\n7♦\nJ♥\nQ♣\n4♣\n6♦\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 17 carte\nAvversario 27 carte\nTORNA AL MENU"
+    },
+    "error": null
+  },
+  {
+    "mode": "poker",
+    "created": true,
+    "joined": true,
+    "started": true,
+    "host": {
+      "activeGame": "poker",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Poker Texas Hold'em\nESCI E TORNA A GIOCA\nPOKER TEXAS ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\nA♠\nK♥\nTAVOLO\n10♠\nJ♦\nQ♥\nAVVERSARI\nAvversario 12 carte\nAvversario 22 carte\nTORNA AL MENU"
+    },
+    "guest": {
+      "activeGame": "poker",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Poker Texas Hold'em\nESCI E TORNA A GIOCA\nPOKER TEXAS ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\nA♠\nK♥\nTAVOLO\n10♠\nJ♦\nQ♥\nAVVERSARI\nAvversario 12 carte\nAvversario 22 carte\nTORNA AL MENU"
+    },
+    "error": null
+  },
+  {
+    "mode": "blackjack",
+    "created": true,
+    "joined": true,
+    "started": true,
+    "host": {
+      "activeGame": "blackjack",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Blackjack\nESCI E TORNA A GIOCA\nBLACKJACK ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\nA♣\n9♦\nTAVOLO\n8♣\n?\nAVVERSARI\nAvversario 12 carte\nAvversario 22 carte\nTORNA AL MENU"
+    },
+    "guest": {
+      "activeGame": "blackjack",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Blackjack\nESCI E TORNA A GIOCA\nBLACKJACK ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\nA♣\n9♦\nTAVOLO\n8♣\n?\nAVVERSARI\nAvversario 12 carte\nAvversario 22 carte\nTORNA AL MENU"
+    },
+    "error": null
+  },
+  {
+    "mode": "millemiglia",
+    "created": true,
+    "joined": true,
+    "started": true,
+    "host": {
+      "activeGame": "millemiglia",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Mille Miglia\nESCI E TORNA A GIOCA\nMILLE MIGLIA ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\n100KM\n50KM\nRIP\nINC\nGO\nSTOP\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 16 carte\nAvversario 26 carte\nTORNA AL MENU"
+    },
+    "guest": {
+      "activeGame": "millemiglia",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Mille Miglia\nESCI E TORNA A GIOCA\nMILLE MIGLIA ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\n100KM\n50KM\nRIP\nINC\nGO\nSTOP\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 16 carte\nAvversario 26 carte\nTORNA AL MENU"
+    },
+    "error": null
+  },
+  {
+    "mode": "tressette",
+    "created": true,
+    "joined": true,
+    "started": true,
+    "host": {
+      "activeGame": "tressette",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Tressette\nESCI E TORNA A GIOCA\nTRESSETTE ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\n3♦\n2♣\nA♥\nF♠\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 14 carte\nAvversario 24 carte\nTORNA AL MENU"
+    },
+    "guest": {
+      "activeGame": "tressette",
+      "isOnlineMatch": true,
+      "hasSnapshot": true,
+      "mainText": "PARTITA: Tressette\nESCI E TORNA A GIOCA\nTRESSETTE ONLINE\n\nSnapshot sincronizzato server-side per Giocatore. Le mani online sono distinte per ciascun giocatore in tutte le modalita.\n\nLE TUE CARTE\nMazzo 60\n3♦\n2♣\nA♥\nF♠\nTAVOLO\nNessuna carta a terra.\nAVVERSARI\nAvversario 14 carte\nAvversario 24 carte\nTORNA AL MENU"
+    },
+    "error": null
+  }
+]

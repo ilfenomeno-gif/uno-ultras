@@ -323,6 +323,212 @@ body::before {
   margin-bottom: 12px;
 }
 
+.online-tour {
+  margin-bottom: 14px;
+  padding: 12px 2px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.online-head {
+  margin-bottom: 14px;
+}
+
+.online-kicker {
+  margin: 0;
+  color: var(--amber);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.online-head h2 {
+  margin: 5px 0 6px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(28px, 3.4vw, 44px);
+  line-height: 0.92;
+}
+
+.online-head p {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.online-big-cta-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.online-big-cta {
+  border: 1px solid rgba(255, 184, 77, 0.58);
+  border-radius: 999px;
+  min-height: 62px;
+  padding: 0 18px;
+  color: #2b1a00;
+  background: linear-gradient(135deg, #ffdf7f, #ffb84d 52%, #ffd874);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.online-big-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(255, 184, 77, 0.22);
+}
+
+.online-join-tools {
+  display: grid;
+  grid-template-columns: 1.2fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.online-code-input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  background: transparent;
+  color: var(--text-main);
+  padding: 10px 4px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.online-code-input:focus {
+  outline: none;
+  border-bottom-color: var(--amber);
+}
+
+.online-join-feedback {
+  margin: 8px 0 10px;
+  font-size: 12px;
+}
+
+.online-join-feedback.is-error {
+  color: #ff9a9a;
+}
+
+.online-join-feedback.is-ok {
+  color: var(--teal);
+}
+
+.online-friend-list,
+.online-players-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.online-friend-row,
+.online-player {
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.online-friend-row strong {
+  display: block;
+  font-size: 13px;
+}
+
+.online-friend-row small {
+  color: var(--text-soft);
+}
+
+.online-friend-row.is-closed {
+  opacity: 0.62;
+}
+
+.online-friend-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.online-state {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.online-room-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.online-room-code {
+  font-size: 13px;
+}
+
+.online-room-code strong {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  letter-spacing: 0.05em;
+  color: var(--amber);
+}
+
+.online-room-top-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.online-room-split {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 16px;
+}
+
+.online-room-left,
+.online-room-right {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.online-room-left h3,
+.online-room-right h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.online-room-controls {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.online-room-controls label {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.online-room-controls select {
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-main);
+  padding: 9px 10px;
+  font-family: inherit;
+}
+
+.online-player.is-host {
+  color: var(--amber);
+}
+
 .section-head {
   display: flex;
   flex-wrap: wrap;
@@ -624,6 +830,16 @@ body::before {
   .mode-grid,
   .three-cols {
     grid-template-columns: 1fr;
+  }
+
+  .online-big-cta-row,
+  .online-room-split {
+    grid-template-columns: 1fr;
+  }
+
+  .online-join-tools {
+    grid-template-columns: 1fr;
+    align-items: stretch;
   }
 
   .legacy-buttons {

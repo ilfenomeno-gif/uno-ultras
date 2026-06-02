@@ -1,0 +1,51 @@
+timestamp,mode,channel,players,pass,reason,details
+20260601-132803,uno,single,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,ruba,single,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,scopa,single,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,briscola,single,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,scala40,single,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,burraco,single,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,poker,single,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,blackjack,single,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,millemiglia,single,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,tressette,single,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,uno,local,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,uno,local,3,PASS,board started,no immediate action selector found in first render
+20260601-132803,uno,local,4,PASS,board started,no immediate action selector found in first render
+20260601-132803,ruba,local,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,ruba,local,3,PASS,board started,no immediate action selector found in first render
+20260601-132803,ruba,local,4,PASS,board started,no immediate action selector found in first render
+20260601-132803,scopa,local,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,scopa,local,3,PASS,board started,no immediate action selector found in first render
+20260601-132803,scopa,local,4,PASS,board started,no immediate action selector found in first render
+20260601-132803,briscola,local,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,briscola,local,3,PASS,board started,no immediate action selector found in first render
+20260601-132803,briscola,local,4,PASS,board started,no immediate action selector found in first render
+20260601-132803,scala40,local,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,scala40,local,3,PASS,board started,no immediate action selector found in first render
+20260601-132803,scala40,local,4,PASS,board started,no immediate action selector found in first render
+20260601-132803,burraco,local,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,burraco,local,3,PASS,board started,no immediate action selector found in first render
+20260601-132803,burraco,local,4,PASS,board started,no immediate action selector found in first render
+20260601-132803,poker,local,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,poker,local,3,PASS,board started,no immediate action selector found in first render
+20260601-132803,poker,local,4,PASS,board started,no immediate action selector found in first render
+20260601-132803,blackjack,local,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,blackjack,local,3,PASS,board started,no immediate action selector found in first render
+20260601-132803,blackjack,local,4,PASS,board started,no immediate action selector found in first render
+20260601-132803,millemiglia,local,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,millemiglia,local,3,PASS,board started,no immediate action selector found in first render
+20260601-132803,millemiglia,local,4,PASS,board started,no immediate action selector found in first render
+20260601-132803,tressette,local,2,PASS,board started,no immediate action selector found in first render
+20260601-132803,tressette,local,3,PASS,board started,no immediate action selector found in first render
+20260601-132803,tressette,local,4,PASS,board started,no immediate action selector found in first render
+20260601-132803,uno,online,lobby,PASS,online lobby created,UNO
+20260601-132803,ruba,online,lobby,PASS,online lobby created,RUBA
+20260601-132803,scopa,online,lobby,PASS,online lobby created,SCOPA
+20260601-132803,briscola,online,lobby,PASS,online lobby created,BRISCOLA
+20260601-132803,scala40,online,lobby,PASS,online lobby created,SCALA40
+20260601-132803,burraco,online,lobby,PASS,online lobby created,BURRACO
+20260601-132803,poker,online,lobby,PASS,online lobby created,POKER
+20260601-132803,blackjack,online,lobby,PASS,online lobby created,BLACKJACK
+20260601-132803,millemiglia,online,lobby,PASS,online lobby created,MILLEMIGLIA
+20260601-132803,tressette,online,lobby,PASS,online lobby created,TRESSETTE

@@ -455,6 +455,7 @@ export function getUnoRuntimeState(): {
   currentPlayer: number;
   isPlayerTurn: boolean;
   playableIndices: number[];
+  log: string[];
 } | null {
   if (!engine) return null;
 
@@ -476,6 +477,7 @@ export function getUnoRuntimeState(): {
     opponents,
     currentPlayer: state.currentPlayerIndex,
     isPlayerTurn: isHumanTurn(state),
-    playableIndices: engine.getPlayableIndicesForCurrent()
+    playableIndices: engine.getPlayableIndicesForCurrent(),
+    log: [...gameLog]
   };
 }

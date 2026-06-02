@@ -285,6 +285,48 @@ html, body {
   font-size: 11px;
   letter-spacing: .3px;
 }
+.mode-news-shell {
+  margin-bottom: 14px;
+}
+.mode-news-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.mode-news-card {
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+  color: inherit;
+  text-align: left;
+  font-family: inherit;
+  padding: 10px;
+  cursor: pointer;
+}
+.mode-news-card:hover {
+  border-color: rgba(34,211,238,.35);
+  background: rgba(34,211,238,.08);
+}
+.mode-news-card h3 {
+  font-size: 12px;
+  margin: 6px 0 4px;
+}
+.mode-news-card p {
+  font-size: 10px;
+  color: rgba(255,255,255,.52);
+  line-height: 1.45;
+}
+.news-hub-trigger.compact {
+  margin-bottom: 0;
+  padding: 8px 10px;
+}
+.news-hub-trigger.compact strong {
+  font-size: 12px;
+}
+.news-hub-trigger.compact small {
+  font-size: 10px;
+}
 
 #news-hub-dialog {
   width: min(820px, 92vw);
@@ -1047,6 +1089,27 @@ html, body {
   margin-bottom: 8px;
 }
 .mp-mode-picker:focus-visible { outline: 2px solid #22D3EE; outline-offset: 2px; }
+.mp-mode-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.mp-mode-quick-btn {
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.78);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.mp-mode-quick-btn.active {
+  border-color: rgba(34,211,238,.45);
+  background: rgba(34,211,238,.14);
+  color: #22D3EE;
+}
 .mp-mode-list {
   display: flex;
   flex-direction: column;
@@ -1283,6 +1346,9 @@ html, body {
   background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
   border-radius: 12px; padding: 13px 14px;
 }
+.targhetta-row.locked {
+  opacity: .72;
+}
 .club-sfida-icon { font-size: 22px; flex-shrink: 0; }
 .club-sfida-info { flex: 1; min-width: 0; }
 .club-sfida-name { font-size: 13px; font-weight: 700; }
@@ -1290,6 +1356,29 @@ html, body {
 .club-sfida-badge {
   flex-shrink: 0; font-size: 10px; font-weight: 700;
   background: rgba(34,211,238,.12); color: #22D3EE;
+.title-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  background: rgba(255,255,255,.03);
+}
+.title-group-name {
+  font-size: 12px;
+  font-weight: 800;
+}
+.title-group-count {
+  font-size: 10px;
+  color: #22D3EE;
+  font-weight: 800;
+}
+.torneo-title-row {
+  cursor: default;
+}
   border-radius: 20px; padding: 3px 10px;
 }
 
@@ -1415,6 +1504,10 @@ html, body {
 .locker-item-row.selected {
   border-color: rgba(52,211,153,.42);
   background: rgba(52,211,153,.1);
+}
+.locker-item-row.locked {
+  opacity: .7;
+  cursor: default;
 }
 .locker-item-icon {
   width: 30px;
